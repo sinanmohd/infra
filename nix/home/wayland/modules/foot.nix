@@ -11,7 +11,7 @@ in
     enable = true;
 
     settings = {
-      colors = {
+      colors-dark = {
         background = "000000";
         alpha = "0.8";
       };
