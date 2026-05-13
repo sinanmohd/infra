@@ -10,6 +10,7 @@
     ./modules/mimeapps.nix
     ./modules/ttyasrt.nix
     ./modules/sway/home.nix
+    ./modules/waybar
   ];
 
   home = {

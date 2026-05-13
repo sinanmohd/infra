@@ -1,0 +1,32 @@
+@import "/home/sinan/.local/share/wallust/waybar.css";
+
+* {
+  background-color: @background;
+  color: @foreground;
+
+  border: none;
+  border-radius: 0;
+  font-family: 'DeepMind Sans';
+  font-size: 15px;
+}
+
+.modules-left {
+  margin-left: 0px;
+}
+.modules-right {
+  margin-right: 5px;
+}
+#tray {
+  margin-left: 10px;
+}
+
+#workspaces button {
+  all: initial;
+  padding: 0 4px;
+  margin: 0 1.5px;
+  min-width: 9px;
+  opacity: 0.5;
+}
+#workspaces button.focused {
+  opacity: 1;
+}

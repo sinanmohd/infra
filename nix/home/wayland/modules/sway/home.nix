@@ -18,7 +18,6 @@ let
 
   bemenu = "${pkgs.bemenu}/bin/bemenu-run --prompt ' '";
   foot = lib.getExe config.programs.foot.package;
-  i3status = lib.getExe config.programs.i3status.package;
   swaylock = lib.getExe config.programs.swaylock.package;
 
   termux_sway_yazi = pkgs.writeShellApplication {
@@ -80,11 +79,6 @@ let
   dbook = "${wayland-scripts}/bin/dbook";
   mako = lib.getExe config.services.mako.package;
   firefox = lib.getExe config.programs.firefox.finalPackage;
-
-  font =
-    config.global.font.sans.name
-    + lib.optionalString (config.global.font.sans.size != null) " "
-    + builtins.toString config.global.font.sans.size;
 in
 {
   imports = [
@@ -93,7 +87,6 @@ in
     ./bemenu.nix
     ./swayidle.nix
     ./swaylock.nix
-    ./i3status.nix
   ];
 
   programs.bash.profileExtra = ''
@@ -133,16 +126,6 @@ in
 
         "[app_id=Slack]" = 8;
         "[app_id=Element]" = 9;
-      };
-      bar = {
-        inherit font;
-        position = "top";
-        status_command = i3status;
-        colors = {
-          background = "#000000";
-          focused_workspace = "#000000 #000000 #ffba08";
-          inactive_workspace = "#000000 #000000 #cde4e6";
-        };
       };
 
       bindgesture = {

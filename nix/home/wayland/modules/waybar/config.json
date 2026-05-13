@@ -1,0 +1,128 @@
+{
+  "reload_style_on_change": true,
+  "layer": "top",
+  "position": "top",
+  "spacing": 10,
+  "height": 24,
+
+  "modules-left": ["sway/workspaces"],
+  "modules-center": [
+    "clock",
+    "privacy",
+    "custom/weather",
+    "custom/idle-indicator"
+  ],
+  "modules-right": [
+    "group/tray-expander",
+    "network",
+    "bluetooth",
+    "pulseaudio",
+    "memory",
+    "cpu",
+    "battery"
+  ],
+
+  "privacy": {
+    "icon-size": 15,
+    "ignore-monitor": false
+  },
+  "cpu": {
+    "interval": 5,
+    "format": "  {usage}%",
+    "on-click": "omarchy-launch-or-focus-tui btop",
+    "on-click-right": "alacritty"
+  },
+  "memory": {
+    "interval": 5,
+    "format": " {avail:0.1f}GiB",
+    "tooltip-format": "{used:0.1f} / {total:0.1f}GiB RAM ⏽ {swapUsed:0.1f} / {swapTotal:0.1f}GiB Swap",
+    "on-click": "omarchy-launch-or-focus-tui btop",
+    "on-click-right": "alacritty"
+  },
+  "clock": {
+    "format": "{:L%a, %d %B %H:%M}",
+    "tooltip": false,
+    "on-click-right": "omarchy-launch-floating-terminal-with-presentation omarchy-tz-select"
+  },
+  "custom/weather": {
+    "exec": "wttrbar --nerd --hide-conditions --custom-indicator '   {uvIndex} {ICON}  {FeelsLikeC}'",
+    "return-type": "json",
+    "interval": 60,
+    "tooltip": true,
+    "on-click": "ttyasrt curl https://wttr.in"
+  },
+  "network": {
+    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+    "format": "{icon}  {bandwidthTotalBytes}",
+    "format-wifi": "{icon}  {bandwidthTotalBytes}",
+    "format-ethernet": "󰀂  {bandwidthTotalBytes}",
+    "format-disconnected": "",
+    "tooltip-format-wifi": "{essid} ⏽ {frequency} GHz ⏽ {ipaddr}/{cidr}",
+    "tooltip-format-ethernet": "Connected",
+    "tooltip-format-disconnected": "Disconnected",
+    "interval": 3,
+    "spacing": 1,
+    "on-click": "omarchy-launch-wifi"
+  },
+  "battery": {
+    "format": "{icon} {capacity}%",
+    "format-discharging": "{icon} {capacity}%",
+    "format-charging": "{icon} {capacity}%",
+    "format-icons": {
+      "charging": ["󰂄"],
+      "default": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
+    },
+    "format-full": "󰂄 {capacity}%",
+    "tooltip-format-discharging": "{time} Remaining ⏽ {power:>1.0f}W↓⏽ {cycles} Cycles",
+    "tooltip-format-charging": "{time} Until Full ⏽ {power:>1.0f}W↓⏽ {cycles} Cycles",
+    "interval": 5,
+    "on-click": "omarchy-menu power",
+    "on-click-right": "notify-send -u low \"$(omarchy-battery-status)\"",
+    "states": {
+      "warning": 20,
+      "critical": 10
+    }
+  },
+  "bluetooth": {
+    "format": "",
+    "format-off": "󰂲",
+    "format-disabled": "󰂲",
+    "format-connected": "󰂱 {device_battery_percentage}%",
+    "format-no-controller": "",
+    "tooltip-format": "{num_connections} Connected ⏽ {device_alias}",
+    "on-click": "omarchy-launch-bluetooth"
+  },
+  "pulseaudio": {
+    "format": "{icon}  {volume}%",
+    "on-click": "omarchy-launch-audio",
+    "on-click-right": "pamixer -t",
+    "tooltip-format": "{desc}",
+    "scroll-step": 5,
+    "format-muted": "",
+    "format-icons": {
+      "headphone": "󱡏",
+      "headset": "󱡏",
+      "default": ["", "", ""]
+    }
+  },
+  "group/tray-expander": {
+    "orientation": "inherit",
+    "drawer": {
+      "transition-duration": 600,
+      "children-class": "tray-group-item"
+    },
+    "modules": ["custom/expand-icon", "tray"]
+  },
+  "custom/expand-icon": {
+    "format": "",
+    "tooltip": false,
+    "on-scroll-up": "",
+    "on-scroll-down": "",
+    "on-scroll-left": "",
+    "on-scroll-right": ""
+  },
+  "tray": {
+    "icon-size": 14,
+    "spacing": 10
+  }
+}
