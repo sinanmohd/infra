@@ -15,10 +15,10 @@ let
     "hostmaster@${domain}"
   ];
 
-  credentials_directory = "/run/credentials/stalwart-mail.service";
+  credentials_directory = "/run/credentials/stalwart.service";
 in
 {
-  security.acme.certs.${domain}.postRun = "systemctl restart stalwart-mail.service";
+  security.acme.certs.${domain}.postRun = "systemctl restart stalwart.service";
   sops.secrets = {
     "mail.${domain}/dkim_rsa".sopsFile = ./secrets.yaml;
     "mail.${domain}/dkim_ed25519".sopsFile = ./secrets.yaml;
