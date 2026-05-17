@@ -290,33 +290,6 @@ in
               "http://${config.services.nix-serve.bindAddress}:${toString config.services.nix-serve.port}";
           };
         };
-
-        "www.alinafs.com" = defaultOpts // {
-          useACMEHost = null;
-          enableACME = true;
-          globalRedirect = "alinafs.com/home";
-          extraConfig = ''
-            ssl_early_data on;
-          '';
-        };
-        "alinafs.com" = defaultOpts // {
-          useACMEHost = null;
-          enableACME = true;
-
-          locations = {
-            "/metrics".return = "307 /home/";
-            "/" = {
-              proxyWebsockets = true;
-              proxyPass = "http://127.0.0.1:${builtins.toString config.services.alina.port}";
-            };
-          };
-
-          extraConfig = ''
-            proxy_buffering off;
-            proxy_request_buffering off;
-            client_max_body_size 0;
-          '';
-        };
       };
   };
 }

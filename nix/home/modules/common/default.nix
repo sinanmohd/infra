@@ -4,6 +4,8 @@ let
 in
 {
   imports = [
+    ../../../global/modules/common
+
     ./modules/git.nix
     ./modules/tmux.nix
     ./modules/shell.nix

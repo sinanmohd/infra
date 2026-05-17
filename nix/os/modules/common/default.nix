@@ -12,6 +12,8 @@ in
     "services/networking/pppd.nix"
   ];
   imports = [
+    ../../../global/modules/common
+
     ./modules/nix.nix
     ./modules/user.nix
     ./modules/environment.nix

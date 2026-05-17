@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOs/nixpkgs/nixos-unstable";
+    deploy-rs.url = "github:serokell/deploy-rs";
 
     sops-nix = {
       url = "github:Mic92/sops-nix";
@@ -26,6 +27,7 @@
       nixpkgs,
       sops-nix,
       home-manager,
+      deploy-rs,
       nix-index-database,
     }:
     let
@@ -73,7 +75,7 @@
         "kay"
       ] (host: makeNixosConfigs host "x86_64-linux");
 
-      HomeModules = lib.genAttrs [
+      homeModules = lib.genAttrs [
         "common"
         "wayland"
         "pc"
@@ -81,5 +83,20 @@
       homeConfigurations = lib.genAttrs [
         "cez"
       ] (host: makeHomeConfigs host "x86_64-linux");
+
+      deploy = {
+        sshUser = "sinan";
+        user = "root";
+        remoteBuild = true;
+        nodes.kay = {
+          hostname = "sinanmohd.com";
+          profilesOrder = [ "system" ];
+          profiles.system = {
+            path = deploy-rs.lib.x86_64-linux.activate.nixos self.nixosConfigurations.kay;
+          };
+        };
+      };
+
+      checks = builtins.mapAttrs (system: deployLib: deployLib.deployChecks self.deploy) deploy-rs.lib;
     };
 }

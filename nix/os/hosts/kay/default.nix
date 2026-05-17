@@ -27,7 +27,6 @@ in
     ./modules/services/home-assistant.nix
     ./modules/services/nix-cache
     ./modules/services/immich.nix
-    ./modules/services/alina
     ./modules/services/matrix
     ./modules/services/vaultwarden
   ];

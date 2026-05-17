@@ -2,7 +2,6 @@
   config,
   pkgs,
   lib,
-  namescale,
   ...
 }:
 let
@@ -28,7 +27,6 @@ let
       "tag:internal" = [ "group:owner" ];
       "tag:gaijin" = [ "group:owner" ];
       "tag:headplane" = [ "group:owner" ];
-      "tag:namescale" = [ "group:owner" ];
 
       "tag:bud_staff" = [ "group:owner" ];
       "tag:bud_internal" = [ "group:owner" ];
@@ -58,11 +56,6 @@ let
 
       {
         action = "accept";
-        src = [ "*" ];
-        dst = [ "tag:namescale:53" ];
-      }
-      {
-        action = "accept";
         src = [ "tag:headplane" ];
         dst = [ "*:*" ];
       }
@@ -82,10 +75,6 @@ let
   };
 in
 {
-  imports = [
-    namescale.nixosModules.namescale
-  ];
-
   environment.systemPackages = [ config.services.headscale.package ];
 
   sops.secrets = {
@@ -98,7 +87,6 @@ in
       owner = config.services.headscale.user;
       sopsFile = ./secrets.yaml;
     };
-    "namescale/preauth_key".sopsFile = ./secrets.yaml;
     "headscale/noise_private_key" = {
       owner = config.services.headscale.user;
       sopsFile = ./secrets.yaml;
@@ -187,12 +175,6 @@ in
         "--advertise-routes=192.168.43.0/24,192.168.38.0/24"
         "--advertise-tags=tag:internal"
       ];
-    };
-
-    namescale = {
-      enable = true;
-      environmentFile = config.sops.secrets."namescale/preauth_key".path;
-      settings.tsnet.coordination_server_url = url;
     };
   };
 }
