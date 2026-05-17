@@ -22,34 +22,29 @@ let
   policy = {
     groups = {
       "group:owner" = [ "sinan@" ];
-      "group:bud" = [
-        "sinan@"
-        "bud@"
-      ];
     };
 
     tagOwners = {
       "tag:internal" = [ "group:owner" ];
-      "tag:cusat" = [ "group:owner" ];
       "tag:gaijin" = [ "group:owner" ];
+      "tag:headplane" = [ "group:owner" ];
+      "tag:namescale" = [ "group:owner" ];
 
-      "tag:bud_staff" = [ "group:bud" ];
-      "tag:bud_internal" = [ "group:bud" ];
+      "tag:bud_staff" = [ "group:owner" ];
+      "tag:bud_internal" = [ "group:owner" ];
+      "tag:bud_clients" = [ "group:owner" ];
     };
 
     autoApprovers = {
       routes = {
         "192.168.43.0/24" = [
-          "group:owner"
           "tag:internal"
         ];
         "192.168.38.0/24" = [
-          "group:owner"
           "tag:internal"
         ];
       };
       exitNode = [
-        "group:owner"
         "tag:internal"
       ];
     };
@@ -57,25 +52,21 @@ let
     acls = [
       {
         action = "accept";
-        src = [ "*" ];
-        dst = [ "namescale@:53" ];
-      }
-      {
-        action = "accept";
-        src = [ "headplane@" ];
+        src = [ "group:owner" ];
         dst = [ "*:*" ];
       }
 
       {
         action = "accept";
-        src = [ "group:owner" ];
-        dst = [ "*:*" ];
+        src = [ "*" ];
+        dst = [ "tag:namescale:53" ];
       }
       {
         action = "accept";
-        src = [ "tag:internal" ];
+        src = [ "tag:headplane" ];
         dst = [ "*:*" ];
       }
+
       {
         action = "accept";
         src = [ "nazer@" ];
@@ -84,13 +75,8 @@ let
 
       {
         action = "accept";
-        src = [ "group:bud" ];
-        dst = [ "group:bud:*" ];
-      }
-      {
-        action = "accept";
-        src = [ "group:bud" ];
-        dst = [ "tag:bud_clients:*" ];
+        src = [ "tag:bud_staff" ];
+        dst = [ "tag:bud_internal:*" ];
       }
     ];
   };
@@ -122,7 +108,7 @@ in
       sopsFile = ./secrets.yaml;
     };
     # client
-    "headscale/pre_auth_key".sopsFile = ./secrets.yaml;
+    "tailscale/preauth_key".sopsFile = ./secrets.yaml;
   };
 
   networking.firewall = {
@@ -194,7 +180,7 @@ in
       enable = true;
       openFirewall = true;
 
-      authKeyFile = config.sops.secrets."headscale/pre_auth_key".path;
+      authKeyFile = config.sops.secrets."tailscale/preauth_key".path;
       extraUpFlags = [
         "--login-server=${url}"
         "--advertise-exit-node"
