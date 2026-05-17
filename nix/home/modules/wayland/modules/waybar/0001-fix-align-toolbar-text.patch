@@ -1,0 +1,53 @@
+From 07b8ffc4f3afa9060df1bc51e927893e3244ed1c Mon Sep 17 00:00:00 2001
+From: sinanmohd <sinan@sinanmohd.com>
+Date: Tue, 12 May 2026 22:46:13 +0530
+Subject: [PATCH] fix: align toolbar text
+
+---
+ src/main.rs | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/src/main.rs b/src/main.rs
+index 2b168d7..6301fb7 100644
+--- a/src/main.rs
++++ b/src/main.rs
+@@ -224,10 +224,10 @@ fn main() {
+         };
+ 
+         tooltip += &format!(
+-            "{} {}° {} {}° ",
+-            if args.nerd { "󰳡" } else { "⬆️" },
++            "{} {}° {} {}°\t",
++            if args.nerd { "󰳡 " } else { "⬆️" },
+             max_temp,
+-            if args.nerd { "󰳛" } else { "⬇️" },
++            if args.nerd { "󰳛 " } else { "⬇️" },
+             min_temp
+         );
+ 
+@@ -237,10 +237,10 @@ fn main() {
+             .unwrap_or("?");
+ 
+         tooltip += &format!(
+-            "{} {} {} {} {} {}%\n",
+-            if args.nerd { "󰖜" } else { "🌅" },
++            "{} {} {} {}\t{} {}%\n\n",
++            if args.nerd { "󰖜 " } else { "🌅" },
+             format_ampm_time(day, "sunrise", args.ampm),
+-            if args.nerd { "󰖛" } else { "🌇" },
++            if args.nerd { "󰖛 " } else { "🌇" },
+             format_ampm_time(day, "sunset", args.ampm),
+             format_moon_phase_icon(moon_phase, args.nerd),
+             moon_illumination
+@@ -261,7 +261,7 @@ fn main() {
+             }
+ 
+             let mut tooltip_line = format!(
+-                "{} {} {} {}",
++                "{} \t{} \t{} \t{}",
+                 format_time(hour["time"].as_str().unwrap(), args.ampm),
+                 if args.nerd {
+                     WEATHER_CODES_NERD
+-- 
+2.53.0
+

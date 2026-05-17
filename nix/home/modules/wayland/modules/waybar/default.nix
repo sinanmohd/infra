@@ -1,14 +1,9 @@
 { pkgs, ... }:
 {
   systemd.user.services.waybar.Service.Environment = "PATH=${
-    pkgs.wttrbar.overrideAttrs {
-      src = pkgs.fetchFromGitHub {
-        owner = "sinanmohd";
-        repo = "wttrbar";
-        rev = "feat/align-text";
-        hash = "sha256-QwLaVfLhI1mH22z+RDvpxH1n1GtbrEKG3eYPG1L/aU0=";
-      };
-    }
+    pkgs.wttrbar.overrideAttrs (oldAttrs: {
+      patches = (oldAttrs.patches or [ ]) ++ [ ./0001-fix-align-toolbar-text.patch ];
+    })
   }/bin";
 
   programs.waybar = {
