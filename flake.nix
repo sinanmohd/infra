@@ -1,10 +1,8 @@
 {
-  description = "sinan's reproducible nixos systems";
+  description = "sinan's reproducible systems";
 
   inputs = {
     nixpkgs.url = "github:NixOs/nixpkgs/nixos-unstable";
-    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
-    determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
 
     sops-nix = {
       url = "github:Mic92/sops-nix";
@@ -13,16 +11,6 @@
 
     home-manager = {
       url = "github:sinanmohd/home-manager/sway-generators";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    alina = {
-      url = "github:sinanmohd/alina";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    namescale = {
-      url = "github:sinanmohd/namescale";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -38,71 +26,60 @@
       nixpkgs,
       sops-nix,
       home-manager,
-      nixos-hardware,
-      alina,
-      determinate,
-      namescale,
       nix-index-database,
     }:
     let
       lib = nixpkgs.lib;
+      nixosImports = [
+        sops-nix.nixosModules.sops
+        home-manager.nixosModules.home-manager
+        nix-index-database.nixosModules.default
+      ];
 
-      makeNixos =
+      makeNixosModules = moduleName: {
+        imports = nixosImports ++ [
+          ./nix/os/modules/${moduleName}
+        ];
+      };
+      makeNixosConfigs =
         host: system:
         lib.nixosSystem {
           inherit system;
-
-          specialArgs = {
-            inherit alina;
-            inherit namescale;
-            inherit determinate;
-            inherit nixos-hardware;
-          };
-
-          modules = [
-            self.nixosModules.common
-            ./nix/os/${host}/configuration.nix
+          modules = nixosImports ++ [
+            ./nix/os/hosts/${host}
           ];
         };
 
-      makeHome =
+      makeHomeModules = moduleName: {
+        imports = [
+          ./nix/home/modules/${moduleName}
+        ];
+      };
+      makeHomeConfigs =
         host: system:
         home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages.${system};
-          modules = [
-            ./nix/home/common/home.nix
-          ]
-          ++ lib.optional (builtins.pathExists ./nix/home/${host}) ./nix/home/${host}/home.nix;
+          modules = [ ./nix/home/hosts/${host} ];
         };
     in
     {
-      nixosModules = lib.genAttrs [ "common" "server" "pc" ] (host: {
-        nix.nixPath = [ "nixpkgs=${nixpkgs}" ];
-        imports = [
-          ./nix/os/${host}/configuration.nix
-          sops-nix.nixosModules.sops
-          home-manager.nixosModules.home-manager
-          determinate.nixosModules.default
-
-          nix-index-database.nixosModules.default
-          {
-            programs.nix-index-database.comma.enable = true;
-          }
-        ];
-      });
-
-      nixosConfigurations = lib.genAttrs [
+      nixosModules = lib.genAttrs [
         "common"
         "server"
         "pc"
+      ] makeNixosModules;
+      nixosConfigurations = lib.genAttrs [
         "cez"
         "kay"
-        "lia"
-        "fscusat"
-      ] (host: makeNixos host "x86_64-linux");
+      ] (host: makeNixosConfigs host "x86_64-linux");
 
-      homeConfigurations = lib.genAttrs [ "common" "wayland" "pc" "cez" ] (
-        host: makeHome host "x86_64-linux"
-      );
+      HomeModules = lib.genAttrs [
+        "common"
+        "wayland"
+        "pc"
+      ] makeHomeModules;
+      homeConfigurations = lib.genAttrs [
+        "cez"
+      ] (host: makeHomeConfigs host "x86_64-linux");
     };
 }

@@ -2,30 +2,17 @@ keys:
   - &sinan age1q5sfy74d53n6jxlgsc2zrsz4wcl9d830nxuagc3wfmdkrrp55ckq9ev6nv
   - &machine_cez age1nur989fnjmfgfk54ctczrwg25epqqr0xgkl5d4swfxka9aw6cdrqdawvaq
   - &machine_kay age15989j5lkkf2kn5wa2p6qc8wlxjjksc63k5ync8rz8t4e87394pzqm7h4rm
-  - &machine_lia age1l9kd320xj89vdr06u7ej8fhjrxl470t04trgwd3jwzczknf05aesv2pp8x
-  - &machine_fscusat age1yqma4xm4qss787cnwv2v7j2e0eswhm5k9f27n6zhp74euyydv9essxdrmn
 
 creation_rules:
-  - path_regex: nix/(os|home)/(pc|cez)/.*
+  - path_regex: nix/os/modules/pc/.*
     key_groups:
       - age:
-        - *sinan
-        - *machine_cez
-  - path_regex: nix/os/kay/.*
+          - *sinan
+          - *machine_cez
+  - path_regex: nix/os/hosts/kay/.*
     key_groups:
       - age:
-        - *sinan
-        - *machine_kay
-
-  - path_regex: nix/os/lia/.*
-    key_groups:
-      - age:
-        - *sinan
-        - *machine_lia
-  - path_regex: nix/os/fscusat/.*
-    key_groups:
-      - age:
-        - *sinan
-        - *machine_fscusat
+          - *sinan
+          - *machine_kay
 
   - age: *sinan
