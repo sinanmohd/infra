@@ -1,4 +1,9 @@
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   username = config.global.userdata.name;
 in
@@ -21,7 +26,7 @@ in
   programs.home-manager.enable = true;
 
   nix = {
-    package = pkgs.nix;
+    package = lib.mkForce pkgs.nix;
     settings = {
       use-xdg-base-directories = true;
       bash-prompt-prefix = "";
