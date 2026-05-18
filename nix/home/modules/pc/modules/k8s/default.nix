@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
   programs = {
     kubecolor = {
@@ -7,6 +7,7 @@
     };
     k9s = {
       enable = true;
+      plugins.debug-container = lib.fromTOML ((lib.readFile ./debug-container.toml));
       skins = {
         transparency = {
           k9s = {
