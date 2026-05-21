@@ -1,5 +1,39 @@
-{ ... }:
+{ pkgs, ... }:
 {
+  home.packages = with pkgs; [ pywalfox-native ];
+  programs.wallust.settings = {
+    hooks.firefox = ''
+      pywalfox install
+      pywalfox update
+    '';
+    templates.firefox = {
+      template = pkgs.writeText "colors.json" ''
+        {
+          "wallpaper": "{{wallpaper}}",
+          "colors": {
+            "color0": "{{background}}",
+            "color1": "{{color1}}",
+            "color2": "{{color2}}",
+            "color3": "{{background}}",
+            "color4": "{{color4}}",
+            "color5": "{{color5}}",
+            "color6": "{{color6}}",
+            "color7": "{{color7}}",
+            "color8": "{{color8}}",
+            "color9": "{{color9}}",
+            "color10": "{{foreground}}",
+            "color11": "{{color11}}",
+            "color12": "{{color12}}",
+            "color13": "{{foreground}}",
+            "color14": "{{color14}}",
+            "color15": "{{color15}}"
+          }
+        }
+      '';
+      target = "~/.cache/wal/colors.json";
+    };
+  };
+
   programs.firefox = {
     enable = true;
     policies = {
@@ -59,6 +93,11 @@
           installation_mode = "force_installed";
           default_area = "menupanel";
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/tridactyl-vim/latest.xpi";
+        };
+        "pywalfox@frewacom.org" = {
+          installation_mode = "force_installed";
+          default_area = "menupanel";
+          install_url = "http://addons.mozilla.org/firefox/downloads/latest/pywalfox/latest.xpi";
         };
         "{446900e4-71c2-419f-a6a7-df9c091e268b}" = {
           installation_mode = "force_installed";

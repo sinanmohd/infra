@@ -7,7 +7,6 @@
   sway,
   ffmpeg,
   libnotify,
-  bemenu,
   jq,
   coreutils,
   mpv,
@@ -17,9 +16,7 @@
   wl-clipboard,
   xdg-utils,
   wtype,
-  curl,
   tailscale,
-  bc,
 }:
 
 stdenvNoCC.mkDerivation {
@@ -53,8 +50,6 @@ stdenvNoCC.mkDerivation {
           sway
         ]
       }
-    wrapProgram $out/bin/daskpass \
-      --prefix PATH : ${lib.makeBinPath [ bemenu ]}
     wrapProgram $out/bin/ttyasrt \
       --prefix PATH : ${lib.makeBinPath [ libnotify ]}
     wrapProgram $out/bin/freezshot \
@@ -70,7 +65,6 @@ stdenvNoCC.mkDerivation {
       --prefix PATH : ${
         lib.makeBinPath [
           libnotify
-          bemenu
           mpv
           util-linux
           gnugrep
@@ -83,32 +77,10 @@ stdenvNoCC.mkDerivation {
         lib.makeBinPath [
           libnotify
           file
-          bemenu
           coreutils
           wl-clipboard
           xdg-utils
           wtype
-        ]
-      }
-    wrapProgram $out/bin/pirowatch \
-      --prefix PATH : ${
-        lib.makeBinPath [
-          libnotify
-          curl
-          bemenu
-          coreutils
-          gnugrep
-          # webtorrent
-        ]
-      }
-    wrapProgram $out/bin/tcsv \
-      --prefix PATH : ${
-        lib.makeBinPath [
-          libnotify
-          curl
-          bemenu
-          bc
-          # webtorrent
         ]
       }
     wrapProgram $out/bin/vpn \
@@ -126,6 +98,7 @@ stdenvNoCC.mkDerivation {
     homepage = "https://www.sinanmohd.com";
     license = lib.licenses.gpl3;
     platforms = lib.platforms.unix;
+    mainProgram = "pinentry-fuzzel";
     maintainers = with lib.maintainers; [ sinanmohd ];
   };
 }

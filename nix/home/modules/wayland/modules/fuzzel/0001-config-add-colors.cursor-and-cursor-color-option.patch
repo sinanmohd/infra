@@ -1,0 +1,198 @@
+From ce1a91f986470fed6e982b68676ca74de3168b30 Mon Sep 17 00:00:00 2001
+From: sinanmohd <sinan@sinanmohd.com>
+Date: Sat, 23 May 2026 07:23:38 +0530
+Subject: [PATCH] config: add colors.cursor and --cursor-color option
+
+---
+ completions/fish/fuzzel.fish |  1 +
+ completions/zsh/_fuzzel      |  1 +
+ config.c                     |  4 ++++
+ config.h                     |  1 +
+ doc/fuzzel.1.scd             |  3 +++
+ main.c                       | 24 ++++++++++++++++++++++++
+ render.c                     |  6 ++++--
+ 7 files changed, 38 insertions(+), 2 deletions(-)
+
+diff --git a/completions/fish/fuzzel.fish b/completions/fish/fuzzel.fish
+index b1fc6d1..190229d 100644
+--- a/completions/fish/fuzzel.fish
++++ b/completions/fish/fuzzel.fish
+@@ -50,6 +50,7 @@ complete -c fuzzel -x      -l message-color
+ complete -c fuzzel -x      -l prompt-color                                                                      -d "color of the prompt text (586e75ff)"
+ complete -c fuzzel -x      -l placeholder-color                                                                 -d "color of the placeholder text (93a1a1ff)"
+ complete -c fuzzel -x      -l input-color                                                                       -d "color of the input string (657b83ff)"
++complete -c fuzzel -x      -l cursor                                                                            -d "color of the cursor (657b83ff)"
+ complete -c fuzzel -x -s m -l match-color                                                                       -d "color of matched substring (cb4b16ff)"
+ complete -c fuzzel -x -s s -l selection-color                                                                   -d "background color of selected item (eee8d5ff)"
+ complete -c fuzzel -x -s S -l selection-text-color                                                              -d "text color of selected item (586e75ff)"
+diff --git a/completions/zsh/_fuzzel b/completions/zsh/_fuzzel
+index bb79f22..1fa8d5f 100644
+--- a/completions/zsh/_fuzzel
++++ b/completions/zsh/_fuzzel
+@@ -42,6 +42,7 @@ _arguments \
+     '--prompt-color[color of the prompt text (586e75ff)]:prompt-color:()' \
+     '--placeholder-color[color of the placeholder text (93a1a1ff)]:()' \
+     '--input-color[color of the input string (657b83ff)]:input-color:()' \
++    '--cursor-color[color of the cursor (657b83ff)]:cursor-color:()' \
+     '(-m --match-color)'{-m,--match-color}'[color of matched substring (cb4b16ff)]:match-color:()' \
+     '(-s --selection-color)'{-s,--selection-color}'[background color of selected item (eee8d5ff)]:selection-color:()' \
+     '(-S --selection-text-color)'{-S,--selection-text-color}'[text color of selected item (586e75ff)]:selection-text-color:()' \
+diff --git a/config.c b/config.c
+index 1c36992..cb1e510 100644
+--- a/config.c
++++ b/config.c
+@@ -1083,6 +1083,9 @@ parse_section_colors(struct context *ctx)
+     else if (strcmp(key, "input") == 0)
+         return value_to_color(ctx, true, &conf->colors.input);
+ 
++    else if (strcmp(key, "cursor") == 0)
++        return value_to_color(ctx, true, &conf->colors.cursor);
++
+     else if (strcmp(key, "match") == 0)
+         return value_to_color(ctx, true, &conf->colors.match);
+ 
+@@ -1703,6 +1706,7 @@ config_load(struct config *conf, const char *conf_path,
+             .message = conf_hex_to_rgba(0x657b83ff),
+             .prompt = conf_hex_to_rgba(0x586e75ff),
+             .input = conf_hex_to_rgba(0x657b83ff),
++            .cursor = conf_hex_to_rgba(0x657b83ff),
+             .match = conf_hex_to_rgba(0xcb4b16ff),
+             .selection = conf_hex_to_rgba(0xeee8d5ff),
+             .selection_text = conf_hex_to_rgba(0x586e75ff),
+diff --git a/config.h b/config.h
+index 3003152..0918ba1 100644
+--- a/config.h
++++ b/config.h
+@@ -208,6 +208,7 @@ struct config {
+         struct rgba match;
+         struct rgba selection;
+         struct rgba selection_text;
++        struct rgba cursor;
+         struct rgba selection_match;
+         struct rgba counter;
+         struct rgba placeholder;
+diff --git a/doc/fuzzel.1.scd b/doc/fuzzel.1.scd
+index 04f3c60..ab88602 100644
+--- a/doc/fuzzel.1.scd
++++ b/doc/fuzzel.1.scd
+@@ -336,6 +336,9 @@ Many things can be configured with *fuzzel.ini*(5) or command line options:
+ *-C*,*--border-color*=_HEX_
+ 	The color of the border. See *COLORS*. Default: _002b36ff_.
+ 
++*--cursor-color*=_HEX_
++	The color of the cursor. See *COLORS*. Default: _657b83ff_.
++
+ *--show-actions*
+ 	Include desktop actions in the list. Desktop actions are
+ 	alternative actions some desktop entries have. Examples include
+diff --git a/main.c b/main.c
+index 2fe1f40..c30d6dd 100644
+--- a/main.c
++++ b/main.c
+@@ -407,6 +407,7 @@ print_usage(const char *prog_name)
+            "  -B,--border-width=INT          width of border, in pixels (1)\n"
+            "  -r,--border-radius=INT         amount of corner \"roundness\" (10)\n"
+            "  -C,--border-color=HEX          border color (002b36ff)\n"
++           "     --cursor-color=HEX          cursor color (657b83ff)\n"
+            "     --show-actions              include desktop actions in the list\n"
+            "     --match-mode=exact|fzf|fuzzy how to match what you type against the entries\n"
+            "     --filter-desktop            filter desktop entries based on XDG_CURRENT\n"
+@@ -868,6 +869,7 @@ main(int argc, char *const *argv)
+     #define OPT_DMENU_MESSAGE                311
+     #define OPT_DMENU_MESSAGE_MODE           312
+     #define OPT_MESSAGE_COLOR                313
++    #define OPT_CURSOR_COLOR                 314
+ 
+     static const struct option longopts[] = {
+         {"config",               required_argument, 0, OPT_CONFIG},
+@@ -912,6 +914,7 @@ main(int argc, char *const *argv)
+         {"border-width",         required_argument, 0, 'B'},
+         {"border-radius",        required_argument, 0, 'r'},
+         {"border-color",         required_argument, 0, 'C'},
++        {"cursor-color",         required_argument, 0, OPT_CURSOR_COLOR},
+         {"prompt",               required_argument, 0, 'p'},
+         {"prompt-only",          required_argument, 0, OPT_PROMPT_ONLY},
+         {"placeholder",          required_argument, 0, OPT_PLACEHOLDER},
+@@ -997,6 +1000,7 @@ main(int argc, char *const *argv)
+         bool input_color_set:1;
+         bool match_color_set:1;
+         bool selection_color_set:1;
++        bool cursor_color_set:1;
+         bool selection_text_color_set:1;
+         bool selection_match_color_set:1;
+         bool selection_border_radius_set:1;
+@@ -1615,6 +1619,24 @@ main(int argc, char *const *argv)
+             break;
+         }
+ 
++        case OPT_CURSOR_COLOR: {
++            const char *clr_start = optarg;
++            if (clr_start[0] == '#')
++                clr_start++;
++
++            errno = 0;
++            char *end = NULL;
++            uint32_t cursor_color = strtoul(clr_start, &end, 16);
++            if (errno != 0 || end == NULL || *end != '\0' || (end - clr_start) != 8) {
++                fprintf(stderr, "cursor-color: %s: invalid color\n", optarg);
++                return EXIT_FAILURE;
++            }
++            cmdline_overrides.conf.colors.cursor =
++                conf_hex_to_rgba(cursor_color);
++            cmdline_overrides.cursor_color_set = true;
++            break;
++        }
++
+         case OPT_SHOW_ACTIONS:
+             cmdline_overrides.actions_enabled_set = true;
+             cmdline_overrides.conf.actions_enabled = true;
+@@ -2123,6 +2145,8 @@ main(int argc, char *const *argv)
+         conf.colors.placeholder = cmdline_overrides.conf.colors.placeholder;
+     if (cmdline_overrides.input_color_set)
+         conf.colors.input = cmdline_overrides.conf.colors.input;
++    if (cmdline_overrides.cursor_color_set)
++        conf.colors.cursor = cmdline_overrides.conf.colors.cursor;
+     if (cmdline_overrides.match_color_set)
+         conf.colors.match = cmdline_overrides.conf.colors.match;
+     if (cmdline_overrides.selection_color_set)
+diff --git a/render.c b/render.c
+index 7a7ee03..719d49b 100644
+--- a/render.c
++++ b/render.c
+@@ -82,6 +82,7 @@ struct render {
+     pixman_color_t pix_message_color;
+     pixman_color_t pix_prompt_color;
+     pixman_color_t pix_input_color;
++    pixman_color_t pix_cursor_color;
+     pixman_color_t pix_match_color;
+     pixman_color_t pix_selection_color;
+     pixman_color_t pix_selection_text_color;
+@@ -437,7 +438,7 @@ render_cursor(const struct render *render, int x, int baseline, pixman_image_t *
+         const int height = min(font->ascent + font->descent, render->row_height);
+ 
+         pixman_image_fill_rectangles(
+-            PIXMAN_OP_SRC, pix, &render->pix_input_color,
++            PIXMAN_OP_SRC, pix, &render->pix_cursor_color,
+             1, &(pixman_rectangle16_t){
+                 x,
+                 baseline + render->font->descent - height,
+@@ -446,7 +447,7 @@ render_cursor(const struct render *render, int x, int baseline, pixman_image_t *
+     } else {
+         /* TODO: future: underline cursor */
+         pixman_image_fill_rectangles(
+-            PIXMAN_OP_SRC, pix, &render->pix_input_color,
++            PIXMAN_OP_SRC, pix, &render->pix_cursor_color,
+             1, &(pixman_rectangle16_t){
+                 x, baseline - font->underline.position,
+                 font->max_advance.x,
+@@ -1968,6 +1969,7 @@ render_initialize_colors(struct render *render, const struct config *conf,
+     render->pix_message_color = rgba2pixman(gamma_correct, conf->colors.message);
+     render->pix_prompt_color = rgba2pixman(gamma_correct, conf->colors.prompt);
+     render->pix_input_color = rgba2pixman(gamma_correct, conf->colors.input);
++    render->pix_cursor_color = rgba2pixman(gamma_correct, conf->colors.cursor);
+     render->pix_match_color = rgba2pixman(gamma_correct, conf->colors.match);
+     render->pix_selection_color = rgba2pixman(gamma_correct, conf->colors.selection);
+     render->pix_selection_text_color = rgba2pixman(gamma_correct, conf->colors.selection_text);
+-- 
+2.53.0
+

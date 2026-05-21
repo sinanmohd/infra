@@ -2,8 +2,9 @@
 let
   font =
     config.global.font.sans.name
-    + lib.optionalString (config.global.font.sans.size != null) " "
-    + builtins.toString config.global.font.sans.size;
+    + lib.optionalString (
+      config.global.font.sans.size != null
+    ) " ${lib.toString config.global.font.sans.size}px";
 in
 {
   programs.zathura = {

@@ -64,8 +64,10 @@ updatewall() {
 
 	rm -f "$bgdesk" "$bglock"
 	cp  "$1" "$bgdesk"
-	swaymsg "output * background '${bgdesk}' fill"
-	ffmpeg -loglevel quiet -i "$bgdesk" -vf "boxblur=50" -f mjpeg "$bglock"
+
+	awww img "${bgdesk}" --transition-type wipe --transition-angle 30 --transition-duration 0.5 --transition-fps 120 &
+	wallust run "${bgdesk}" -s &
+	ffmpeg -loglevel quiet -i "$bgdesk" -vf "boxblur=50" -f mjpeg "$bglock" &
 }
 
 ########
@@ -96,7 +98,7 @@ case "$(mimetype "$input")" in
 		die "no image file in $input"
 	fi
 
-	updatewall "$img" && info "Wallpaper updated to $img"
+	updatewall "$img"
 	;;
 *)
 	die "invalid input $input"

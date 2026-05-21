@@ -1,10 +1,23 @@
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   user = config.global.userdata.name;
 
-  fontSans = config.global.font.sans.name;
-  fontMonospace = config.global.font.monospace.name;
   fontPackages = config.global.font.monospace.packages ++ config.global.font.sans.packages;
+  fontMonospace =
+    config.global.font.monospace.name
+    + lib.optionalString (
+      config.global.font.monospace.size != null
+    ) ":size=${lib.toString config.global.font.monospace.size}";
+  fontSans =
+    config.global.font.sans.name
+    + lib.optionalString (
+      config.global.font.sans.size != null
+    ) ":pixelsize=${lib.toString config.global.font.sans.size}";
 in
 {
   fonts = {
@@ -17,8 +30,8 @@ in
 
       defaultFonts = {
         monospace = [ fontMonospace ];
-        serif = [ fontSans ];
-        sansSerif = [ fontSans ];
+        serif = [ (fontSans + " 1000px") ];
+        sansSerif = [ (fontSans + " 1000px") ];
       };
     };
   };

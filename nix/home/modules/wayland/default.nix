@@ -1,7 +1,10 @@
 { pkgs, ... }:
+let
+  wayland-scripts = pkgs.callPackage ./pkgs/wayland-scripts { };
+in
 {
   imports = [
-    ./modules/foot.nix
+    ./modules/alacritty.nix
     ./modules/mango.nix
     ./modules/portal.nix
     ./modules/zathura.nix
@@ -10,6 +13,11 @@
     ./modules/ttyasrt.nix
     ./modules/sway
     ./modules/waybar
+    ./modules/wallust.nix
+    ./modules/awww.nix
+    ./modules/mako.nix
+    ./modules/fuzzel
+    ./modules/element.nix
   ];
 
   home = {
@@ -23,10 +31,10 @@
 
       mpv
       imv
-      qemu
       hoppscotch
-      element-desktop
       gimp3
     ];
   };
+
+  programs.rbw.settings.pinentry = wayland-scripts;
 }

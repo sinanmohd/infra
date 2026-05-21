@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, ... }:
 let
   email = config.global.userdata.email;
   domain = "https://vaultwarden.${config.global.userdata.domain}";
@@ -9,7 +9,6 @@ in
     settings = {
       inherit email;
       base_url = domain;
-      pinentry = pkgs.pinentry-bemenu;
     };
   };
 }

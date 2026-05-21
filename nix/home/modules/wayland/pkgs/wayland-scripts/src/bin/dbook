@@ -2,8 +2,6 @@
 
 book_conf="${XDG_CONFIG_HOME:-$HOME/.config}/dbook/dbook.conf"
 book_data="${XDG_DATA_HOME:-$HOME/.local/share}/dbook"
-w_menu="bemenu"
-x_menu="dmenu"
 ico_dbk=" "
 ico_url="󰖟 "
 ico_doc=" "
@@ -173,44 +171,24 @@ clip()
 	: "${1:?}"
 	: "${2:?}"
 
-	if [ -n "$WAYLAND_DISPLAY" ]; then
-		dep_check "wl-copy"
+	dep_check "wl-copy"
 
-		[ "$1" = "text" ] &&
-			printf "%s" "$2" | wl-copy
-		[ "$1" = "file" ] &&
-			printf "file://%s" "$2" | wl-copy -t text/uri-list
-	elif [ -n "$DISPLAY" ]; then
-		dep_check "xclip"
-
-		[ "$1" = "text" ] &&
-			printf "%s" "$2" | xclip -selection clipboard
-		[ "$1" = "file" ] &&
-			printf "file://%s" "$2" | xclip -selection clipboard "$1" -t text/uri-list
-	fi
+	[ "$1" = "text" ] &&
+		printf "%s" "$2" | wl-copy
+	[ "$1" = "file" ] &&
+		printf "file://%s" "$2" | wl-copy -t text/uri-list
 
 	note "${1} coppied to clipboard"
 }
 
-set_menu()
-{
-	if [ -n "$WAYLAND_DISPLAY" ]; then
-		menu="$w_menu"
-	elif [ -n "$DISPLAY" ]; then
-		menu="$x_menu"
-	else
-		die "tty not supported"
-	fi
-}
-
 ip_menu()
 {
-	printf "" | "$menu" -p "${ico_dbk} ${1:?} "
+	printf "" | fuzzel --dmenu
 }
 
 key_menu()
 {
-	parse_data | "$menu" -l 25 -p "${ico_dbk} key " || return 1
+	parse_data | fuzzel --dmenu || return 1
 }
 
 
@@ -218,6 +196,7 @@ key_menu()
 # MAIN #
 ########
 
+dep_check fuzzel
 key=
 value=
 
@@ -226,7 +205,6 @@ value=
 [ -d "$book_conf" ] ||
 	mkdir -p "${book_conf%/*}"
 
-set_menu
 case "$1" in
 -*) ;;
 "") ;;
@@ -286,14 +264,8 @@ rm)
 
 	case "$1" in
 	-t)
-		if [ -z "$WAYLAND_DISPLAY" ]
-		then
-			dep_check "xdotool"
-			xdotool type --delay 20 "$value"
-		else
-			dep_check "wtype"
-			wtype -d 20 "$value"
-		fi
+		dep_check "wtype"
+		wtype -d 20 "$value"
 		;;
 	-c)
 		case "$(file --brief --dereference --mime-type "$value")" in

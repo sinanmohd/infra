@@ -23,6 +23,4 @@ in
       };
     };
   };
-
-  programs.bemenu.settings.line-height = 25;
 }

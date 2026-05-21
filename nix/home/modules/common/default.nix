@@ -21,6 +21,7 @@ in
     ./modules/dev.nix
     ./modules/neovim
     ./modules/yazi.nix
+    ./modules/btop.nix
   ];
 
   programs.home-manager.enable = true;
@@ -40,7 +41,6 @@ in
 
     packages = with pkgs; [
       unzip
-      htop
       curl
       file
       ps_mem

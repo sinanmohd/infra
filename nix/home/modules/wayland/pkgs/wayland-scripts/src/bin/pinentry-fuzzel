@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+echo 'OK Pleased to meet you'
+while read -r stdin; do
+	case $stdin in
+		*BYE*)
+			break
+			;;
+		*GETPIN*)
+			printf "D %s\nOK\n" "$(fuzzel --dmenu --password --prompt-only '    ')"
+			;;
+		*)
+			echo OK
+			;;
+	esac
+done

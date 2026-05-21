@@ -3,7 +3,23 @@
   programs.bash.enable = true;
 
   home = {
-    packages = with pkgs; [ neovim ];
+    packages = with pkgs; [
+      neovim
+      eza
+      bat
+    ];
+
+    shellAliases = {
+      ls = "eza -l --group-directories-first --icons=auto";
+      lsa = "ls -a";
+      lt = "eza --tree --level=2 --long --icons --git";
+      lta = "lt -a";
+      cat = "bat --style='changes,snip'";
+
+      gs = "git status";
+      gm = "git commit -a -m";
+      ga = "git commit -a --amend";
+    };
 
     sessionVariables = {
       EDITOR = "nvim";

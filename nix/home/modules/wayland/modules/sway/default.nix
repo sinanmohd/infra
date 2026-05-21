@@ -11,14 +11,19 @@ let
   down = "j";
   up = "k";
 
-  background = "${config.xdg.dataHome}/wayland/desktop";
   wayland-scripts = pkgs.callPackage ../../pkgs/wayland-scripts { };
   cwall = "${wayland-scripts}/bin/cwall";
   daskpass = "${wayland-scripts}/bin/daskpass";
 
-  bemenu = "${pkgs.bemenu}/bin/bemenu-run --prompt ' '";
-  foot = lib.getExe config.programs.foot.package;
+  fuzzel = lib.getExe config.programs.fuzzel.package;
+  alacritty = lib.getExe config.programs.alacritty.package;
   swaylock = lib.getExe config.programs.swaylock.package;
+
+  font =
+    config.global.font.sans.name
+    + lib.optionalString (
+      config.global.font.sans.size != null
+    ) " ${lib.toString config.global.font.sans.size}px";
 
   termux_sway_yazi = pkgs.writeShellApplication {
     name = "termux_sway_yazi";
@@ -35,9 +40,9 @@ let
       session_name="_root_session_managed_by_home_manager"
       tmux_sock_path="$XDG_RUNTIME_DIR/tmux-$UID/default"
 
-      is_foot_running() {
+      is_alacritty_running() {
         while read -r window_name; do
-          if [ "$window_name" == "foot" ]; then
+          if [ "$window_name" == "Alacritty" ]; then
               return 0
           fi
           echo "$window_name"
@@ -58,8 +63,8 @@ let
         done
       }
 
-      if ! is_foot_running; then
-        setsid foot &
+      if ! is_alacritty_running; then
+        setsid alacritty &
       fi
       if ! is_tmux_running; then
         tmux_wait
@@ -82,9 +87,7 @@ let
 in
 {
   imports = [
-    ./mako.nix
     ./theme.nix
-    ./bemenu.nix
     ./swayidle.nix
     ./swaylock.nix
   ];
@@ -98,10 +101,9 @@ in
   home = {
     packages = [
       pkgs.wl-clipboard
-      pkgs.bemenu
       pkgs.swayidle
       pkgs.brightnessctl
-      pkgs.pwvucontrol
+      pkgs.wiremix
       wayland-scripts
       termux_sway_yazi
     ];
@@ -113,19 +115,38 @@ in
     };
   };
 
+  programs.wallust.settings = {
+    hooks.sway = "swaymsg  reload";
+    templates.sway = {
+      template = pkgs.writeText "sway.conf" ''
+        client.focused          {{foreground}}     {{background}}     {{foreground}}  {{foreground}}       {{foreground}}
+        client.placeholder      {{foreground}}     {{background}}     {{foreground}}  {{foreground}}       {{foreground}}
+
+        client.focused_inactive {{foreground}}     {{background}}     {{foreground | darken(0.4)}}  {{foreground}}       {{foreground | darken(0.4)}}
+        client.unfocused        {{foreground}}     {{background}}     {{foreground | darken(0.4)}}  {{foreground}}       {{foreground | darken(0.4)}}
+
+        client.urgent           {{foreground}}     {{background}}     {{foreground}}  {{foreground}}       {{foreground}}
+
+        client.background                          {{background}}
+      '';
+      target = "~/.local/share/wallust/sway.conf";
+    };
+  };
+
   wayland.windowManager.sway = {
     enable = true;
-    # checkConfig fails if ${background} doesn't exist
-    checkConfig = false;
+    checkConfig = true;
     config = null;
 
     settings = {
+      include = "~/.local/share/wallust/sway.conf";
+      font = "pango:${font}";
       assign = {
-        "[app_id=foot]" = 1;
+        "[app_id=Alacritty]" = 1;
         "[app_id=firefox]" = 2;
 
         "[app_id=Slack]" = 8;
-        "[app_id=Element]" = 9;
+        "[app_id=electron]" = 9;
       };
 
       bindgesture = {
@@ -200,10 +221,10 @@ in
 
         # exec
         "print" = "exec ${freezshot}";
-        "${mod}+return" = "exec ${foot}";
+        "${mod}+return" = "exec ${alacritty}";
         "${mod}+a" = "exec ${damb}";
         "${mod}+d" = "exec ${dbook}";
-        "${mod}+o" = "exec ${bemenu}";
+        "${mod}+o" = "exec ${fuzzel}";
         "${mod}+w" = "exec ${firefox}";
         "${mod}+backslash" = "exec ${yazi}";
 
@@ -227,8 +248,6 @@ in
       gaps.inner = 10;
       default_border.pixel = 2;
       floating_modifier = "${mod} normal";
-      output."*".background = "${background} fill";
-      "client.focused" = "#4c7899 #285577 #ffffff #285577";
     };
   };
 }
