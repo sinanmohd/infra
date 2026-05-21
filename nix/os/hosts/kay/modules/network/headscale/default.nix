@@ -121,10 +121,6 @@ in
         dns = {
           base_domain = "tsnet.${config.global.userdata.domain}";
           override_local_dns = false;
-          nameservers.split."${config.services.headscale.settings.dns.base_domain}" = [
-            "100.64.0.12"
-            "fd7a:115c:a1e0::c"
-          ];
         };
         derp = {
           server = {

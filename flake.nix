@@ -89,7 +89,7 @@
         user = "root";
         remoteBuild = true;
         nodes.kay = {
-          hostname = "sinanmohd.com";
+          hostname = "kay";
           profilesOrder = [ "system" ];
           profiles.system = {
             path = deploy-rs.lib.x86_64-linux.activate.nixos self.nixosConfigurations.kay;
