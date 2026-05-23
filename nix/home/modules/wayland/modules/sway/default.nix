@@ -135,6 +135,7 @@ in
 
   wayland.windowManager.sway = {
     enable = true;
+    xwayland = false;
     checkConfig = true;
     config = null;
 

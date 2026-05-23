@@ -2,7 +2,6 @@
 
 bgroot="$XDG_DATA_HOME/wayland"
 bgdesk="$bgroot/desktop"
-bglock="$bgroot/lockscreen"
 walldir="$HOME/pix/wall"
 
 info() {
@@ -62,12 +61,15 @@ randimg() {
 updatewall() {
 	: "${1:?}"
 
-	rm -f "$bgdesk" "$bglock"
+	rm -f "$bgdesk"
 	cp  "$1" "$bgdesk"
 
-	awww img "${bgdesk}" --transition-type wipe --transition-angle 30 --transition-duration 0.5 --transition-fps 120 &
+	awww img "${bgdesk}" \
+		--transition-type wipe \
+		--transition-angle 30 \
+		--transition-duration 0.5 \
+		--transition-fps 120 &
 	wallust run "${bgdesk}" -s &
-	# ffmpeg -loglevel quiet -i "$bgdesk" -vf "boxblur=50" -f mjpeg "$bglock" &
 }
 
 ########

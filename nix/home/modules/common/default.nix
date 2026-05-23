@@ -45,6 +45,7 @@ in
       curl
       file
       ps_mem
+      jq
 
       dig
       tcpdump

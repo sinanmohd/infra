@@ -31,7 +31,6 @@ in
 
       mpv
       imv
-      hoppscotch
       gimp3
     ];
   };

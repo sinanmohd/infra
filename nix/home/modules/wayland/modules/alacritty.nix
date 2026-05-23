@@ -12,14 +12,16 @@ in
 
   programs.wallust.settings.templates.alacritty = {
     template = pkgs.writeText "alacritty.toml" ''
+      # from catppuccin: https://github.com/catppuccin/alacritty/blob/main/catppuccin-mocha.toml
       [colors.primary]
+      # background = "#1e1e2e"
+      # foreground = "#cdd6f4"
+      # dim_foreground = "#7f849c"
+      # bright_foreground = "#cdd6f4"
       background="{{background}}"
       foreground = "{{foreground}}"
-
-      # from catppuccin: https://github.com/catppuccin/alacritty/blob/main/catppuccin-mocha.toml
-      # foreground = "#cdd6f4"
-      dim_foreground = "#7f849c"
-      bright_foreground = "#cdd6f4"
+      dim_foreground = "{{foreground | darken(0.4)}}"
+      bright_foreground = "{{foreground | lighten(0.2)}}"
 
       [colors.cursor]
       text = "#1e1e2e"
