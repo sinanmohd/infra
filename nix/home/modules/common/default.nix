@@ -22,6 +22,7 @@ in
     ./modules/neovim
     ./modules/yazi.nix
     ./modules/btop.nix
+    ./modules/font.nix
   ];
 
   programs.home-manager.enable = true;

@@ -3,7 +3,7 @@
   home.packages = with pkgs; [ pywalfox-native ];
   programs.wallust.settings = {
     hooks.firefox = ''
-      pywalfox install
+      pywalfox install > /dev/null
       pywalfox update
     '';
     templates.firefox = {

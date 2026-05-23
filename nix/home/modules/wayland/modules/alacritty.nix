@@ -14,9 +14,10 @@ in
     template = pkgs.writeText "alacritty.toml" ''
       [colors.primary]
       background="{{background}}"
+      foreground = "{{foreground}}"
 
       # from catppuccin: https://github.com/catppuccin/alacritty/blob/main/catppuccin-mocha.toml
-      foreground = "#cdd6f4"
+      # foreground = "#cdd6f4"
       dim_foreground = "#7f849c"
       bright_foreground = "#cdd6f4"
 

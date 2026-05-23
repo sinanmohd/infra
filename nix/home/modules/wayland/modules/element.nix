@@ -7,7 +7,7 @@
   programs.wallust.settings = {
     hooks.element = ''
       pkill -9 electron
-      element-desktop
+      nohup element-desktop > /dev/null 2>&1 &
     '';
     templates.element = {
       template = pkgs.writeText "colors.json" ''

@@ -67,7 +67,7 @@ updatewall() {
 
 	awww img "${bgdesk}" --transition-type wipe --transition-angle 30 --transition-duration 0.5 --transition-fps 120 &
 	wallust run "${bgdesk}" -s &
-	ffmpeg -loglevel quiet -i "$bgdesk" -vf "boxblur=50" -f mjpeg "$bglock" &
+	# ffmpeg -loglevel quiet -i "$bgdesk" -vf "boxblur=50" -f mjpeg "$bglock" &
 }
 
 ########
