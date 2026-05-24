@@ -20,7 +20,7 @@ require('lazy').setup({
   require 'pacman.plugins.lspconfig',
   require 'pacman.plugins.conform',
   require 'pacman.plugins.blink-cmp',
-  require 'pacman.plugins.catppuccin',
+  require 'pacman.plugins.dracula',
   require 'pacman.plugins.todo-comments',
   require 'pacman.plugins.mini',
   require 'pacman.plugins.treesitter',

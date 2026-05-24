@@ -9,8 +9,7 @@
   "modules-center": [
     "clock",
     "privacy",
-    "custom/weather",
-    "custom/idle-indicator"
+    "custom/weather"
   ],
   "modules-right": [
     "group/tray-expander",
@@ -28,24 +27,24 @@
   },
   "cpu": {
     "interval": 5,
-    "format": "  {usage}%",
-    "on-click": "omarchy-launch-or-focus-tui btop",
+    "format": "{usage}%",
+    "on-click": "ttyasrt btop",
     "on-click-right": "alacritty"
   },
   "memory": {
     "interval": 5,
-    "format": " {avail:0.1f}GiB",
+    "format": "{avail:0.1f}GiB",
     "tooltip-format": "{used:0.1f} / {total:0.1f}GiB RAM ⏽ {swapUsed:0.1f} / {swapTotal:0.1f}GiB Swap",
-    "on-click": "omarchy-launch-or-focus-tui btop",
+    "on-click": "ttyasrt btop",
     "on-click-right": "alacritty"
   },
   "clock": {
     "format": "{:L%a, %d %B %H:%M}",
     "tooltip": false,
-    "on-click-right": "omarchy-launch-floating-terminal-with-presentation omarchy-tz-select"
+    "on-click-right": "ttyasrt peaclock"
   },
   "custom/weather": {
-    "exec": "wttrbar --nerd --hide-conditions --custom-indicator '   {uvIndex} {ICON}  {FeelsLikeC}'",
+    "exec": "wttrbar --nerd --hide-conditions --custom-indicator ' {uvIndex} {ICON}{FeelsLikeC}'",
     "return-type": "json",
     "interval": 60,
     "tooltip": true,
@@ -53,31 +52,30 @@
   },
   "network": {
     "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
-    "format": "{icon}  {bandwidthTotalBytes}",
-    "format-wifi": "{icon}  {bandwidthTotalBytes}",
-    "format-ethernet": "󰀂  {bandwidthTotalBytes}",
+    "format": "{icon} {bandwidthTotalBytes}",
+    "format-wifi": "{icon} {bandwidthTotalBytes}",
+    "format-ethernet": "󰀂 {bandwidthTotalBytes}",
     "format-disconnected": "",
     "tooltip-format-wifi": "{essid} ⏽ {frequency} GHz ⏽ {ipaddr}/{cidr}",
     "tooltip-format-ethernet": "Connected",
     "tooltip-format-disconnected": "Disconnected",
     "interval": 3,
     "spacing": 1,
-    "on-click": "omarchy-launch-wifi"
+    "on-click": "ttyasrt impala"
   },
   "battery": {
-    "format": "{icon} {capacity}%",
-    "format-discharging": "{icon} {capacity}%",
-    "format-charging": "{icon} {capacity}%",
+    "format": "{icon}{capacity}%",
+    "format-discharging": "{icon}{capacity}%",
+    "format-charging": "{icon}{capacity}%",
     "format-icons": {
       "charging": ["󰂄"],
       "default": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
     },
-    "format-full": "󰂄 {capacity}%",
+    "format-full": "󰂄{capacity}%",
     "tooltip-format-discharging": "{time} Remaining ⏽ {power:>1.0f}W↓⏽ {cycles} Cycles",
     "tooltip-format-charging": "{time} Until Full ⏽ {power:>1.0f}W↓⏽ {cycles} Cycles",
     "interval": 5,
-    "on-click": "omarchy-menu power",
-    "on-click-right": "notify-send -u low \"$(omarchy-battery-status)\"",
+    "on-click": "ttyasrt powertop",
     "states": {
       "warning": 20,
       "critical": 10
@@ -87,14 +85,14 @@
     "format": "",
     "format-off": "󰂲",
     "format-disabled": "󰂲",
-    "format-connected": "󰂱 {device_battery_percentage}%",
+    "format-connected": "󰂱{device_battery_percentage}%",
     "format-no-controller": "",
     "tooltip-format": "{num_connections} Connected ⏽ {device_alias}",
-    "on-click": "omarchy-launch-bluetooth"
+    "on-click": "ttyasrt bluetui"
   },
   "pulseaudio": {
-    "format": "{icon}  {volume}%",
-    "on-click": "omarchy-launch-audio",
+    "format": "{icon}{volume}%",
+    "on-click": "ttyasrt wiremix",
     "on-click-right": "pamixer -t",
     "tooltip-format": "{desc}",
     "scroll-step": 5,
@@ -102,7 +100,7 @@
     "format-icons": {
       "headphone": "󱡏",
       "headset": "󱡏",
-      "default": ["", "", ""]
+      "default": ["", "", " "]
     }
   },
   "group/tray-expander": {

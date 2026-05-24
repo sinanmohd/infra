@@ -12,76 +12,65 @@ in
 
   programs.wallust.settings.templates.alacritty = {
     template = pkgs.writeText "alacritty.toml" ''
-      # from catppuccin: https://github.com/catppuccin/alacritty/blob/main/catppuccin-mocha.toml
+      # mixed with static colors from dracula: https://github.com/dracula/alacritty/blob/master/dracula.toml
+
       [colors.primary]
-      # background = "#1e1e2e"
-      # foreground = "#cdd6f4"
-      # dim_foreground = "#7f849c"
-      # bright_foreground = "#cdd6f4"
       background="{{background}}"
       foreground = "{{foreground}}"
       dim_foreground = "{{foreground | darken(0.4)}}"
       bright_foreground = "{{foreground | lighten(0.2)}}"
 
       [colors.cursor]
-      text = "#1e1e2e"
-      cursor = "#f5e0dc"
+      text = "{{background}}"
+      cursor = "{{foreground}}"
 
       [colors.vi_mode_cursor]
-      text = "#1e1e2e"
-      cursor = "#b4befe"
-
-      [colors.search.matches]
-      foreground = "#1e1e2e"
-      background = "#a6adc8"
-
-      [colors.search.focused_match]
-      foreground = "#1e1e2e"
-      background = "#a6e3a1"
-
-      [colors.footer_bar]
-      foreground = "#1e1e2e"
-      background = "#a6adc8"
-
-      [colors.hints.start]
-      foreground = "#1e1e2e"
-      background = "#f9e2af"
-
-      [colors.hints.end]
-      foreground = "#1e1e2e"
-      background = "#a6adc8"
+      text = "{{foreground}}"
+      cursor = "{{background}}"
 
       [colors.selection]
-      text = "#1e1e2e"
-      background = "#f5e0dc"
+      text = "{{foreground}}"
+      background = "{{background}}"
 
       [colors.normal]
-      black = "#45475a"
-      red = "#f38ba8"
-      green = "#a6e3a1"
-      yellow = "#f9e2af"
-      blue = "#89b4fa"
-      magenta = "#f5c2e7"
-      cyan = "#94e2d5"
-      white = "#bac2de"
+      black = "{{background}}"
+      red = "#ff5555"
+      green = "#50fa7b"
+      yellow = "#f1fa8c"
+      blue = "#bd93f9"
+      magenta = "#ff79c6"
+      cyan = "#8be9fd"
+      white = "{{foreground | darken(0.4)}}"
 
       [colors.bright]
-      black = "#585b70"
-      red = "#f38ba8"
-      green = "#a6e3a1"
-      yellow = "#f9e2af"
-      blue = "#89b4fa"
-      magenta = "#f5c2e7"
-      cyan = "#94e2d5"
-      white = "#a6adc8"
+      black = "#6272a4"
+      red = "#ff6e6e"
+      green = "#69ff94"
+      yellow = "#ffffa5"
+      blue = "#d6acff"
+      magenta = "#ff92df"
+      cyan = "#a4ffff"
+      white = "{{foreground | darken(0.4)}}"
 
-      [[colors.indexed_colors]]
-      index = 16
-      color = "#fab387"
+      [colors.search.matches]
+      foreground = "#44475a"
+      background = "#50fa7b"
 
-      [[colors.indexed_colors]]
-      index = 17
-      color = "#f5e0dc"
+      [colors.search.focused_match]
+      foreground = "#44475a"
+      background = "#ffb86c"
+
+      [colors.footer_bar]
+      background = "#282a36"
+      foreground = "#f8f8f2"
+
+      [colors.hints.start]
+      foreground = "#282a36"
+      background = "#f1fa8c"
+
+      [colors.hints.end]
+      foreground = "#f1fa8c"
+      background = "#282a36"
     '';
     target = "~/.local/share/wallust/alacritty.toml";
   };

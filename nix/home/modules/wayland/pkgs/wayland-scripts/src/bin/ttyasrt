@@ -19,5 +19,5 @@ fi
 if tty --silent; then
 	exec "$@"
 else
-	exec "$TERMINAL" -- "$@"
+	exec "$TERMINAL" -e "$@"
 fi

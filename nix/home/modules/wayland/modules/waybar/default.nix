@@ -20,6 +20,10 @@ in
     enable = true;
     systemd.enable = true;
     style = builtins.readFile ./style.css;
+    # TODO:
+    # - ttyart not in $PATH
+    # - add all ttyart apps to home.packages
+    # - refactor ttyart to hardcode allacritty, the -e is not universal
     settings.master = builtins.fromJSON (builtins.readFile ./config.json);
   };
 
