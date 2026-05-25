@@ -11,7 +11,8 @@
     ];
 
     shellAliases = {
-      ls = "eza -l --group-directories-first --icons=auto";
+      l = "eza -l --group-directories-first --icons=auto";
+      grep = "grep --color=auto";
       lsa = "ls -a";
       lt = "eza --tree --level=2 --long --icons --git";
       lta = "lt -a";

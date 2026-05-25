@@ -203,13 +203,8 @@ play_amb()
 
 set_clip()
 {
-	if [ -n "$WAYLAND_DISPLAY" ]; then
-		dep_check "wl-paste"
-		_clip="$(wl-paste -n)"
-	elif [ -n "$DISPLAY" ]; then
-		dep_check "xclip"
-		_clip="$(xclip -o)"
-	fi
+	dep_check "wl-paste"
+	_clip="$(wl-paste -n | tr -d '\n')"
 
 	verify_val "$_clip"
 }

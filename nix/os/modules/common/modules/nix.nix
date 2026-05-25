@@ -1,11 +1,19 @@
 {
   config,
+  lib,
   ...
 }:
 let
   user = config.global.userdata.name;
 in
 {
+  nixpkgs.config.allowUnfreePredicate =
+    pkg:
+    builtins.elem (lib.getName pkg) [
+      "nvidia-x11"
+      "slack"
+    ];
+
   nix = {
     gc = {
       automatic = true;
