@@ -2,7 +2,7 @@
   "reload_style_on_change": true,
   "layer": "top",
   "position": "top",
-  "spacing": 10,
+  "spacing": 8,
   "height": 24,
 
   "modules-left": ["sway/workspaces"],
@@ -14,10 +14,10 @@
   "modules-right": [
     "group/tray-expander",
     "network",
+    "cpu",
+    "memory",
     "bluetooth",
     "pulseaudio",
-    "memory",
-    "cpu",
     "battery"
   ],
 
@@ -52,8 +52,8 @@
   },
   "network": {
     "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
-    "format": "{icon} {bandwidthTotalBytes}",
-    "format-wifi": "{icon} {bandwidthTotalBytes}",
+    "format": "{icon}{bandwidthTotalBytes}",
+    "format-wifi": "{icon}{bandwidthTotalBytes}",
     "format-ethernet": "󰀂 {bandwidthTotalBytes}",
     "format-disconnected": "",
     "tooltip-format-wifi": "{essid} ⏽ {frequency} GHz ⏽ {ipaddr}/{cidr}",

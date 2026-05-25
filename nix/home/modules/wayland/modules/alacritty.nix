@@ -29,8 +29,8 @@ in
       cursor = "{{background}}"
 
       [colors.selection]
-      text = "{{foreground}}"
-      background = "{{background}}"
+      text = "{{background}}"
+      background = "{{foreground}}"
 
       [colors.normal]
       black = "{{background}}"
