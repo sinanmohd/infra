@@ -1,6 +1,6 @@
 apiVersion: v2
-name: zookeeper
-description: A Helm chart for zookeeper
+name: argocd
+description: A Helm chart for argocd
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -29,7 +29,7 @@ maintainers:
     url: "https://www.sinanmohd.com"
 
 dependencies:
-  - name: zookeeper
-    version: 0.6.7
-    repository: oci://registry-1.docker.io/cloudpirates
-    condition: zookeeper.enabled
+  - name: argo-cd
+    version: 9.5.15
+    repository: https://argoproj.github.io/argo-helm
+    condition: argo-cd.enabled

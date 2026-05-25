@@ -1,6 +1,0 @@
-dependencies:
-- name: rustfs
-  repository: oci://registry-1.docker.io/cloudpirates
-  version: 0.7.1
-digest: sha256:cc8e478086466ac9f5457554b1910b4a93b8d08b900b7e1ca8c2f60c3d0da9d4
-generated: "2026-04-03T15:53:44.319780287+05:30"

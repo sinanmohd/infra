@@ -1,7 +1,0 @@
-zookeeper:
-  enabled: true
-  metrics:
-    enabled: false
-  persistence:
-    storageClass: "local-path"
-    size: 8Gi

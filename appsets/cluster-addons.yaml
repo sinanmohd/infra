@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cluster-addons
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - list:
+        elements:
+          - name: cert-manager
+            namespace: cert-manager
+  template:
+    metadata:
+      name: "{{.name}}"
+    spec:
+      project: default
+
+      source:
+        repoURL: "https://github.com/sinanmohd/infra.git"
+        targetRevision: HEAD
+        path: "charts/{{.name}}"
+        helm:
+          valueFiles:
+            - values.yaml
+
+      destination:
+        server: "https://kubernetes.default.svc"
+        namespace: "{{.namespace}}"
+
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+        automated:
+          prune: true
+          selfHeal: true
