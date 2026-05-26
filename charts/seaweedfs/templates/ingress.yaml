@@ -1,0 +1,35 @@
+{{- if $.Values.ingress.enabled }}
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ .Release.Name }}-https-redirect
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-s3
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Release.Namespace }}-{{ .Release.Name }}-https-redirect@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: {{ $.Values.ingress.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: seaweed-s3
+                port:
+                  number: 8333
+  tls:
+    - hosts:
+        - {{ $.Values.ingress.host }}
+      secretName: {{ .Release.Name }}-s3-acme-cert
+{{- end }}

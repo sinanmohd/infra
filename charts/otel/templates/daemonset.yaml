@@ -151,11 +151,7 @@ spec:
         spike_limit_percentage: 15
 
     exporters:
-      debug: {}
-      otlp_grpc:
-        endpoint: signoz-otel-collector.signoz:4317
-        tls:
-          insecure: true
+      {{- toYaml $.Values.exporters | nindent 6}}
 
     service:
       pipelines:
@@ -174,7 +170,7 @@ metadata:
   name: otel-collector-daemonset
 rules:
   - apiGroups: [""]
-    resources: 
+    resources:
       - nodes/stats
       - nodes
       - pods

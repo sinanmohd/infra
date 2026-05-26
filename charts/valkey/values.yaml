@@ -15,7 +15,7 @@ valkey:
     enabled: false
   persistence:
     enabled: true
-    storageClass: "openebs-lvm"
+    storageClass: ""
     size: "1Gi"
   sentinel:
     # only creates master srv when sentinel is disabled
@@ -23,7 +23,3 @@ valkey:
   auth:
     enabled: true
     password: "valkey"
-  # needed for ../bud
-  config:
-    extraConfig:
-      - "notify-keyspace-events KEA"

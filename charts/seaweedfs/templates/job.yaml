@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ .Release.Name }}-postgres-table-create-{{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum | trunc 8 }}"
+spec:
+  ttlSecondsAfterFinished: 86400 # 1Day
+  template:
+    spec:
+      volumes:
+        - name: "{{ .Release.Name }}-postgres-table-create-script"
+          configMap:
+            name: "{{ .Release.Name }}-postgres-table-create-script"
+      containers:
+      - name: postgres-table-create
+        image: {{ .Values.postgres.image | quote }}
+        volumeMounts:
+          - mountPath: "/var/script.sh"
+            name: "{{ .Release.Name }}-postgres-table-create-script"
+            subPath: script.sh
+            readOnly: true
+        command: ["/bin/bash", "/var/script.sh"]
+      restartPolicy: Never

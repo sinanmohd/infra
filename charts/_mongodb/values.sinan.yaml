@@ -1,0 +1,9 @@
+users:
+  monitoring:
+    password: monitoring
+    roles:
+      - name: clusterMonitor
+        db: admin
+
+storage:
+  class: "local-path"

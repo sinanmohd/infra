@@ -1,0 +1,9 @@
+keel:
+  enabled: true
+  helmProvider:
+    version: "v3"
+  resources:
+    limits:
+      memory: 512Mi
+    requests:
+      memory: 128Mi

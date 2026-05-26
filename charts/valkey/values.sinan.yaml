@@ -1,0 +1,3 @@
+valkey:
+  persistence:
+    storageClass: "local-path"

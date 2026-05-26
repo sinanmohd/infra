@@ -1,0 +1,11 @@
+replsetSize: 3
+image: "percona/percona-server-mongodb:8.0.19-7"
+imagePullPolicy: "Always"
+storage:
+  size: 4Gi
+  class: ""
+
+users: {}
+
+psmdb-operator:
+  enabled: true

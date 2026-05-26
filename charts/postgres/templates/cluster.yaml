@@ -13,16 +13,16 @@ spec:
   {{- if $.Values.users }}
   managed:
     roles:
-    {{- range $.Values.users }}
-    - name: {{ .name }}
+    {{- range $user, $value := .Values.users }}
+    - name: {{ $user }}
       ensure: present
       login: true
       superuser: false
       passwordSecret:
-        name: "{{ .name }}-cnpg-user"
-      {{- if .inRoles }}
+        name: "cnpg-user-{{ $user }}"
+      {{- if $value.inRoles }}
       inRoles:
-        {{- range .inRoles }}
+        {{- range $value.inRoles }}
         - {{ . }}
         {{- end -}}
       {{- end -}}

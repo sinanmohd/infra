@@ -1,0 +1,19 @@
+ingress:
+  enabled: true
+  host: s3.sinanmohd.com
+
+volumeSizeLimitMB: 5000
+defaultReplication: "100"
+
+buckets:
+  opentofu:
+    reclaimPolicy: Retain
+    versioning: "Off"
+    objectLock: false
+    anonymousRead: false
+    quota:
+      size: 128Mi
+      enforce: true
+    access:
+      - user: opentofu
+        actions: [Read, Write, List]

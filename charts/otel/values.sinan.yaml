@@ -1,0 +1,17 @@
+exporters:
+  otlp_grpc:
+    endpoint: signoz-otel-collector.signoz:4317
+    tls:
+      insecure: true
+
+monitoring:
+  valkey:
+    endpoint: "valkey.valkey:6379"
+    password: "valkey"
+  postgres:
+    endpoint: "postgres-r.postgres:5432"
+    username: "monitoring"
+    password: "monitoring"
+  clickhouse:
+    endpoint: "clickhouse-altinity-clickhouse-operator-metrics.clickhouse:8888"
+    path: "/metrics"

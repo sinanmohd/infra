@@ -1,0 +1,23 @@
+users:
+  example_user:
+    password: "example_password"
+    spec:
+      authorization:
+        type: simple
+        acls:
+          - resource:
+              type: topic
+              name: my_app
+              patternType: literal
+            host: "*"
+            operations:
+              - Create
+              - Write
+              - Read
+              - Delete
+              - Describe
+              - Alter
+              - DescribeConfigs
+              - AlterConfigs
+              - ClusterAction
+              - IdempotentWrite

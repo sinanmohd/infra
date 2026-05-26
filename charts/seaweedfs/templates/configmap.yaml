@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Release.Name }}-postgres-table-create-script"
+data:
+  script.sh: |-
+    export PGPASSWORD="{{ $.Values.postgres.password }}"
+
+    echo "Waiting for PostgreSQL to be ready..."
+    while ! pg_isready -h {{ $.Values.postgres.host }} -p {{ $.Values.postgres.port }} -U {{ $.Values.postgres.username }} ; do
+      sleep 1
+    done
+    echo "PostgreSQL is ready"
+
+    psql -h {{ $.Values.postgres.host }} -p {{ $.Values.postgres.port }} -U {{ $.Values.postgres.username }} <<- EOF
+      CREATE TABLE IF NOT EXISTS filemeta (
+        dirhash BIGINT NOT NULL,
+        name VARCHAR(65535) NOT NULL,
+        directory VARCHAR(65535) NULL,
+        meta BYTEA NULL,
+        PRIMARY KEY (dirhash, name)
+      );
+    EOF
+
+    echo "Database initialization complete"

@@ -1,0 +1,58 @@
+{{ $installName := "clickhouse" }}
+{{ $clusterName := "cluster" }}
+apiVersion: clickhouse.altinity.com/v1
+kind: ClickHouseInstallation
+metadata:
+  name: {{ $installName | quote }}
+spec:
+  configuration:
+    settings:
+      logger/level: "warning"
+    users:
+      default/networks/ip:
+        - "::/0"
+    {{- if $.Values.keeper.enabled }}
+    zookeeper:
+      nodes:
+        - host: "keeper-clickhouse-keeper"
+          port: 2181
+    {{- end }}
+    clusters:
+      - name: {{ $clusterName | quote }}
+        layout:
+          shardsCount: 1
+          replicasCount: {{ .Values.replicaCount }}
+        templates:
+          podTemplate: clickhouse-pod
+          volumeClaimTemplate: clickhouse-storage
+
+  templates:
+    podTemplates:
+      - name: clickhouse-pod
+        spec:
+          containers:
+            - name: clickhouse
+              image: {{ .Values.image | quote }}
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+              - podAffinityTerm:
+                  labelSelector:
+                    matchLabels:
+                      clickhouse.altinity.com/chi: {{ $installName | quote }}
+                      clickhouse.altinity.com/cluster: {{ $clusterName | quote }}
+                  topologyKey: kubernetes.io/hostname
+                weight: 100
+
+    volumeClaimTemplates:
+      - name: clickhouse-storage
+        reclaimPolicy: {{ .Values.reclaimPolicy | required "A valid reclaimPolicy is required" | quote }}
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: {{ .Values.size | required "A valid size is required" | quote }}
+          {{- if .Values.storageClass }}
+          storageClassName: {{ .Values.storageClass | quote }}
+          {{- end }}

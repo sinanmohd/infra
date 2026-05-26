@@ -1,6 +1,5 @@
-{{- range $.Values.users }}
-{{ $user := .name -}}
-{{- range .db }}
+{{- range $user, $value := .Values.users }}
+{{- range $value.databases }}
 apiVersion: postgresql.cnpg.io/v1
 kind: Database
 metadata:

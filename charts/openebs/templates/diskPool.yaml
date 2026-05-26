@@ -1,0 +1,10 @@
+{{- range $name, $value := $.Values.diskPool }}
+apiVersion: "openebs.io/v1beta3"
+kind: DiskPool
+metadata:
+  name: {{ $name | quote }}
+spec:
+  node: {{ $name | quote }}
+  disks: {{ $value }}
+---
+{{- end }}

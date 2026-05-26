@@ -1,0 +1,21 @@
+storageClass: "local-path"
+
+users:
+  monitoring:
+    password: "monitoring"
+    inRoles:
+      - pg_monitor
+      - pg_read_all_stats
+  signoz:
+    password: "signoz"
+    databases:
+      - signoz
+
+  seaweedfs:
+    password: "seaweedfs"
+    databases:
+      - seaweedfs
+  keycloak:
+    password: "keycloak"
+    databases:
+      - keycloak

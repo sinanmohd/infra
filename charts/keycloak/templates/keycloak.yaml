@@ -1,0 +1,31 @@
+apiVersion: k8s.keycloak.org/v2beta1
+kind: Keycloak
+metadata:
+  name: keycloak
+spec:
+  instances: {{ $.Values.instances }}
+  {{- with $.Values.image }}
+  image: {{ . | quote }}
+  {{- end }}
+  db:
+    vendor: postgres
+    host: {{ $.Values.postgres.host | quote }}
+    port: {{ $.Values.postgres.port }}
+    database: {{ $.Values.postgres.database | quote }}
+    usernameSecret:
+      name: keycloak-db
+      key: username
+    passwordSecret:
+      name: keycloak-db
+      key: password
+  bootstrapAdmin:
+    user:
+      secret: keycloak-admin
+  http:
+    httpEnabled: true
+  ingress:
+    enabled: false
+  hostname:
+    hostname: {{ $.Values.ingress.host | quote }}
+  proxy:
+    headers: xforwarded

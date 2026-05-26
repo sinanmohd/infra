@@ -1,0 +1,7 @@
+openebs:
+  mayastor:
+    nats:
+      cluster:
+        replicas: 1
+    etcd:
+      replicaCount: 1

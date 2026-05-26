@@ -1,3 +1,5 @@
+diskPool: {}
+
 openebs:
   enabled: true
 
@@ -18,11 +20,6 @@ openebs:
     nats:
       cluster:
         enabled: true
-        replicas: 1
-
-    # allow single node cluster
-    etcd:
-      replicaCount: 1
 
     # disable default storageClass
     storageClass:

@@ -8,6 +8,10 @@ spec:
 
   config:
     receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
       k8s_cluster:
         auth_type: serviceAccount
         node_conditions_to_report:
@@ -18,9 +22,11 @@ spec:
           - memory
       k8s_events:
         auth_type: serviceAccount
+
+      {{- if $.Values.monitoring.valkey }}
       redis:
-        endpoint: {{ .Values.monitoring.redis.endpoint | quote }}
-        password: {{ .Values.monitoring.redis.password | quote }}
+        endpoint: {{ .Values.monitoring.valkey.endpoint | quote }}
+        password: {{ .Values.monitoring.valkey.password | quote }}
         collection_interval: 8s
         metrics:
           redis.maxmemory:
@@ -29,6 +35,9 @@ spec:
             enabled: true
           redis.db.keys:
             enabled: true
+      {{- end }}
+
+      {{- if $.Values.monitoring.mongodb }}
       mongodb:
         hosts:
           - endpoint: {{ .Values.monitoring.mongodb.endpoint | quote }}
@@ -41,6 +50,9 @@ spec:
         metrics:
           mongodb.operation.latency.time:
             enabled: true
+      {{- end }}
+
+      {{- if $.Values.monitoring.postgres }}
       postgresql:
         endpoint: {{ .Values.monitoring.postgres.endpoint | quote }}
         collection_interval: 8s
@@ -53,7 +65,9 @@ spec:
             enabled: true
           postgresql.deadlocks:
             enabled: true
+      {{- end }}
 
+      {{- if $.Values.monitoring.clickhouse }}
       prometheus/clickhouse:
         config:
           global:
@@ -64,9 +78,10 @@ spec:
                 - targets:
                     - {{ .Values.monitoring.clickhouse.endpoint | quote }}
               metrics_path: {{ .Values.monitoring.clickhouse.path | quote }}
+      {{- end }}
 
-      {{/* k8sobjects: */}}
-      {{/*   auth_type: serviceAccount */}}
+      {{- /* k8sobjects: */}}
+      {{- /*   auth_type: serviceAccount */}}
 
     processors:
       k8s_attributes:
@@ -110,7 +125,6 @@ spec:
             - service.version
             - service.instance.id
 
-
       batch: {}
 
       memory_limiter:
@@ -118,8 +132,8 @@ spec:
         limit_percentage: 80
         spike_limit_percentage: 15
 
-      {{ $kube_system_namespace := (lookup "v1" "Namespace" "" "kube-system") }}
-      {{ if $kube_system_namespace }}
+      {{- $kube_system_namespace := (lookup "v1" "Namespace" "" "kube-system") }}
+      {{- if $kube_system_namespace }}
       transform:
         trace_statements:
           - set(resource.attributes["k8s.cluster.uid"], "{{ $kube_system_namespace.metadata.uid }}")
@@ -127,19 +141,28 @@ spec:
           - set(resource.attributes["k8s.cluster.uid"], "{{ $kube_system_namespace.metadata.uid }}")
         log_statements:
           - set(resource.attributes["k8s.cluster.uid"], "{{ $kube_system_namespace.metadata.uid }}")
-      {{ end }}
+      {{- end }}
 
     exporters:
-      debug: {}
-      otlp_grpc:
-        endpoint: signoz-otel-collector.signoz:4317
-        tls:
-          insecure: true
+      {{- toYaml $.Values.exporters | nindent 6}}
 
     service:
       pipelines:
         metrics:
-          receivers: [k8s_cluster, redis, postgresql, prometheus/clickhouse, mongodb]
+          receivers: 
+            - k8s_cluster
+            {{- if $.Values.monitoring.valkey }}
+            - redis
+            {{- end }}
+            {{- if $.Values.monitoring.postgres }}
+            - postgresql
+            {{- end }}
+            {{- if $.Values.monitoring.clickhouse }}
+            - prometheus/clickhouse
+            {{- end }}
+            {{- if $.Values.monitoring.mongodb }}
+            - mongodb
+            {{- end }}
           processors: [memory_limiter, batch, k8s_attributes, transform]
           exporters: [debug, otlp_grpc]
         logs:

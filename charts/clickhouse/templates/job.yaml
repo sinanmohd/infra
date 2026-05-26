@@ -13,7 +13,7 @@ spec:
             name: "{{ .Release.Name }}-clickhouse-db-create-script"
       containers:
       - name: clickhouse-db-create
-        image: "{{ .Values.image }}"
+        image: {{ .Values.image | quote }}
         volumeMounts:
           - mountPath: "/var/script.sh"
             name: "{{ .Release.Name }}-clickhouse-db-create-script"

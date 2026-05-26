@@ -1,0 +1,20 @@
+# Basic configuration (required)
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaNodePool
+metadata:
+  name: kafka-node-pool
+  labels:
+    strimzi.io/cluster: kafka
+spec:
+  replicas: {{ $.Values.replicas }}
+  roles:
+    - controller
+    - broker
+  storage:
+    type: jbod
+    volumes:
+      - id: 0
+        type: persistent-claim
+        size: {{ .Values.storage.size | quote }}
+        class: {{ .Values.storage.ClassName | quote }}
+        deleteClaim: true

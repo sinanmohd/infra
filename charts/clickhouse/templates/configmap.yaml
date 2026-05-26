@@ -7,7 +7,7 @@ data:
     ch_isready() {
       while true; do
         clickhouse-client \
-          --host clickhouse-{{ .Release.Name }}-clickhouse \
+          --host clickhouse-clickhouse \
           -q ""
         exit_code="$?"
 
@@ -15,36 +15,47 @@ data:
           break
         else
           echo "Waiting for clickhouse"
-          sleep 2
+          sleep 4
           continue
         fi
       done
     }
 
-    echo "Waiting for ClickHouse to be ready..."
+    echo "Waiting for ClickHouse to be ready"
     ch_isready
     echo "ClickHouse is ready"
 
-    echo "Creating databases..."
+    {{ $clusterString := ""}}
+    {{- if gt $.Values.replicaCount 1.0 }}
+    {{ $clusterString = " on cluster 'cluster'"}}
+    {{- end -}}
+
+    echo "Updating databases on {{ $.Values.replicaCount }} replicas"
     clickhouse-client \
-      --host clickhouse-{{ .Release.Name }}-clickhouse <<- EOF
-    {{- range $.Values.users }}
-      {{ $name := .name -}}
+      --host clickhouse-clickhouse <<- EOF
+    {{- range $userName, $userValue := .Values.users }}
 
-      CREATE USER IF NOT EXISTS {{ .name }} IDENTIFIED
-      WITH sha256_password BY '{{ .name }}';
 
-      {{ range .grants -}}
-      grant {{ . }} TO '{{ $name }}';
-      {{ end }}
+      #======>
+      # user: {{ $userName }}
+      CREATE USER IF NOT EXISTS '{{ $userName }}' {{- $clusterString }};
+      ALTER USER '{{ $userName }}' {{- $clusterString }} IDENTIFIED WITH sha256_password BY '{{ $userValue.password }}';
 
-      {{ range .databases -}}
-      CREATE DATABASE IF NOT EXISTS {{ . }};
-      grant ALL ON {{ . }}.* TO {{ $name }};
-      {{ end -}}
+      # grants
+      {{- range $userValue.grants }}
+      grant {{ . }} TO '{{ $userName }}' {{- $clusterString }};
+      {{- end }}
 
-      {{ if .databases -}}
-      ALTER USER '{{ .name }}' DEFAULT DATABASE '{{ first .databases }}';
+      # databases
+      {{- range $userValue.databases }}
+      CREATE DATABASE IF NOT EXISTS {{ .name }} {{- $clusterString }} {{ .extraArgs }};
+      grant ALL ON {{ .name }}.* TO {{ $userName }} {{- $clusterString }};
+      {{- end }}
+
+      {{ if $userValue.databases -}}
+      ALTER USER '{{ $userName }}' {{- $clusterString }} DEFAULT DATABASE '{{ (index $userValue.databases 0).name }}';
       {{- end }}
     {{- end }}
     EOF
+
+    echo "Success"

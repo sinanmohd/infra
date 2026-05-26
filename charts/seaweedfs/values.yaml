@@ -1,0 +1,37 @@
+ingress:
+  enabled: false
+  host: example.com
+
+volumeServerDiskCount: 1
+image: chrislusf/seaweedfs:4.26
+storageClassName: ""
+
+volumePvcSize: "64Gi"
+volumeSizeLimitMB: 10000
+defaultReplication: "000"
+replicas:
+  master: 3
+  worker: 2
+  filer: 2
+  s3: 2
+  volume: 2
+
+volumeTopology: {}
+
+postgres:
+  image: "ghcr.io/cloudnative-pg/postgresql:17.9"
+  host: "postgres-rw.postgres"
+  port: 5432
+  username: "seaweedfs"
+  password: "seaweedfs"
+  database: "seaweedfs"
+
+seaweedfs-operator:
+  image:
+    pullPolicy: IfNotPresent
+    tag: "1.0.19"
+  enabled: true
+  grafanaDashboard:
+    enabled: false
+
+buckets: {}

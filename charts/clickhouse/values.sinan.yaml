@@ -1,0 +1,26 @@
+storageClass: "local-path"
+keeper:
+  storageClass: "local-path"
+
+users:
+  signoz:
+    password: "signoz"
+    grants:
+      - SELECT(host_name, host_address, port, cluster) ON system.clusters
+      - SELECT(name, type) ON system.disks
+      - SELECT(entry, cluster, query, host, port, status, exception_code) ON
+        system.distributed_ddl_queue
+      - SELECT(host, port) ON system.zookeeper_connection
+      - SELECT(database, table, command, mutation_id, latest_fail_reason,
+        is_done) ON system.mutations
+
+      - CLUSTER ON *.*
+      - REMOTE ON *.*
+
+      - ALL ON signoz_metadata.*
+      - ALL ON signoz_analytics.*
+    databases:
+      - name: signoz_metrics
+      - name: signoz_traces
+      - name: signoz_logs
+      - name: signoz_meter

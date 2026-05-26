@@ -1,0 +1,8 @@
+volumeSizeLimitMB: 2000
+defaultReplication: "000"
+replicas:
+  master: 1
+  worker: 1
+  filer: 1
+  s3: 1
+  volume: 1

@@ -1,0 +1,66 @@
+apiVersion: seaweed.seaweedfs.com/v1
+kind: Seaweed
+metadata:
+  name: seaweed
+spec:
+  image: {{ $.Values.image | quote }}
+  volumeServerDiskCount: {{ $.Values.volumeServerDiskCount }}
+  enablePVReclaim: true
+  pvReclaimPolicy: "Delete"
+
+  # disable builtin mTLS, use istio
+  tls:
+    enabled: false
+
+  volumeTopology:
+    {{- if $.Values.volumeTopology }}
+{{- $.Values.volumeTopology | toYaml | nindent 4 }}
+    {{- else }}
+    default:
+      replicas: {{ $.Values.replicas.volume }}
+      rack: "rack1"
+      dataCenter: "dc1"
+      storageClassName: {{ $.Values.storageClassName | quote }}
+      requests:
+        storage: {{ $.Values.volumePvcSize }}
+    {{- end }}
+  # disable legacy volume section
+  volume:
+    replicas: 0
+    requests:
+      storage: 10Gi
+
+  s3:
+    replicas: {{ $.Values.replicas.s3 }}
+
+  admin: {}
+  worker:
+    replicas: {{ $.Values.replicas.worker }}
+    jobType: "all"
+    maxExecute: 4
+    persistence:
+      enabled: true
+      storageClassName: {{ $.Values.storageClassName | quote }}
+      resources:
+        requests:
+          storage: 1Gi
+
+  master:
+    replicas: {{ $.Values.replicas.master }}
+    volumeSizeLimitMB: {{ $.Values.volumeSizeLimitMB }}
+    volumePreallocate: false
+    defaultReplication: {{ $.Values.defaultReplication | quote }}
+
+  filer:
+    replicas: {{ $.Values.replicas.filer }}
+    config: |
+      [leveldb2]
+      enabled = false
+      [postgres]
+      enabled = true
+      hostname = "{{ $.Values.postgres.host }}"
+      port = {{ $.Values.postgres.port }}
+      username = "{{ $.Values.postgres.username }}"
+      password = "{{ $.Values.postgres.password }}"
+      database = "{{ $.Values.postgres.database }}"
+      sslmode = "disable"

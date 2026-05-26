@@ -1,0 +1,11 @@
+{{- range $name, $value := .Values.buckets }}
+apiVersion: seaweed.seaweedfs.com/v1
+kind: Bucket
+metadata:
+  name: {{ $name | quote }}
+spec:
+  clusterRef:
+    name: seaweed
+{{- $value | toYaml | nindent 2 }}
+---
+{{- end }}

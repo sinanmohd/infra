@@ -1,0 +1,6 @@
+diskPool:
+  # NOTE: these are lvm volumes, refer this for auto expansion
+  # https://openebs.io/docs/user-guides/replicated-storage-user-guide/replicated-pv-mayastor/advanced-operations/diskpool-expansion
+  hetzner-ax52-0: ["uring:///dev/mapper/openebs-mayastor"]
+  hetzner-ax52-1: ["uring:///dev/mapper/openebs-mayastor"]
+  hetzner-ax52-2: ["uring:///dev/mapper/openebs-mayastor"]

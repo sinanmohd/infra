@@ -1,17 +1,10 @@
-instances: 1
-storageClass: local-path
-size: 16Gi
+instances: 3
+storageClass: ""
+size: "16Gi"
 
 cloudnative-pg:
   enabled: true
   config:
     clusterWide: false
 
-users:
-  - name: "signoz"
-    db:
-      - "signoz"
-  - name: "monitoring"
-    inRoles:
-      - pg_monitor
-      - pg_read_all_stats
+users: {}
