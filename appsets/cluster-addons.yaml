@@ -11,6 +11,11 @@ spec:
         elements:
           - name: cert-manager
             namespace: cert-manager
+            valueFiles: []
+          - name: argocd
+            namespace: argocd
+            valueFiles:
+              - "secrets://secrets.yaml"
   template:
     metadata:
       name: "{{.name}}"
@@ -21,9 +26,6 @@ spec:
         repoURL: "https://github.com/sinanmohd/infra.git"
         targetRevision: HEAD
         path: "charts/{{.name}}"
-        helm:
-          valueFiles:
-            - values.yaml
 
       destination:
         server: "https://kubernetes.default.svc"
@@ -35,3 +37,12 @@ spec:
         automated:
           prune: true
           selfHeal: true
+  templatePatch: |
+    spec:
+      source:
+        helm:
+          valueFiles:
+            - "values.yaml"
+          {{- range $valueFile := .valueFiles }}
+            - {{ $valueFile }}
+          {{- end }}

@@ -2,15 +2,28 @@ valkey:
   enabled: true
   architecture: "replication"
   replicaCount: 3
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - podAffinityTerm:
+            topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: "valkey"
+          weight: 100
   metrics:
     enabled: false
   persistence:
     enabled: true
-    storageClass: "local-path"
-    size: "8Gi"
+    storageClass: "openebs-lvm"
+    size: "1Gi"
   sentinel:
-    enabled: true
-    masterName: "master"
+    # only creates master srv when sentinel is disabled
+    enabled: false
   auth:
     enabled: true
     password: "valkey"
+  # needed for ../bud
+  config:
+    extraConfig:
+      - "notify-keyspace-events KEA"
