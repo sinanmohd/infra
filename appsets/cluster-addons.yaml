@@ -31,7 +31,6 @@ spec:
             namespace: openebs
             valueFiles:
               - "values.minimal.yaml"
-              - "values.sinan.yaml"
           - name: otel
             namespace: otel
             valueFiles:
