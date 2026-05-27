@@ -25,8 +25,8 @@ in
       cursor = "{{foreground}}"
 
       [colors.vi_mode_cursor]
-      text = "{{foreground}}"
-      cursor = "{{background}}"
+      text = "CellBackground"
+      cursor = "CellForeground"
 
       [colors.selection]
       text = "{{background}}"
@@ -40,7 +40,7 @@ in
       blue = "#bd93f9"
       magenta = "#ff79c6"
       cyan = "#8be9fd"
-      white = "{{foreground | darken(0.4)}}"
+      white = "{{foreground}}"
 
       [colors.bright]
       black = "#6272a4"
@@ -50,7 +50,7 @@ in
       blue = "#d6acff"
       magenta = "#ff92df"
       cyan = "#a4ffff"
-      white = "{{foreground | darken(0.4)}}"
+      white = "{{foreground}}"
 
       [colors.search.matches]
       foreground = "#44475a"
