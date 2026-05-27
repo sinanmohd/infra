@@ -1,7 +1,7 @@
 altinity-clickhouse-operator:
   enabled: true
 
-image: altinity/clickhouse-server:26.1.6.20001.altinityantalya
+image: altinity/clickhouse-server:26.1.11.20001.altinityantalya
 storageClass: ""
 size: 8Gi
 reclaimPolicy: Retain # (Retain|Delete)
@@ -9,7 +9,7 @@ replicaCount: 3
 
 keeper:
   enabled: true
-  image: altinity/clickhouse-keeper:26.1.6.20001.altinityantalya
+  image: altinity/clickhouse-keeper:26.1.11.20001.altinityantalya
   storageClass: ""
   size: 1Gi
 
