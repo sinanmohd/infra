@@ -16,6 +16,8 @@ spec:
     {{- range $user, $value := .Values.users }}
     - name: {{ $user }}
       ensure: present
+      connectionLimit: -1
+      inherit: true
       login: true
       superuser: false
       passwordSecret:
