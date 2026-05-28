@@ -30,14 +30,15 @@ harbor:
       coreDatabase: "harbor"
   trivy:
     enabled: false
-  redis:
-    type: external
-    external:
-      coreDatabaseIndex: "0"
-      harborDatabaseIndex: "0"
-      cacheLayerDatabaseIndex: "0"
-      jobserviceDatabaseIndex: "1"
-      registryDatabaseIndex: "2"
-      trivyAdapterIndex: "5"
-      addr: "valkey-master.valkey:6379"
-      password: "valkey"
+  # redis:
+  #   type: external
+  #   external:
+  #     coreDatabaseIndex: "0"
+  #     harborDatabaseIndex: "0"
+  #     cacheLayerDatabaseIndex: "0"
+  #     jobserviceDatabaseIndex: "1"
+  #     registryDatabaseIndex: "2"
+  #     trivyAdapterIndex: "5"
+  #     addr: "harbor.valkey:6379"
+  #     username: "harbor"
+  #     password: "valkey"

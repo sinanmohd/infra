@@ -30,11 +30,11 @@ spec:
               - "values.minimal.yaml"
               - "values.sinan.yaml"
               - "secrets://secrets.sinan.yaml"
-          # - name: harbor
-          #   namespace: harbor
-          #   valueFiles:
-          #     - "values.sinan.yaml"
-          #     - "secrets://secrets.sinan.yaml"
+          - name: harbor
+            namespace: harbor
+            valueFiles:
+              - "values.sinan.yaml"
+              - "secrets://secrets.sinan.yaml"
           - name: cert-manager
             namespace: cert-manager
             valueFiles: []
@@ -77,9 +77,7 @@ spec:
               - "secrets://secrets.sinan.yaml"
           - name: valkey
             namespace: valkey
-            valueFiles:
-              - "values.sinan.yaml"
-              - "secrets://secrets.sinan.yaml"
+            valueFiles: []
   template:
     metadata:
       name: "{{.name}}"

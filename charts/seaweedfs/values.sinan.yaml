@@ -3,7 +3,7 @@ ingress:
   host: s3.sinanmohd.com
 
 volumeSizeLimitMB: 5000
-defaultReplication: "100"
+defaultReplication: "000"
 
 buckets:
   opentofu:
