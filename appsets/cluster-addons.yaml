@@ -13,49 +13,49 @@ spec:
             namespace: argocd
             valueFiles:
               - "secrets://secrets.sinan.yaml"
-          - name: cert-manager
-            namespace: cert-manager
-            valueFiles: []
-          - name: clickhouse
-            namespace: clickhouse
-            valueFiles:
-              - "values.minimal.yaml"
-              - "values.sinan.yaml"
-              - "secrets://secrets.sinan.yaml"
-          - name: keycloak
-            namespace: keycloak
-            valueFiles:
-              - "secrets://secrets.sinan.yaml"
-              - "values.sinan.yaml"
-          - name: openebs
-            namespace: openebs
-            valueFiles:
-              - "values.minimal.yaml"
-          - name: otel
-            namespace: otel
-            valueFiles:
-              - "secrets://secrets.sinan.yaml"
-              - "values.sinan.yaml"
-          - name: postgres
-            namespace: postgres
-            valueFiles:
-              - "values.minimal.yaml"
-              - "values.sinan.yaml"
-              - "secrets://secrets.sinan.yaml"
-          - name: seaweedfs
-            namespace: seaweedfs
-            valueFiles:
-              - "values.minimal.yaml"
-              - "values.sinan.yaml"
-              - "secrets://secrets.sinan.yaml"
-          - name: signoz
-            namespace: signoz
-            valueFiles:
-              - "secrets://secrets.sinan.yaml"
-              - "values.sinan.yaml"
-          - name: valkey
-            namespace: valkey
-            valueFiles: {}
+          # - name: cert-manager
+          #   namespace: cert-manager
+          #   valueFiles: []
+          # - name: clickhouse
+          #   namespace: clickhouse
+          #   valueFiles:
+          #     - "values.minimal.yaml"
+          #     - "values.sinan.yaml"
+          #     - "secrets://secrets.sinan.yaml"
+          # - name: keycloak
+          #   namespace: keycloak
+          #   valueFiles:
+          #     - "secrets://secrets.sinan.yaml"
+          #     - "values.sinan.yaml"
+          # - name: openebs
+          #   namespace: openebs
+          #   valueFiles:
+          #     - "values.minimal.yaml"
+          # - name: otel
+          #   namespace: otel
+          #   valueFiles:
+          #     - "secrets://secrets.sinan.yaml"
+          #     - "values.sinan.yaml"
+          # - name: postgres
+          #   namespace: postgres
+          #   valueFiles:
+          #     - "values.minimal.yaml"
+          #     - "values.sinan.yaml"
+          #     - "secrets://secrets.sinan.yaml"
+          # - name: seaweedfs
+          #   namespace: seaweedfs
+          #   valueFiles:
+          #     - "values.minimal.yaml"
+          #     - "values.sinan.yaml"
+          #     - "secrets://secrets.sinan.yaml"
+          # - name: signoz
+          #   namespace: signoz
+          #   valueFiles:
+          #     - "secrets://secrets.sinan.yaml"
+          #     - "values.sinan.yaml"
+          # - name: valkey
+          #   namespace: valkey
+          #   valueFiles: {}
   template:
     metadata:
       name: "{{.name}}"
@@ -64,7 +64,7 @@ spec:
 
       source:
         repoURL: "https://github.com/sinanmohd/infra.git"
-        targetRevision: HEAD
+        targetRevision: fix/unused
         path: "charts/{{.name}}"
 
       destination:
