@@ -1,0 +1,16 @@
+passwords:
+  harbor: harbor
+
+valkey:
+  harbor:
+    replicas: 0
+    users:
+      - name: harbor
+        passwordSecret:
+          name: valkey-user-passwords
+          keys: [harbor]
+        permissions: "+@all ~* &*"
+    persistence:
+      enabled: true
+      size: 1Gi
+      storageClassName: ""

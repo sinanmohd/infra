@@ -10,7 +10,6 @@ users:
     password: "signoz"
     databases:
       - signoz
-
   seaweedfs:
     password: "seaweedfs"
     databases:
@@ -19,3 +18,7 @@ users:
     password: "keycloak"
     databases:
       - keycloak
+  harbor:
+    password: "harbor"
+    databases:
+      - harbor

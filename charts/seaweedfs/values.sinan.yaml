@@ -17,3 +17,14 @@ buckets:
     access:
       - user: opentofu
         actions: [Read, Write, List]
+  harbor:
+    reclaimPolicy: Retain
+    versioning: "Off"
+    objectLock: false
+    anonymousRead: false
+    quota:
+      size: 16Gi
+      enforce: true
+    access:
+      - user: harbor
+        actions: [Read, Write, List]

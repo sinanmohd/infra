@@ -5,9 +5,6 @@ exporters:
       insecure: true
 
 monitoring:
-  valkey:
-    endpoint: "valkey.valkey:6379"
-    password: "valkey"
   postgres:
     endpoint: "postgres-r.postgres:5432"
     username: "monitoring"
@@ -15,6 +12,9 @@ monitoring:
   clickhouse:
     endpoint: "clickhouse-altinity-clickhouse-operator-metrics.clickhouse:8888"
     path: "/metrics"
+  # valkey:
+  #   endpoint: "valkey.valkey:6379"
+  #   password: "valkey"
   # mongodb:
   #   endpoint: "mongodb-rs0.mongodb:27017"
   #   username: "monitoring"
