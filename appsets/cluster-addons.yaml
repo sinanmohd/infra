@@ -27,10 +27,10 @@ spec:
             valueFiles:
               - "secrets://secrets.sinan.yaml"
               - "values.sinan.yaml"
-          # - name: openebs
-          #   namespace: openebs
-          #   valueFiles:
-          #     - "values.minimal.yaml"
+          - name: openebs
+            namespace: openebs
+            valueFiles:
+              - "values.minimal.yaml"
           - name: otel
             namespace: otel
             valueFiles:
@@ -53,12 +53,9 @@ spec:
             valueFiles:
               - "secrets://secrets.sinan.yaml"
               - "values.sinan.yaml"
-          # - name: valkey
-          #   namespace: valkey
-          #   valueFiles:
-          #     - "values.minimal.yaml"
-          #     - "secrets://secrets.sinan.yaml"
-          #     - "values.sinan.yaml"
+          - name: valkey
+            namespace: valkey
+            valueFiles: {}
   template:
     metadata:
       name: "{{.name}}"

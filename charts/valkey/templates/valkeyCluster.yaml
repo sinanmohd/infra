@@ -1,0 +1,38 @@
+{{- range $name, $value := $.Values.valkey }}
+apiVersion: valkey.io/v1alpha1
+kind: ValkeyCluster
+metadata:
+  name: {{ $name | quote }}
+spec:
+  shards: 1
+  replicas: {{ $value.replicas }}
+  workloadType: StatefulSet
+
+  exporter:
+    enabled: false
+
+  {{- if $value.persistence.enabled }}
+  persistence:
+    size: {{ $value.persistence.size | quote }}
+    {{- with $value.persistence.storageClassName }}
+    storageClassName: {{ . | quote }}
+    {{- end }}
+    reclaimPolicy: Delete
+  {{- end }}
+
+  {{- with $value.users }}
+
+  users:
+  {{- . | toYaml | nindent 2 }}
+  {{- end }}
+
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - podAffinityTerm:
+            topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: "valkey"
+          weight: 100
+{{- end }}
