@@ -35,4 +35,5 @@ spec:
               matchLabels:
                 app.kubernetes.io/name: "valkey"
           weight: 100
+---
 {{- end }}

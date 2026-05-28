@@ -11,6 +11,4 @@ valkey:
           keys: [harbor]
         permissions: "+@all ~* &*"
     persistence:
-      enabled: true
-      size: 1Gi
-      storageClassName: ""
+      enabled: false

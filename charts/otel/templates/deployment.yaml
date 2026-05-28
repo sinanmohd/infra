@@ -23,10 +23,10 @@ spec:
       k8s_events:
         auth_type: serviceAccount
 
-      {{- if $.Values.monitoring.valkey }}
-      redis:
-        endpoint: {{ .Values.monitoring.valkey.endpoint | quote }}
-        password: {{ .Values.monitoring.valkey.password | quote }}
+      {{- range $name, $value := $.Values.monitoring.valkey }}
+      redis/{{ $name }}:
+        endpoint: {{ $value.endpoint | quote }}
+        password: {{ $value.password | quote }}
         collection_interval: 8s
         metrics:
           redis.maxmemory:
@@ -151,8 +151,8 @@ spec:
         metrics:
           receivers: 
             - k8s_cluster
-            {{- if $.Values.monitoring.valkey }}
-            - redis
+            {{- range $name, $value := $.Values.monitoring.valkey }}
+            - redis/{{ $name }}
             {{- end }}
             {{- if $.Values.monitoring.postgres }}
             - postgresql

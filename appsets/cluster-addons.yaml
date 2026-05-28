@@ -73,11 +73,13 @@ spec:
           - name: signoz
             namespace: signoz
             valueFiles:
-              - "secrets://secrets.sinan.yaml"
               - "values.sinan.yaml"
+              - "secrets://secrets.sinan.yaml"
           - name: valkey
             namespace: valkey
-            valueFiles: {}
+            valueFiles:
+              - "values.sinan.yaml"
+              - "secrets://secrets.sinan.yaml"
   template:
     metadata:
       name: "{{.name}}"
