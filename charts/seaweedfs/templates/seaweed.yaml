@@ -9,8 +9,7 @@ spec:
   pvReclaimPolicy: "Delete"
 
   # disable builtin mTLS, use istio
-  tls:
-    enabled: false
+  tls: {}
 
   volumeTopology:
     {{- if $.Values.volumeTopology }}

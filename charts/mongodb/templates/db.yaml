@@ -62,7 +62,9 @@ spec:
         resources:
           requests:
             storage: {{ .Values.storage.size | quote }}
-        storageClassName: {{ .Values.storage.class | quote }}
+        {{- with $.Values.storage.className }}
+        storageClassName: {{ . | quote }}
+        {{- end }}
     expose:
       enabled: false
     hidden:

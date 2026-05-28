@@ -12,7 +12,7 @@ data:
     done
     echo "PostgreSQL is ready"
 
-    psql -h {{ $.Values.postgres.host }} -p {{ $.Values.postgres.port }} -U {{ $.Values.postgres.username }} <<- EOF
+    until psql -h {{ $.Values.postgres.host }} -p {{ $.Values.postgres.port }} -U {{ $.Values.postgres.username }} <<- EOF
       CREATE TABLE IF NOT EXISTS filemeta (
         dirhash BIGINT NOT NULL,
         name VARCHAR(65535) NOT NULL,
@@ -21,5 +21,9 @@ data:
         PRIMARY KEY (dirhash, name)
       );
     EOF
+    do
+      echo "table creation failed. retrying in 3 seconds"
+      sleep 3
+    done
 
     echo "Database initialization complete"

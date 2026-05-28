@@ -15,3 +15,7 @@ monitoring:
   clickhouse:
     endpoint: "clickhouse-altinity-clickhouse-operator-metrics.clickhouse:8888"
     path: "/metrics"
+  # mongodb:
+  #   endpoint: "mongodb-rs0.mongodb:27017"
+  #   username: "monitoring"
+  #   password: "monitoring"
