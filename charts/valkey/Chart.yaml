@@ -29,7 +29,7 @@ maintainers:
     url: "https://www.sinanmohd.com"
 
 dependencies:
-  - name: valkey
-    version: 0.19.0
-    repository: oci://registry-1.docker.io/cloudpirates
-    condition: valkey.enabled
+  - name: valkey-operator
+    version: v0.1.0
+    repository: https://valkey.io/valkey-helm
+    condition: valkey-operator.enabled

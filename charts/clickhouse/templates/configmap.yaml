@@ -36,7 +36,7 @@ data:
     {{- range $userName, $userValue := .Values.users }}
 
 
-      #======>
+      # ======>
       # user: {{ $userName }}
       CREATE USER IF NOT EXISTS '{{ $userName }}' {{- $clusterString }};
       ALTER USER '{{ $userName }}' {{- $clusterString }} IDENTIFIED WITH sha256_password BY '{{ $userValue.password }}';

@@ -1,25 +1,6 @@
-valkey:
+valkey-operator:
   enabled: true
-  architecture: "replication"
-  replicaCount: 3
-  affinity:
-    podAntiAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - podAffinityTerm:
-            topologyKey: kubernetes.io/hostname
-            labelSelector:
-              matchLabels:
-                app.kubernetes.io/name: "valkey"
-          weight: 100
-  metrics:
-    enabled: false
-  persistence:
-    enabled: true
-    storageClass: ""
-    size: "1Gi"
-  sentinel:
-    # only creates master srv when sentinel is disabled
-    enabled: false
-  auth:
-    enabled: true
-    password: "valkey"
+
+# NOTE: use seperate instance for each app, dont use shared valkey instance
+# https://github.com/valkey-io/valkey-operator/blob/main/docs/valkeycluster.md
+valkey: {}

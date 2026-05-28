@@ -20,8 +20,8 @@ spec:
             namespace: clickhouse
             valueFiles:
               - "values.minimal.yaml"
-              - "secrets://secrets.sinan.yaml"
               - "values.sinan.yaml"
+              - "secrets://secrets.sinan.yaml"
           - name: keycloak
             namespace: keycloak
             valueFiles:
@@ -40,14 +40,14 @@ spec:
             namespace: postgres
             valueFiles:
               - "values.minimal.yaml"
-              - "secrets://secrets.sinan.yaml"
               - "values.sinan.yaml"
+              - "secrets://secrets.sinan.yaml"
           - name: seaweedfs
             namespace: seaweedfs
             valueFiles:
               - "values.minimal.yaml"
-              - "secrets://secrets.sinan.yaml"
               - "values.sinan.yaml"
+              - "secrets://secrets.sinan.yaml"
           - name: signoz
             namespace: signoz
             valueFiles:
@@ -55,10 +55,7 @@ spec:
               - "values.sinan.yaml"
           - name: valkey
             namespace: valkey
-            valueFiles:
-              - "values.minimal.yaml"
-              - "secrets://secrets.sinan.yaml"
-              - "values.sinan.yaml"
+            valueFiles: {}
   template:
     metadata:
       name: "{{.name}}"

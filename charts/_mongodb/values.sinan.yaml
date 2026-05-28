@@ -6,4 +6,4 @@ users:
         db: admin
 
 storage:
-  class: "local-path"
+  class: ""

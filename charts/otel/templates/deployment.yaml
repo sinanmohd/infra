@@ -163,11 +163,23 @@ spec:
             {{- if $.Values.monitoring.mongodb }}
             - mongodb
             {{- end }}
-          processors: [memory_limiter, batch, k8s_attributes, transform]
+          processors:
+            - memory_limiter
+            - batch
+            - k8s_attributes
+            {{- if $kube_system_namespace }}
+            - transform
+            {{- end }}
           exporters: [debug, otlp_grpc]
         logs:
           receivers: [k8s_events]
-          processors: [memory_limiter, batch, k8s_attributes, transform]
+          processors:
+            - memory_limiter
+            - batch
+            - k8s_attributes
+            {{- if $kube_system_namespace }}
+            - transform
+            {{- end }}
           exporters: [debug, otlp_grpc]
 ---
 apiVersion: rbac.authorization.k8s.io/v1

@@ -1,7 +1,7 @@
 dapr:
   dapr_scheduler:
     cluster:
-      storageClassName: "local-path"
+      storageClassName: ""
   dapr_placement:
     volumeclaims:
-      storageClassName: "local-path"
+      storageClassName: ""

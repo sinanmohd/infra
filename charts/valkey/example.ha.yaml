@@ -1,0 +1,11 @@
+valkey:
+  app:
+    replicas: 3
+    users:
+      - name: bob
+        nopass: true
+        permissions: "+@all ~* &*"
+    persistence:
+      enabled: true
+      size: 1Gi
+      storageClassName: ""

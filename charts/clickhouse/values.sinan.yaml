@@ -1,6 +1,6 @@
-storageClass: "local-path"
+storageClass: ""
 keeper:
-  storageClass: "local-path"
+  storageClass: ""
 
 users:
   signoz:

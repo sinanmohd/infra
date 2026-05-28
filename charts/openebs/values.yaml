@@ -30,6 +30,9 @@ openebs:
     local:
       zfs:
         enabled: false
+    replicated:
+      mayastor:
+        enabled: false
   localpv-provisioner:
     analytics:
       enabled: false

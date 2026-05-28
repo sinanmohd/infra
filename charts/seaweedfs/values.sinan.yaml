@@ -1,5 +1,5 @@
 ingress:
-  enabled: true
+  enabled: false
   host: s3.sinanmohd.com
 
 volumeSizeLimitMB: 5000

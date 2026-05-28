@@ -4,3 +4,9 @@ diskPool:
   hetzner-ax52-0: ["uring:///dev/mapper/openebs-mayastor"]
   hetzner-ax52-1: ["uring:///dev/mapper/openebs-mayastor"]
   hetzner-ax52-2: ["uring:///dev/mapper/openebs-mayastor"]
+
+openebs:
+  engines:
+    replicated:
+      mayastor:
+        enabled: true

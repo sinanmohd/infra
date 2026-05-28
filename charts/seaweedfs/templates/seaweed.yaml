@@ -20,7 +20,9 @@ spec:
       replicas: {{ $.Values.replicas.volume }}
       rack: "rack1"
       dataCenter: "dc1"
-      storageClassName: {{ $.Values.storageClassName | quote }}
+      {{- with $.Values.storageClassName }}
+      storageClassName: {{ . | quote }}
+      {{- end }}
       requests:
         storage: {{ $.Values.volumePvcSize }}
     {{- end }}
@@ -40,7 +42,9 @@ spec:
     maxExecute: 4
     persistence:
       enabled: true
-      storageClassName: {{ $.Values.storageClassName | quote }}
+      {{- with $.Values.storageClassName }}
+      storageClassName: {{ . | quote }}
+      {{- end }}
       resources:
         requests:
           storage: 1Gi
