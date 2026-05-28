@@ -6,7 +6,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/sinanmohd/infra.git
-    targetRevision: HEAD
+    targetRevision: fix/argo-cd
     path: appsets
   destination:
     server: "https://kubernetes.default.svc"

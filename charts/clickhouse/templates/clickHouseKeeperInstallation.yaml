@@ -50,5 +50,7 @@ spec:
           resources:
             requests:
               storage: {{ $.Values.keeper.size }}
-          storageClassName: {{ $.Values.keeper.storageClass | quote }}
+          {{- with $.Values.keeper.storageClass }}
+          storageClassName: {{ . | quote }}
+          {{- end }}
 {{- end }}

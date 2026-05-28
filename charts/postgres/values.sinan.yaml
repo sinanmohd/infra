@@ -1,4 +1,4 @@
-storageClass: "local-path"
+storageClass: ""
 
 users:
   monitoring:

@@ -157,11 +157,25 @@ spec:
       pipelines:
         metrics:
           receivers: [kubeletstats, hostmetrics]
-          processors: [memory_limiter, batch, resourcedetection, k8s_attributes, transform]
+          processors:
+            - memory_limiter
+            - batch
+            - resourcedetection
+            - k8s_attributes
+            {{ if $kube_system_namespace }}
+            - transform
+            {{ end }}
           exporters: [debug, otlp_grpc]
         logs:
           receivers: [filelog]
-          processors: [memory_limiter, batch, resourcedetection, k8s_attributes, transform]
+          processors:
+            - memory_limiter
+            - batch
+            - resourcedetection
+            - k8s_attributes
+            {{ if $kube_system_namespace }}
+            - transform
+            {{ end }}
           exporters: [debug, otlp_grpc]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
