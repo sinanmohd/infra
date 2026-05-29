@@ -86,7 +86,7 @@ spec:
 
       source:
         repoURL: "https://github.com/sinanmohd/infra.git"
-        targetRevision: fix/unused
+        targetRevision: HEAD
         path: "charts/{{.name}}"
 
       destination:

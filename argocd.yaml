@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/sinanmohd/infra.git
-    targetRevision: fix/unused
+    targetRevision: HEAD
     path: appsets
   destination:
     server: "https://kubernetes.default.svc"
