@@ -13,28 +13,28 @@ spec:
             namespace: argocd
             valueFiles:
               - "secrets://secrets.sinan.yaml"
-          - name: dapr
-            namespace: dapr-system
-            valueFiles:
-              - "values.sinan.yaml"
-          - name: keel
-            namespace: keel
-            valueFiles: []
-          - name: kafka
-            namespace: kafka
-            valueFiles:
-              - "values.minimal.yaml"
-          - name: mongodb
-            namespace: mongodb
-            valueFiles:
-              - "values.minimal.yaml"
-              - "values.sinan.yaml"
-              - "secrets://secrets.sinan.yaml"
-          - name: harbor
-            namespace: harbor
-            valueFiles:
-              - "values.sinan.yaml"
-              - "secrets://secrets.sinan.yaml"
+          # - name: dapr
+          #   namespace: dapr-system
+          #   valueFiles:
+          #     - "values.sinan.yaml"
+          # - name: keel
+          #   namespace: keel
+          #   valueFiles: []
+          # - name: kafka
+          #   namespace: kafka
+          #   valueFiles:
+          #     - "values.minimal.yaml"
+          # - name: mongodb
+          #   namespace: mongodb
+          #   valueFiles:
+          #     - "values.minimal.yaml"
+          #     - "values.sinan.yaml"
+          #     - "secrets://secrets.sinan.yaml"
+          # - name: harbor
+          #   namespace: harbor
+          #   valueFiles:
+          #     - "values.sinan.yaml"
+          #     - "secrets://secrets.sinan.yaml"
           - name: cert-manager
             namespace: cert-manager
             valueFiles: []
