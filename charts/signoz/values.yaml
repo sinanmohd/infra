@@ -40,6 +40,7 @@ signoz:
       # signoz_emailing_smtp_from: todo
       # signoz_emailing_smtp_auth_username: todo
       # signoz_emailing_smtp_auth_password: todo
+      signoz_tokenizer_jwt_secret: changeme
       signoz_sqlstore_provider: postgres
       signoz_sqlstore_postgres_dsn: postgres://signoz:signoz@postgres-rw.postgres:5432/signoz?sslmode=disable
     persistence:

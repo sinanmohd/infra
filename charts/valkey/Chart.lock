@@ -1,6 +1,6 @@
 dependencies:
 - name: valkey-operator
   repository: https://valkey.io/valkey-helm
-  version: 0.1.0
-digest: sha256:2593a0627dc403748764861a7091775c0e1192484fdec0bb6b0bdb09e4a8f1cc
-generated: "2026-05-28T15:44:57.112703623+05:30"
+  version: 0.1.1
+digest: sha256:65869f6a3c16b29c4b404ee692fb5fc0ccff9fed00c48fe077a818e2ad7ab3d0
+generated: "2026-05-29T10:50:38.422428367+05:30"

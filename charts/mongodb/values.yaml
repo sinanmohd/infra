@@ -3,7 +3,7 @@ image: "percona/percona-server-mongodb:8.0.19-7"
 imagePullPolicy: "Always"
 storage:
   size: 4Gi
-  class: ""
+  className: ""
 
 users: {}
 

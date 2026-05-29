@@ -16,5 +16,7 @@ spec:
       - id: 0
         type: persistent-claim
         size: {{ .Values.storage.size | quote }}
-        class: {{ .Values.storage.ClassName | quote }}
+        {{- with $.Values.storage.ClassName }}
+        class: {{ . | quote }}
+        {{- end }}
         deleteClaim: true

@@ -6,10 +6,13 @@ metadata:
 spec:
   shards: 1
   replicas: {{ $value.replicas }}
-  workloadType: StatefulSet
+  workloadType: {{ $value.workloadType }}
 
   exporter:
     enabled: false
+
+  config:
+    databases: "16"
 
   {{- if $value.persistence.enabled }}
   persistence:
@@ -35,4 +38,5 @@ spec:
               matchLabels:
                 app.kubernetes.io/name: "valkey"
           weight: 100
+---
 {{- end }}
