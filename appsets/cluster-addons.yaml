@@ -35,6 +35,10 @@ spec:
           #   valueFiles:
           #     - "values.sinan.yaml"
           #     - "secrets://secrets.sinan.yaml"
+          # - name: istio
+          #   namespace: istio-system
+          #   valueFiles:
+          #     - "values.sinan.yaml"
           - name: cert-manager
             namespace: cert-manager
             valueFiles: []

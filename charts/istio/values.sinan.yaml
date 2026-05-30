@@ -1,0 +1,5 @@
+# NOTE: this for bundled CNI, if you're using celium see
+# https://istio.io/latest/docs/ambient/install/platform-prerequisites/#k3s
+cni:
+  global:
+    platform: k3s

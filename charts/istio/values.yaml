@@ -1,0 +1,16 @@
+# TODO: istio pod image injection does not work until istiod pod is up
+# so after chart install and isitod is up you have to manually delete the
+# istio pod to allow isitiod to recreate the image
+
+base:
+  enabled: true
+istiod:
+  enabled: true
+  profile: ambient
+cni:
+  enabled: true
+  profile: ambient
+ztunnel:
+  enabled: true
+gateway:
+  enabled: true

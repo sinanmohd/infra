@@ -1,7 +1,7 @@
 apiVersion: v2
 
 name: keel
-description: Keel Chart for Bud
+description: A Helm chart for keel
 type: application
 version: 0.1.0
 

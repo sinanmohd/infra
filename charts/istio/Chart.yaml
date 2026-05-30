@@ -1,0 +1,33 @@
+apiVersion: v2
+
+name: dapr
+description: A Helm chart for istio
+type: application
+version: 0.1.0
+
+maintainers:
+  - name: "sinanmohd"
+    email: "sinan@sinanmohd.com"
+    url: "https://www.sinanmohd.com"
+
+dependencies:
+  - name: base
+    version: 1.30.0
+    repository: https://istio-release.storage.googleapis.com/charts
+    condition: base.enabled
+  - name: istiod
+    version: 1.30.0
+    repository: https://istio-release.storage.googleapis.com/charts
+    condition: istiod.enabled
+  - name: cni
+    version: 1.30.0
+    repository: https://istio-release.storage.googleapis.com/charts
+    condition: cni.enabled
+  - name: ztunnel
+    version: 1.30.0
+    repository: https://istio-release.storage.googleapis.com/charts
+    condition: ztunnel.enabled
+  - name: gateway
+    version: 1.30.0
+    repository: https://istio-release.storage.googleapis.com/charts
+    condition: gateway.enabled

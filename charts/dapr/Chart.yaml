@@ -1,7 +1,7 @@
 apiVersion: v2
 
 name: dapr
-description: Dapr Chart for Bud
+description: A Helm chart for dapr
 type: application
 version: 0.1.0
 
