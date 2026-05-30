@@ -1,0 +1,17 @@
+apiVersion: v2
+
+name: dapr
+description: A Helm chart for cilium
+type: application
+version: 0.1.0
+
+maintainers:
+  - name: "sinanmohd"
+    email: "sinan@sinanmohd.com"
+    url: "https://www.sinanmohd.com"
+
+dependencies:
+  - name: cilium
+    version: 1.19.4
+    repository: oci://quay.io/cilium/charts
+    condition: cilium.enabled
