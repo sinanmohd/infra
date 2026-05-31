@@ -135,7 +135,6 @@ in
 
   wayland.windowManager.sway = {
     enable = true;
-    xwayland = false;
     checkConfig = true;
     config = null;
 
@@ -248,6 +247,9 @@ in
       exec = [ mako ];
       gaps.inner = 10;
       default_border.pixel = 2;
+      hide_edge_borders = "--i3 none";
+      workspace_layout = "tabbed";
+      xwayland = "disable";
       floating_modifier = "${mod} normal";
     };
   };
