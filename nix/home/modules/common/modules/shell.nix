@@ -13,12 +13,12 @@
     shellAliases = {
       l = "eza -l --group-directories-first --icons=auto";
       grep = "grep --color=auto";
-      lsa = "ls -a";
       lt = "eza --tree --level=2 --long --icons --git";
       lta = "lt -a";
       cat = "bat --style='changes,snip'";
 
       gs = "git status";
+      gl = "git log";
       gm = "git commit -a -m";
       ga = "git commit -a --amend";
     };
