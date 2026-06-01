@@ -53,6 +53,6 @@ spec:
           resources:
             requests:
               storage: {{ .Values.size | required "A valid size is required" | quote }}
-          {{- if $.Values.storageClass }}
+          {{- with $.Values.storageClass }}
           storageClassName: {{ . | quote }}
           {{- end }}
