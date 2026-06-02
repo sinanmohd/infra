@@ -53,7 +53,6 @@ let
         src = [ "group:owner" ];
         dst = [ "*:*" ];
       }
-
       {
         action = "accept";
         src = [ "tag:headplane" ];
@@ -71,7 +70,11 @@ let
         src = [ "tag:bud_staff" ];
         dst = [ "tag:bud_internal:*" ];
       }
-
+      {
+        action = "accept";
+        src = [ "tag:bud_internal" ];
+        dst = [ "tag:bud_clients:*" ];
+      }
       {
         action = "accept";
         src = [ "tag:bud_staff" ];
