@@ -14,7 +14,6 @@ in
     ./modules/sway
     ./modules/waybar
     ./modules/wallust.nix
-    ./modules/awww.nix
     ./modules/mako.nix
     ./modules/fuzzel
     ./modules/element.nix
@@ -36,4 +35,5 @@ in
   };
 
   programs.rbw.settings.pinentry = wayland-scripts;
+  services.awww.enable = true;
 }

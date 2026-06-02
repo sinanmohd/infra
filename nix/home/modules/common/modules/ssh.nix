@@ -7,12 +7,12 @@ in
     enable = true;
     enableDefaultConfig = false;
 
-    matchBlocks = {
-      "*".compression = true;
-      "kay".hostname = domain;
-      "exy" = {
-        port = 8022;
-        user = "u0_a369";
+    settings = {
+      "Host *".Compression = true;
+      "Host kay".HostName = domain;
+      "Host exy" = {
+        Port = 8022;
+        User = "u0_a369";
       };
     };
   };
