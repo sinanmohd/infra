@@ -146,7 +146,7 @@ in
         "[app_id=firefox]" = 2;
 
         "[app_id=Slack]" = 8;
-        "[app_id=electron]" = 9;
+        "[app_id=element]" = 9;
       };
 
       bindgesture = {
