@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+set -e
+
+real_path="$(realpath "$1")"
+
+die() {
+	printf "\033[31;1merr: %b\033[0m\n" "$1" 1>&2
+	exit "${2:-1}"
+}
+
+nnvim() {
+	if [ ! -h "$1" ]; then
+		exec nvim "$@"
+	fi
+
+	if [ -O "$1" ]; then
+		cp --no-dereference --update "$1" "$1.nedit.bak"
+		rm "$1"
+		cp -r "$real_path" "$1"
+	else
+		sudo cp --no-dereference --update "$1" "$1.nedit.bak"
+		sudo rm "$1"
+		sudo cp -r "$real_path" "$1"
+		sudo chown -R "$USER" "$1"
+	fi
+
+	chmod -R +w "$1"
+	exec nvim "$@"
+}
+
+##########
+## MAIN ##
+##########
+
+nnvim "$@"

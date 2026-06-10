@@ -1,4 +1,7 @@
 { pkgs, ... }:
+let
+  nnvim = pkgs.callPackage ./nnvim { };
+in
 {
   home.packages = with pkgs; [
     # telescope
@@ -22,6 +25,7 @@
     gopls
     vue-language-server
     luajitPackages.lua-lsp
+    nnvim
   ];
 
   xdg.configFile.nvim.source = ./config;
