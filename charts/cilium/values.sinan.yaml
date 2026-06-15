@@ -1,0 +1,8 @@
+cilium:
+  # cillium fails on k3s without this
+  # k8sServicePort: "6443"
+  # k8sServiceHost: "192.168.1.34"
+  ipam:
+    operator:
+      clusterPoolIPv4PodCIDRList:
+        - "10.42.0.0/16"
