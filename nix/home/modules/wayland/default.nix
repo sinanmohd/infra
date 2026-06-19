@@ -15,6 +15,7 @@ in
     ./modules/waybar
     ./modules/wallust.nix
     ./modules/mako.nix
+    ./modules/mpv.nix
     ./modules/fuzzel
     ./modules/element.nix
   ];
