@@ -8,8 +8,8 @@ let
   font =
     config.global.font.sans.name
     + lib.optionalString (
-      config.global.font.sans.size != null
-    ) ":pixelsize=${lib.toString config.global.font.sans.size}";
+      config.global.font.sans.sizePx != null
+    ) ":pixelsize=${lib.toString config.global.font.sans.sizePx}";
 in
 {
   home.sessionVariables.TERMINAL = lib.getExe config.programs.alacritty.package;

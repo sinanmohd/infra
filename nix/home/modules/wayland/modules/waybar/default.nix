@@ -7,7 +7,7 @@
 let
 
   fontName = config.global.font.sans.name;
-  fontSize = config.global.font.sans.size;
+  fontSize = config.global.font.sans.sizePx;
 in
 {
   systemd.user.services.waybar.Service.Environment = "PATH=${

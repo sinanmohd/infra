@@ -5,7 +5,7 @@
   ...
 }:
 let
-  size = config.global.font.monospace.size;
+  size = config.global.font.monospace.sizePx;
 in
 {
   home.sessionVariables.TERMINAL = lib.getExe config.programs.alacritty.package;

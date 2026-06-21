@@ -3,7 +3,7 @@
   imports = [ ../../modules/common ];
 
   global.font = {
-    sans.size = 15;
-    monospace.size = 13;
+    sans.sizePx = 15;
+    monospace.sizePx = 13;
   };
 }

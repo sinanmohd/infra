@@ -1,4 +1,9 @@
-{ pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   name = {
     type = lib.types.str;
@@ -12,11 +17,20 @@ let
     type = with lib.types; listOf path;
     example = "[ pkgs.nerd-fonts.terminess-ttf ]";
   };
+
+  cfg = config.global.font;
 in
 {
   options.global.font = {
     sans = {
-      size = lib.mkOption size;
+      sizePx = lib.mkOption size;
+      sizePt = lib.mkOption (
+        size
+        // {
+          # 0.75 is used for 96 DPI
+          default = if cfg.sans.sizePx != null then lib.floor (cfg.sans.sizePx * 0.75) else null;
+        }
+      );
       name = lib.mkOption (
         name
         // {
@@ -43,7 +57,14 @@ in
     };
 
     monospace = {
-      size = lib.mkOption size;
+      sizePx = lib.mkOption size;
+      sizePt = lib.mkOption (
+        size
+        // {
+          # 0.75 is used for 96 DPI
+          default = if cfg.monospace.sizePx != null then lib.floor (cfg.monospace.sizePx * 0.75) else null;
+        }
+      );
       name = lib.mkOption (
         name
         // {

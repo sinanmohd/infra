@@ -22,8 +22,8 @@ let
   font =
     config.global.font.sans.name
     + lib.optionalString (
-      config.global.font.sans.size != null
-    ) " ${lib.toString config.global.font.sans.size}px";
+      config.global.font.sans.sizePx != null
+    ) " ${lib.toString config.global.font.sans.sizePx}px";
 
   termux_sway_yazi = pkgs.writeShellApplication {
     name = "termux_sway_yazi";
