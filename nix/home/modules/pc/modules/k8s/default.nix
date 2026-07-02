@@ -7,7 +7,10 @@
     };
     k9s = {
       enable = true;
-      plugins.debug-container = lib.fromTOML ((lib.readFile ./debug-container.toml));
+      plugins = {
+        debug-container = lib.fromTOML ((lib.readFile ./plugins/debug-container.toml));
+        pvc-resize = lib.fromTOML ((lib.readFile ./plugins/pvc-resize.toml));
+      };
       skins = {
         transparency = {
           k9s = {
