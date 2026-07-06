@@ -5,6 +5,7 @@ in
 {
   home.packages = with pkgs; [
     nnvim
+    inotify-tools
     # telescope
     ripgrep
     fd
@@ -28,6 +29,7 @@ in
     vue-language-server
     luajitPackages.lua-lsp
     markdownlint-cli
+    lua-language-server
   ];
 
   xdg.configFile.nvim.source = ./config;
