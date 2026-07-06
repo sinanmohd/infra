@@ -4,6 +4,7 @@ let
 in
 {
   home.packages = with pkgs; [
+    nnvim
     # telescope
     ripgrep
     fd
@@ -23,9 +24,10 @@ in
     tailwindcss-language-server
     helm-ls
     gopls
+    go
     vue-language-server
     luajitPackages.lua-lsp
-    nnvim
+    markdownlint-cli
   ];
 
   xdg.configFile.nvim.source = ./config;
