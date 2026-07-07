@@ -10,6 +10,7 @@ in
     ../../modules/common
 
     ./modules/tlp.nix
+    ./modules/lanzaboote.nix
     ./hardware-configuration.nix
   ];
   home-manager.users.${user}.imports = [

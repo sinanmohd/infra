@@ -3,10 +3,19 @@
 
   inputs = {
     nixpkgs.url = "github:NixOs/nixpkgs/nixos-unstable";
-    deploy-rs.url = "github:serokell/deploy-rs";
+
+    deploy-rs = {
+      url = "github:serokell/deploy-rs";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     sops-nix = {
       url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote/v1.1.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -28,6 +37,7 @@
       sops-nix,
       home-manager,
       deploy-rs,
+      lanzaboote,
       nix-index-database,
     }:
     let
@@ -36,6 +46,7 @@
         sops-nix.nixosModules.sops
         home-manager.nixosModules.home-manager
         nix-index-database.nixosModules.default
+        lanzaboote.nixosModules.lanzaboote
       ];
 
       makeNixosModules = moduleName: {

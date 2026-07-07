@@ -21,7 +21,6 @@
   zramSwap.memoryPercent = 100;
 
   boot = {
-    loader.systemd-boot.enable = true;
     blacklistedKernelModules = [ "k10temp" ];
     extraModulePackages = with config.boot.kernelPackages; [ zenpower ];
 
