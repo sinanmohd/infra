@@ -28,6 +28,11 @@
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    disko = {
+      url = "github:nix-community/disko/latest";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -39,6 +44,7 @@
       deploy-rs,
       lanzaboote,
       nix-index-database,
+      disko,
     }:
     let
       lib = nixpkgs.lib;
@@ -47,6 +53,7 @@
         home-manager.nixosModules.home-manager
         nix-index-database.nixosModules.default
         lanzaboote.nixosModules.lanzaboote
+        disko.nixosModules.disko
       ];
 
       makeNixosModules = moduleName: {
