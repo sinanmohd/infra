@@ -11,11 +11,14 @@ in
 
     ./modules/tlp.nix
     ./modules/lanzaboote.nix
-    ./hardware-configuration.nix
+    ./modules/zram.nix
+
+    ./disko.nix
   ];
   home-manager.users.${user}.imports = [
     ../../../home/hosts/cez
   ];
 
   networking.hostName = "cez";
+  hardware.facter.reportPath = ./facter.json;
 }
