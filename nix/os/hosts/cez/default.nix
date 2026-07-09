@@ -20,5 +20,10 @@ in
   ];
 
   networking.hostName = "cez";
-  hardware.facter.reportPath = ./facter.json;
+
+  hardware.facter = {
+    reportPath = ./facter.json;
+    # uses dhcpcd but we use networkd
+    detected.dhcp.enable = false;
+  };
 }
