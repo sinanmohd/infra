@@ -6,8 +6,9 @@ in
   imports = [
     ../../../global/hosts/cez
 
-    ../../modules/pc
     ../../modules/common
+    ../../modules/pc
+    ../../modules/wayland
 
     ./modules/tlp.nix
     ./modules/lanzaboote.nix

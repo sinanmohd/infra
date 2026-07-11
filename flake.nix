@@ -48,6 +48,7 @@
     }:
     let
       lib = nixpkgs.lib;
+
       nixosImports = [
         sops-nix.nixosModules.sops
         home-manager.nixosModules.home-manager
@@ -87,6 +88,7 @@
         "common"
         "server"
         "pc"
+        "wayland"
       ] makeNixosModules;
       nixosConfigurations = lib.genAttrs [
         "cez"

@@ -1,42 +1,8 @@
 {
-  config,
   pkgs,
   ...
 }:
-let
-  user = config.global.userdata.name;
-
-  fontPackages = config.global.font.monospace.packages ++ config.global.font.sans.packages;
-  fontMonospace = config.global.font.monospace.name;
-  fontSans = config.global.font.sans.name;
-in
 {
-  fonts = {
-    packages = fontPackages;
-    enableDefaultPackages = true;
-
-    fontconfig = {
-      antialias = true;
-      hinting.style = "full";
-      subpixel.rgba = "rgb";
-
-      defaultFonts = {
-        monospace = [ fontMonospace ];
-        serif = [ fontSans ];
-        sansSerif = [ fontSans ];
-      };
-    };
-  };
-
-  users.users.${user}.extraGroups = [ "seat" ];
-  services = {
-    seatd.enable = true;
-    dbus = {
-      enable = true;
-      implementation = "broker";
-    };
-  };
-
   systemd.services.swaynag_battery = {
     path = [
       pkgs.sway
@@ -65,11 +31,6 @@ in
       SUBSYSTEM=="power_supply", ENV{POWER_SUPPLY_ONLINE}=="1", RUN+="${stop}"
       SUBSYSTEM=="power_supply", ATTR{status}=="Charging", RUN+="${stop}"
     '';
-
-  hardware.graphics = {
-    enable = true;
-    enable32Bit = true;
-  };
 
   security.pam.services.swaylock = { };
 }

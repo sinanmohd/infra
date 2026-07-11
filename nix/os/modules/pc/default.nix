@@ -10,7 +10,7 @@ in
   imports = [
     ./modules/getty.nix
     ./modules/network.nix
-    ./modules/wayland.nix
+    ./modules/fonts.nix
     ./modules/nopolkit.nix
     ./modules/work.nix
     ./modules/tailscale
@@ -18,7 +18,6 @@ in
   home-manager.users.${user}.imports = [
     ../../../home/modules/common
     ../../../home/modules/pc
-    ../../../home/modules/wayland
   ];
 
   boot = {
