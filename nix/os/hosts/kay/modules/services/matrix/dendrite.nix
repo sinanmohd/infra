@@ -44,6 +44,7 @@ in
             "vector.im"
           ];
           inherit database;
+          jetstream.storage_path = "/var/lib/dendrite";
         };
         logging = [
           {

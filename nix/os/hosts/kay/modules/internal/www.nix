@@ -79,7 +79,6 @@ in
               200 '${
                 builtins.toJSON {
                   "m.homeserver".base_url = "https://${domain}";
-                  "org.matrix.msc3575.proxy".url = "https://sliding.${domain}";
                   "m.identity_server".base_url = "https://vector.im";
                 }
               }'
@@ -89,19 +88,6 @@ in
 
             "~ ^(\\/_matrix|\\/_synapse\\/client)".proxyPass =
               "http://127.0.0.1:${toString config.services.dendrite.httpPort}";
-          };
-        };
-
-        "sliding.${domain}" = defaultOpts // {
-          extraConfig = ''
-            proxy_buffering off;
-            proxy_request_buffering off;
-            client_max_body_size 0;
-          '';
-
-          locations."/" = {
-            proxyWebsockets = true;
-            proxyPass = "http://${config.services.matrix-sliding-sync-dirty.settings.SYNCV3_BINDADDR}";
           };
         };
 
