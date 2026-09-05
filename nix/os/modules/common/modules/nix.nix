@@ -11,6 +11,7 @@ in
     pkg:
     builtins.elem (lib.getName pkg) [
       "nvidia-x11"
+      "nvidia-settings"
       "slack"
     ];
 

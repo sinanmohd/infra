@@ -13,6 +13,7 @@ in
     ./modules/tlp.nix
     ./modules/lanzaboote.nix
     ./modules/zram.nix
+    ./modules/nvidia.nix
 
     ./disko.nix
   ];
