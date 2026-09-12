@@ -1,4 +1,7 @@
-{ config, pkgs, ... }:
+{
+  config,
+  ...
+}:
 let
   user = config.global.userdata.name;
 in
@@ -10,18 +13,22 @@ in
       {
         commands = [
           {
-            command = "${pkgs.systemd}/bin/systemctl suspend-then-hibernate";
+            command = "/run/current-system/sw/bin/systemctl suspend-then-hibernate";
             options = [
               "SETENV"
               "NOPASSWD"
             ];
           }
           {
-            command = "${pkgs.systemd}/bin/reboot";
+            command = "/run/current-system/sw/bin/reboot";
             options = [ "NOPASSWD" ];
           }
           {
-            command = "${pkgs.systemd}/bin/poweroff";
+            command = "/run/current-system/sw/bin/poweroff";
+            options = [ "NOPASSWD" ];
+          }
+          {
+            command = "/run/current-system/sw/bin/powertop";
             options = [ "NOPASSWD" ];
           }
         ];

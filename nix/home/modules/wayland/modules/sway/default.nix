@@ -140,6 +140,7 @@ in
     settings = {
       include = "~/.local/share/wallust/sway.conf";
       font = "pango:${font}";
+      for_window."[app_id=\"ttyasrt\"]" = "floating enable";
       assign = {
         "[app_id=Alacritty]" = 1;
         "[app_id=firefox]" = 2;

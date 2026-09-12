@@ -12,12 +12,8 @@ die()
 # MAIN #
 ########
 
-if [ -z "$TERMINAL" ]; then
-	die "\$TERMIANL must be set"
-fi
-
 if tty --silent; then
 	exec "$@"
 else
-	exec "$TERMINAL" -e "$@"
+	exec alacritty --class ttyasrt -e "$@"
 fi

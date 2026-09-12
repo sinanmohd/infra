@@ -1,5 +1,7 @@
-{ ... }:
+{ pkgs, ... }:
 {
+  environment.systemPackages = [ pkgs.powertop ];
+
   services.tlp = {
     enable = true;
 

@@ -28,34 +28,32 @@
   "cpu": {
     "interval": 5,
     "format": "{usage}%",
-    "on-click": "ttyasrt btop",
-    "on-click-right": "alacritty"
+    "on-click": "ttyasrt btop"
   },
   "memory": {
     "interval": 5,
     "format": "{avail:0.1f}GiB",
     "tooltip-format": "{used:0.1f} / {total:0.1f}GiB RAM ⏽ {swapUsed:0.1f} / {swapTotal:0.1f}GiB Swap",
-    "on-click": "ttyasrt btop",
-    "on-click-right": "alacritty"
+    "on-click": "ttyasrt btop"
   },
   "clock": {
     "format": "{:L%a, %d %B %H:%M}",
     "tooltip": false,
-    "on-click-right": "ttyasrt peaclock"
+    "on-click": "ttyasrt calcurse"
   },
   "custom/weather": {
     "exec": "wttrbar --nerd --hide-conditions --custom-indicator ' {uvIndex} {ICON}{FeelsLikeC}'",
     "return-type": "json",
     "interval": 60,
     "tooltip": true,
-    "on-click": "ttyasrt curl https://wttr.in"
+    "on-click": "ttyasrt bash"
   },
   "network": {
     "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
     "format": "{icon}{bandwidthTotalBytes}",
     "format-wifi": "{icon}{bandwidthTotalBytes}",
     "format-ethernet": "󰀂 {bandwidthTotalBytes}",
-    "format-disconnected": "",
+    "format-disconnected": "󰤦Scan",
     "tooltip-format-wifi": "{essid} ⏽ {frequency} GHz ⏽ {ipaddr}/{cidr}",
     "tooltip-format-ethernet": "Connected",
     "tooltip-format-disconnected": "Disconnected",
@@ -75,7 +73,7 @@
     "tooltip-format-discharging": "{time} Remaining ⏽ {power:>1.0f}W↓⏽ {cycles} Cycles",
     "tooltip-format-charging": "{time} Until Full ⏽ {power:>1.0f}W↓⏽ {cycles} Cycles",
     "interval": 5,
-    "on-click": "ttyasrt powertop",
+    "on-click": "ttyasrt sudo /run/current-system/sw/bin/powertop",
     "states": {
       "warning": 20,
       "critical": 10
@@ -93,7 +91,7 @@
   "pulseaudio": {
     "format": "{icon}{volume}%",
     "on-click": "ttyasrt wiremix",
-    "on-click-right": "pamixer -t",
+    "on-click-right": "ttyasrt bluetui",
     "tooltip-format": "{desc}",
     "scroll-step": 5,
     "format-muted": "",

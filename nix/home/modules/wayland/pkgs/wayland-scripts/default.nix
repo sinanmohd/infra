@@ -17,6 +17,7 @@
   xdg-utils,
   wtype,
   tailscale,
+  alacritty,
 }:
 
 stdenvNoCC.mkDerivation {
@@ -51,7 +52,12 @@ stdenvNoCC.mkDerivation {
         ]
       }
     wrapProgram $out/bin/ttyasrt \
-      --prefix PATH : ${lib.makeBinPath [ libnotify ]}
+      --prefix PATH : ${
+        lib.makeBinPath [
+          libnotify
+          alacritty
+        ]
+      }
     wrapProgram $out/bin/freezshot \
       --prefix PATH : ${
         lib.makeBinPath [

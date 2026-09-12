@@ -10,20 +10,17 @@ let
   fontSize = config.global.font.sans.sizePx;
 in
 {
-  systemd.user.services.waybar.Service.Environment = "PATH=${
-    pkgs.wttrbar.overrideAttrs (oldAttrs: {
+  home.packages = [
+    pkgs.calcurse
+    (pkgs.wttrbar.overrideAttrs (oldAttrs: {
       patches = (oldAttrs.patches or [ ]) ++ [ ./0001-fix-align-toolbar-text.patch ];
-    })
-  }/bin";
+    }))
+  ];
 
   programs.waybar = {
     enable = true;
     systemd.enable = true;
     style = builtins.readFile ./style.css;
-    # TODO:
-    # - ttyart not in $PATH
-    # - add all ttyart apps to home.packages
-    # - refactor ttyart to hardcode allacritty, the -e is not universal
     settings.master = builtins.fromJSON (builtins.readFile ./config.json);
   };
 
