@@ -12,12 +12,6 @@ let
   up = "k";
 
   wayland-scripts = pkgs.callPackage ../../pkgs/wayland-scripts { };
-  cwall = "${wayland-scripts}/bin/cwall";
-  daskpass = "${wayland-scripts}/bin/daskpass";
-
-  fuzzel = lib.getExe config.programs.fuzzel.package;
-  alacritty = lib.getExe config.programs.alacritty.package;
-  swaylock = lib.getExe config.programs.swaylock.package;
 
   font =
     config.global.font.sans.name
@@ -75,15 +69,6 @@ let
       tmux send-keys -t "$session_name" '${config.programs.yazi.shellWrapperName} && echo -en "\033[2A\033[0J"' Enter
     '';
   };
-  yazi = lib.getExe termux_sway_yazi;
-
-  wpctl = "${pkgs.wireplumber}/bin/wpctl";
-  brightnessctl = lib.getExe pkgs.brightnessctl;
-  freezshot = "${wayland-scripts}/bin/freezshot";
-  damb = "${wayland-scripts}/bin/damb";
-  dbook = "${wayland-scripts}/bin/dbook";
-  mako = lib.getExe config.services.mako.package;
-  firefox = lib.getExe config.programs.firefox.finalPackage;
 in
 {
   imports = [
@@ -103,12 +88,13 @@ in
       pkgs.wl-clipboard
       pkgs.swayidle
       pkgs.brightnessctl
+      pkgs.playerctl
       wayland-scripts
       termux_sway_yazi
     ];
 
     sessionVariables = {
-      SUDO_ASKPASS = daskpass;
+      SUDO_ASKPASS = "${wayland-scripts}/bin/daskpass";
       XDG_CURRENT_DESKTOP = "sway";
       GRIM_DEFAULT_DIR = config.xdg.userDirs.pictures + "/ss";
     };
@@ -152,8 +138,8 @@ in
       bindgesture = {
         "swipe:left" = "workspace next";
         "swipe:right" = "workspace prev";
-        "swipe:down" = "exec ${swaylock}";
-        "swipe:up" = "exec ${cwall}";
+        "swipe:down" = "exec ${lib.getExe config.programs.swaylock.package}";
+        "swipe:up" = "exec ${wayland-scripts}/bin/cwall";
       };
       input = {
         "type:touchpad" = {
@@ -220,20 +206,29 @@ in
         "${mod}+minus" = "scratchpad show";
 
         # exec
-        "print" = "exec ${freezshot}";
-        "${mod}+return" = "exec ${alacritty}";
-        "${mod}+a" = "exec ${damb}";
-        "${mod}+d" = "exec ${dbook}";
-        "${mod}+o" = "exec ${fuzzel}";
-        "${mod}+w" = "exec ${firefox}";
-        "${mod}+backslash" = "exec ${yazi}";
+        "print" = "exec ${wayland-scripts}/bin/freezshot";
+        "${mod}+return" = "exec ${lib.getExe config.programs.alacritty.package}";
+        "${mod}+a" = "exec ${wayland-scripts}/bin/damb";
+        "${mod}+d" = "exec ${wayland-scripts}/bin/dbook";
+        "${mod}+o" = "exec ${lib.getExe config.programs.fuzzel.package}";
+        "${mod}+w" = "exec ${lib.getExe config.programs.firefox.finalPackage}";
+        "${mod}+backslash" = "exec ${lib.getExe termux_sway_yazi}";
 
-        XF86MonBrightnessDown = "exec ${brightnessctl} set 1%-";
-        XF86MonBrightnessUp = "exec ${brightnessctl} set 1%+";
-        XF86AudioLowerVolume = "exec ${wpctl} set-volume @DEFAULT_AUDIO_SINK@ 5%-";
-        XF86AudioRaiseVolume = "exec ${wpctl} set-volume --limit 1.5 @DEFAULT_AUDIO_SINK@ 5%+";
-        XF86AudioMute = "exec ${wpctl} set-mute @DEFAULT_AUDIO_SINK@ toggle";
-        XF86AudioMicMute = "exec ${wpctl} set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
+        # brightness
+        XF86MonBrightnessDown = "exec ${lib.getExe pkgs.brightnessctl} set 1%-";
+        XF86MonBrightnessUp = "exec ${lib.getExe pkgs.brightnessctl} set 1%+";
+
+        # music
+        XF86AudioPlay = "exec ${lib.getExe pkgs.playerctl} play-pause";
+        XF86AudioStop = "exec ${lib.getExe pkgs.playerctl} position 0";
+        XF86AudioPrev = "exec ${lib.getExe pkgs.playerctl} previous";
+        XF86AudioNext = "exec ${lib.getExe pkgs.playerctl} next";
+
+        # volume
+        XF86AudioLowerVolume = "exec ${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-";
+        XF86AudioRaiseVolume = "exec ${pkgs.wireplumber}/bin/wpctl set-volume --limit 1.5 @DEFAULT_AUDIO_SINK@ 5%+";
+        XF86AudioMute = "exec ${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
+        XF86AudioMicMute = "exec ${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
       };
 
       mode.resize.bindsym = {
@@ -244,7 +239,7 @@ in
         return = "mode default";
       };
 
-      exec = [ mako ];
+      exec = [ (lib.getExe config.services.mako.package) ];
       gaps.inner = 10;
       default_border.pixel = 2;
       hide_edge_borders = "--i3 none";
