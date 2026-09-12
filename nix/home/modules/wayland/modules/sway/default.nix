@@ -126,7 +126,7 @@ in
     settings = {
       include = "~/.local/share/wallust/sway.conf";
       font = "pango:${font}";
-      for_window."[app_id=\"ttyasrt\"]" = "floating enable";
+      for_window."[app_id=\"floater\"]" = "floating enable";
       assign = {
         "[app_id=Alacritty]" = 1;
         "[app_id=firefox]" = 2;
@@ -153,83 +153,96 @@ in
         };
       };
 
-      bindsym = {
-        # basics
-        "${mod}+q" = "kill";
-        "${mod}+shift+c" = "reload";
-        "${mod}+shift+e" = ''
-          	  exec swaynag -t warning -m 'Do you really want to exit sway?' \
-          	      -B 'Yes, exit sway' 'swaymsg exit'
-          	'';
+      bindsym =
+        let
+          alacritty = lib.getExe pkgs.alacritty;
+        in
+        {
+          # basics
+          "${mod}+q" = "kill";
+          "${mod}+shift+c" = "reload";
+          "${mod}+shift+e" = ''
+            	  exec swaynag -t warning -m 'Do you really want to exit sway?' \
+            	      -B 'Yes, exit sway' 'swaymsg exit'
+            	'';
 
-        # workspaces
-        "${mod}+1" = "workspace number 1";
-        "${mod}+2" = "workspace number 2";
-        "${mod}+3" = "workspace number 3";
-        "${mod}+4" = "workspace number 4";
-        "${mod}+5" = "workspace number 5";
-        "${mod}+6" = "workspace number 6";
-        "${mod}+7" = "workspace number 7";
-        "${mod}+8" = "workspace number 8";
-        "${mod}+9" = "workspace number 9";
-        "${mod}+tab" = "workspace back_and_forth";
-        "${mod}+shift+1" = "move container to workspace number 1";
-        "${mod}+shift+2" = "move container to workspace number 2";
-        "${mod}+shift+3" = "move container to workspace number 3";
-        "${mod}+shift+4" = "move container to workspace number 4";
-        "${mod}+shift+5" = "move container to workspace number 5";
-        "${mod}+shift+6" = "move container to workspace number 6";
-        "${mod}+shift+7" = "move container to workspace number 7";
-        "${mod}+shift+8" = "move container to workspace number 8";
-        "${mod}+shift+9" = "move container to workspace number 9";
-        "${mod}+c" = "splitv";
-        "${mod}+v" = "splith";
+          # workspaces
+          "${mod}+1" = "workspace number 1";
+          "${mod}+2" = "workspace number 2";
+          "${mod}+3" = "workspace number 3";
+          "${mod}+4" = "workspace number 4";
+          "${mod}+5" = "workspace number 5";
+          "${mod}+6" = "workspace number 6";
+          "${mod}+7" = "workspace number 7";
+          "${mod}+8" = "workspace number 8";
+          "${mod}+9" = "workspace number 9";
+          "${mod}+tab" = "workspace back_and_forth";
+          "${mod}+shift+1" = "move container to workspace number 1";
+          "${mod}+shift+2" = "move container to workspace number 2";
+          "${mod}+shift+3" = "move container to workspace number 3";
+          "${mod}+shift+4" = "move container to workspace number 4";
+          "${mod}+shift+5" = "move container to workspace number 5";
+          "${mod}+shift+6" = "move container to workspace number 6";
+          "${mod}+shift+7" = "move container to workspace number 7";
+          "${mod}+shift+8" = "move container to workspace number 8";
+          "${mod}+shift+9" = "move container to workspace number 9";
+          "${mod}+c" = "splitv";
+          "${mod}+v" = "splith";
 
-        # layout
-        "${mod}+${left}" = "focus left";
-        "${mod}+${down}" = "focus down";
-        "${mod}+${up}" = "focus up";
-        "${mod}+${right}" = "focus right";
-        "${mod}+shift+${left}" = "move left";
-        "${mod}+shift+${right}" = "move right";
-        "${mod}+shift+${down}" = "move down";
-        "${mod}+shift+${up}" = "move up";
-        "${mod}+f" = "fullscreen";
-        "${mod}+s" = "layout stacking";
-        "${mod}+t" = "layout tabbed";
-        "${mod}+e" = "layout toggle split";
-        "${mod}+shift+space" = "floating toggle";
-        "${mod}+r" = "mode resize";
+          # layout
+          "${mod}+${left}" = "focus left";
+          "${mod}+${down}" = "focus down";
+          "${mod}+${up}" = "focus up";
+          "${mod}+${right}" = "focus right";
+          "${mod}+shift+${left}" = "move left";
+          "${mod}+shift+${right}" = "move right";
+          "${mod}+shift+${down}" = "move down";
+          "${mod}+shift+${up}" = "move up";
+          "${mod}+f" = "fullscreen";
+          "${mod}+s" = "layout stacking";
+          "${mod}+t" = "layout tabbed";
+          "${mod}+e" = "layout toggle split";
+          "${mod}+shift+space" = "floating toggle";
+          "${mod}+r" = "mode resize";
 
-        # scratchpad
-        "${mod}+shift+minus" = "move scratchpad";
-        "${mod}+minus" = "scratchpad show";
+          # scratchpad
+          "${mod}+shift+minus" = "move scratchpad";
+          "${mod}+minus" = "scratchpad show";
 
-        # exec
-        "print" = "exec ${wayland-scripts}/bin/freezshot";
-        "${mod}+return" = "exec ${lib.getExe config.programs.alacritty.package}";
-        "${mod}+a" = "exec ${wayland-scripts}/bin/damb";
-        "${mod}+d" = "exec ${wayland-scripts}/bin/dbook";
-        "${mod}+o" = "exec ${lib.getExe config.programs.fuzzel.package}";
-        "${mod}+w" = "exec ${lib.getExe config.programs.firefox.finalPackage}";
-        "${mod}+backslash" = "exec ${lib.getExe termux_sway_yazi}";
+          # exec
+          "print" = "exec ${wayland-scripts}/bin/freezshot";
+          "${mod}+return" = "exec ${lib.getExe config.programs.alacritty.package}";
+          "${mod}+a" = "exec ${wayland-scripts}/bin/damb";
+          "${mod}+d" = "exec ${wayland-scripts}/bin/dbook";
+          "${mod}+o" = "exec ${lib.getExe config.programs.fuzzel.package}";
+          "${mod}+w" = "exec ${lib.getExe config.programs.firefox.finalPackage}";
+          "${mod}+backslash" = "exec ${lib.getExe termux_sway_yazi}";
 
-        # brightness
-        XF86MonBrightnessDown = "exec ${lib.getExe pkgs.brightnessctl} set 1%-";
-        XF86MonBrightnessUp = "exec ${lib.getExe pkgs.brightnessctl} set 1%+";
+          # menu
+          "${mod}+z" = "exec ${alacritty} --class floater -e ${lib.getExe pkgs.impala}";
+          "${mod}+x" = "exec ${alacritty} --class floater -e ${lib.getExe pkgs.bluetui}";
+          "${mod}+bracketleft" = "exec ${alacritty} --class floater -e ${lib.getExe pkgs.wiremix}";
+          "${mod}+semicolon" = "exec ${alacritty} --class floater -e ${lib.getExe pkgs.btop}";
+          "${mod}+comma" = "exec ${alacritty} --class floater -e sudo /run/current-system/sw/bin/powertop";
+          "${mod}+period" = "exec ${alacritty} --class floater -e ${lib.getExe' pkgs.calcurse "calcurse"}";
+          "${mod}+slash" = "exec ${alacritty} --class floater -e ${lib.getExe pkgs.bash}";
 
-        # music
-        XF86AudioPlay = "exec ${lib.getExe pkgs.playerctl} play-pause";
-        XF86AudioStop = "exec ${lib.getExe pkgs.playerctl} position 0";
-        XF86AudioPrev = "exec ${lib.getExe pkgs.playerctl} previous";
-        XF86AudioNext = "exec ${lib.getExe pkgs.playerctl} next";
+          # brightness
+          XF86MonBrightnessDown = "exec ${lib.getExe pkgs.brightnessctl} set 1%-";
+          XF86MonBrightnessUp = "exec ${lib.getExe pkgs.brightnessctl} set 1%+";
 
-        # volume
-        XF86AudioLowerVolume = "exec ${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-";
-        XF86AudioRaiseVolume = "exec ${pkgs.wireplumber}/bin/wpctl set-volume --limit 1.5 @DEFAULT_AUDIO_SINK@ 5%+";
-        XF86AudioMute = "exec ${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
-        XF86AudioMicMute = "exec ${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
-      };
+          # music
+          XF86AudioPlay = "exec ${lib.getExe pkgs.playerctl} play-pause";
+          XF86AudioStop = "exec ${lib.getExe pkgs.playerctl} position 0";
+          XF86AudioPrev = "exec ${lib.getExe pkgs.playerctl} previous";
+          XF86AudioNext = "exec ${lib.getExe pkgs.playerctl} next";
+
+          # volume
+          XF86AudioLowerVolume = "exec ${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-";
+          XF86AudioRaiseVolume = "exec ${pkgs.wireplumber}/bin/wpctl set-volume --limit 1.5 @DEFAULT_AUDIO_SINK@ 5%+";
+          XF86AudioMute = "exec ${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
+          XF86AudioMicMute = "exec ${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
+        };
 
       mode.resize.bindsym = {
         ${left} = "resize shrink width 10px";
