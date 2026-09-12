@@ -45,15 +45,14 @@
     "exec": "wttrbar --nerd --hide-conditions --custom-indicator ' {uvIndex} {ICON}{FeelsLikeC}'",
     "return-type": "json",
     "interval": 60,
-    "tooltip": true,
-    "on-click": "ttyasrt bash"
+    "tooltip": true
   },
   "network": {
     "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
     "format": "{icon}{bandwidthTotalBytes}",
     "format-wifi": "{icon}{bandwidthTotalBytes}",
     "format-ethernet": "󰀂 {bandwidthTotalBytes}",
-    "format-disconnected": "󰤦Scan",
+    "format-disconnected": "",
     "tooltip-format-wifi": "{essid} ⏽ {frequency} GHz ⏽ {ipaddr}/{cidr}",
     "tooltip-format-ethernet": "Connected",
     "tooltip-format-disconnected": "Disconnected",

@@ -6,7 +6,7 @@
   programs.bash.initExtra = lib.mkOrder 2000 ''
     if [ -z "$TMUX" ] &&
       { [ -n "$WAYLAND_DISPLAY" ] || [ -n "$SSH_TTY" ]; }; then
-        exec tmux new-session -A -s _root_session_managed_by_home_manager > /dev/null 2>&1
+        exec tmux new-session -A -s root > /dev/null 2>&1
     fi
   '';
 

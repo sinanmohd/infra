@@ -31,7 +31,7 @@ let
     ];
 
     text = ''
-      session_name="_root_session_managed_by_home_manager"
+      session_name="root"
       tmux_sock_path="$XDG_RUNTIME_DIR/tmux-$UID/default"
 
       is_alacritty_running() {
@@ -225,7 +225,8 @@ in
           "${mod}+semicolon" = "exec ${alacritty} --class floater -e ${lib.getExe pkgs.btop}";
           "${mod}+comma" = "exec ${alacritty} --class floater -e sudo /run/current-system/sw/bin/powertop";
           "${mod}+period" = "exec ${alacritty} --class floater -e ${lib.getExe' pkgs.calcurse "calcurse"}";
-          "${mod}+slash" = "exec ${alacritty} --class floater -e ${lib.getExe pkgs.bash}";
+          "${mod}+slash" =
+            "exec ${alacritty} --class floater -e ${lib.getExe pkgs.tmux} new-session -A -s float";
 
           # brightness
           XF86MonBrightnessDown = "exec ${lib.getExe pkgs.brightnessctl} set 1%-";
