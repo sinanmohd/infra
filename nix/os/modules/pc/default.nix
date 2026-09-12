@@ -31,6 +31,11 @@ in
   };
 
   documentation.dev.enable = true;
-  environment.systemPackages = [ pkgs.android-tools ];
   users.users.${user}.extraGroups = [ "adbusers" ];
+
+  environment.systemPackages = with pkgs; [
+    android-tools
+    wiremix
+    bluetui
+  ];
 }

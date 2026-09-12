@@ -103,7 +103,6 @@ in
       pkgs.wl-clipboard
       pkgs.swayidle
       pkgs.brightnessctl
-      pkgs.wiremix
       wayland-scripts
       termux_sway_yazi
     ];
