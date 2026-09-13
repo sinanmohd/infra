@@ -5,11 +5,22 @@
 {
   home.packages = with pkgs; [
     libnotify
-    (mpv.override { scripts = [ mpvScripts.mpris ]; })
+    (mpv.override {
+      scripts = with mpvScripts; [
+        mpris
+        modernx
+        visualizer
+        autosubsync-mpv
+      ];
+    })
   ];
 
   programs.wallust.settings.templates.mpv = {
     template = pkgs.writeText "mpv.conf" ''
+      # modernx
+      osc = no
+      border = no
+
       hwdec=auto-safe
       vo=dmabuf-wayland
       cache
