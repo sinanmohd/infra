@@ -25,8 +25,8 @@
   ],
 
   "mpris": {
-    "dynamic-order": ["artist", "album", "title"],
-    "dynamic-importance-order": ["artist", "album", "title", "position", "length"],
+    "dynamic-order": ["artist", "title"],
+    "dynamic-importance-order": ["artist", "title", "album", "position", "length"],
     "format": "{player_icon} {dynamic}",
     "format-paused": "{player_icon} ⏸ {dynamic}",
     "title-len": 32,
