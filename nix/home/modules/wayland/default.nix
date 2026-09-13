@@ -29,7 +29,6 @@ in
       slurp
       xdg-utils
 
-      mpv
       imv
       gimp3
     ];

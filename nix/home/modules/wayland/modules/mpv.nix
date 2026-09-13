@@ -3,7 +3,10 @@
   ...
 }:
 {
-  home.packages = with pkgs; [ libnotify ];
+  home.packages = with pkgs; [
+    libnotify
+    (mpv.override { scripts = [ mpvScripts.mpris ]; })
+  ];
 
   programs.wallust.settings.templates.mpv = {
     template = pkgs.writeText "mpv.conf" ''

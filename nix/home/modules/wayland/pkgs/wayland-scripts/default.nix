@@ -10,6 +10,7 @@
   jq,
   coreutils,
   mpv,
+  mpvScripts,
   util-linux,
   gnugrep,
   file,
@@ -71,7 +72,7 @@ stdenvNoCC.mkDerivation {
       --prefix PATH : ${
         lib.makeBinPath [
           libnotify
-          mpv
+          (mpv.override { scripts = [ mpvScripts.mpris ]; })
           util-linux
           gnugrep
           coreutils

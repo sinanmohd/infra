@@ -5,7 +5,10 @@
   "spacing": 8,
   "height": 24,
 
-  "modules-left": ["sway/workspaces"],
+  "modules-left": [
+    "sway/workspaces",
+    "mpris"
+  ],
   "modules-center": [
     "clock",
     "privacy",
@@ -21,6 +24,21 @@
     "battery"
   ],
 
+  "mpris": {
+    "dynamic-order": ["artist", "album", "title"],
+    "dynamic-importance-order": ["artist", "album", "title", "position", "length"],
+    "format": "{player_icon} {dynamic}",
+    "format-paused": "{player_icon} ⏸ {dynamic}",
+    "title-len": 32,
+    "artist-len": 16,
+    "album-len": 16,
+    "player-icons": {
+      "default": "▶",
+      "mpv": "",
+      "spotify": "",
+      "firefox": "󰈹"
+    }
+  },
   "privacy": {
     "icon-size": 15,
     "ignore-monitor": false
