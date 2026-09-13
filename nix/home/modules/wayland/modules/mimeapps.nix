@@ -20,6 +20,7 @@
       "video/mp4" = "mpv.desktop";
       "video/webm" = "mpv.desktop";
       "video/x-matroska" = "mpv.desktop";
+      "audio/x-opus+ogg" = "mpv.desktop";
 
       # browser
       "x-scheme-handler/about" = "linkhandler.desktop";
