@@ -126,7 +126,10 @@ in
     settings = {
       include = "~/.local/share/wallust/sway.conf";
       font = "pango:${font}";
-      for_window."[app_id=\"floater\"]" = "floating enable";
+      for_window = {
+        "[app_id=\"floater\"]" = "floating enable";
+        "[app_id=\"org.kde.kdeconnect.daemon\"]" = "floating enable";
+      };
       assign = {
         "[app_id=Alacritty]" = 1;
         "[app_id=firefox]" = 2;

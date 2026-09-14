@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   ...
 }:
 let
@@ -16,4 +17,16 @@ in
     ../../../home/modules/pc
     ../../../home/modules/wayland
   ];
+
+  # kde connect
+  networking.firewall = rec {
+    enable = lib.mkForce false;
+    allowedTCPPortRanges = [
+      {
+        from = 1714;
+        to = 1764;
+      }
+    ];
+    allowedUDPPortRanges = allowedTCPPortRanges;
+  };
 }

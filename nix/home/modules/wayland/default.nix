@@ -36,4 +36,9 @@ in
 
   programs.rbw.settings.pinentry = wayland-scripts;
   services.awww.enable = true;
+
+  services.kdeconnect = {
+    enable = true;
+    indicator = true;
+  };
 }
