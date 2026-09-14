@@ -28,12 +28,13 @@
     "dynamic-order": ["artist", "title"],
     "dynamic-importance-order": ["artist", "title", "album", "position", "length"],
     "format": "{player_icon} {dynamic}",
-    "format-paused": "{player_icon} ⏸ {dynamic}",
-    "title-len": 32,
-    "artist-len": 16,
-    "album-len": 16,
+    "format-paused": "{player_icon} Paused, {dynamic}",
+    "title-len": 28,
+    "artist-len": 14,
+    "album-len": 14,
     "player-icons": {
-      "default": "▶",
+      "default": "󱜏",
+      "kdeconnect": "",
       "mpv": "",
       "spotify": "",
       "firefox": "󰈹"
