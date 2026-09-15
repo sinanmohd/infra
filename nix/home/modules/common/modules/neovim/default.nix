@@ -18,6 +18,8 @@ in
     ccls
     pyright
     rust-analyzer
+    rustc
+    cargo
     yaml-language-server
     terraform-ls
     bash-language-server
@@ -29,7 +31,9 @@ in
     vue-language-server
     luajitPackages.lua-lsp
     markdownlint-cli
+    mdx-language-server
     lua-language-server
+    typescript
   ];
 
   xdg.configFile.nvim.source = ./config;

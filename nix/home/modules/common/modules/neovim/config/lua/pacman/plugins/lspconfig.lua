@@ -1,3 +1,15 @@
+local function get_nix_tsdk()
+  local tsserver_path = vim.fn.exepath("tsserver")
+  if tsserver_path ~= "" then
+    local real_bin = vim.uv.fs_realpath(tsserver_path) or tsserver_path
+    local lib_dir = vim.fn.fnamemodify(real_bin, ":h:h") .. "/lib/node_modules/typescript/lib"
+    if vim.uv.fs_stat(lib_dir) then
+      return lib_dir
+    end
+  end
+  return nil
+end
+
 -- LSP Plugins
 return {
   {
@@ -209,6 +221,13 @@ return {
         bashls = {},
         nil_ls = {},
         tailwindcss = {},
+        mdx_analyzer = {
+          init_options = {
+            typescript = {
+              tsdk = get_nix_tsdk(),
+            },
+          },
+        },
         helm_ls = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --

@@ -32,6 +32,7 @@ require('lazy').setup({
   require 'pacman.plugins.helm-ls',
   require 'pacman.plugins.toggleterm',
   require 'pacman.plugins.nvim-highlight-colors',
+  require 'pacman.plugins.mdx',
 }, {
   lockfile = vim.fn.stdpath('data') .. "/lazy-lock.json",
 })
