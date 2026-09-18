@@ -109,7 +109,7 @@
 
     profiles."default".settings = {
       "media.ffmpeg.vaapi.enabled" = true;
-      "browser.ml.chat.provider" = "https://grok.com/";
+      "browser.ml.chat.provider" = "https://gemini.google.com/app";
 
       "browser.uiCustomization.state" = builtins.toJSON {
         currentVersion = 1337;
