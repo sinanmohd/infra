@@ -4,6 +4,11 @@
   inputs = {
     nixpkgs.url = "github:eyJhb/nixpkgs/stalwart-webadmin-fix-wasm";
 
+    wrap = {
+      url = "github:rti/nixwrap";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     website = {
       url = "github:sinanmohd/website";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -51,6 +56,7 @@
       nix-index-database,
       disko,
       website,
+      wrap,
     }@inputs:
     let
       lib = nixpkgs.lib;
@@ -88,6 +94,7 @@
         home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages.${system};
           modules = [ ./nix/home/hosts/${host} ];
+          extraSpecialArgs = { inherit inputs; };
         };
     in
     {

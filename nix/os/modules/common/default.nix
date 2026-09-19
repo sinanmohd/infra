@@ -2,6 +2,7 @@
   config,
   pkgs,
   lib,
+  inputs,
   ...
 }:
 let
@@ -26,8 +27,14 @@ in
   ];
   home-manager = {
     useGlobalPkgs = true;
-    useUserPackages = false;
+    useUserPackages = true;
+    extraSpecialArgs = { inherit inputs; };
   };
+  # required by installed Home Manager via its NixOS module + useUserPackages = true
+  environment.pathsToLink = [
+    "/share/applications"
+    "/share/xdg-desktop-portal"
+  ];
 
   system.stateVersion = "26.05";
   time.timeZone = "Asia/Kolkata";

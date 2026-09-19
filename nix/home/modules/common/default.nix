@@ -2,6 +2,7 @@
   config,
   pkgs,
   lib,
+  inputs,
   ...
 }:
 let
@@ -51,6 +52,7 @@ in
       tcpdump
       mtr
       geoipWithDatabase
+      inputs.wrap.packages.${pkgs.stdenv.hostPlatform.system}.wrap
     ];
   };
 }
