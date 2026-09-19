@@ -1,11 +1,7 @@
 {
-  config,
   lib,
   ...
 }:
-let
-  user = config.global.userdata.name;
-in
 {
   nixpkgs.config.allowUnfreePredicate =
     pkg:
@@ -25,7 +21,6 @@ in
     settings = {
       auto-optimise-store = true;
       use-xdg-base-directories = true;
-      trusted-users = [ user ];
 
       experimental-features = [
         "flakes"

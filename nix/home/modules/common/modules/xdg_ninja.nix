@@ -12,6 +12,5 @@ in
   home.sessionVariables = {
     HISTFILE = bashHistory;
     GOPATH = config.xdg.dataHome + "/go";
-    DOCKER_CONFIG = config.xdg.dataHome + "/docker";
   };
 }

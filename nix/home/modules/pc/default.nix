@@ -2,6 +2,7 @@
 {
   imports = [
     ./modules/vaultwarden.nix
+    ./modules/podman.nix
     ./modules/k8s
     ../../../global/modules/common
   ];

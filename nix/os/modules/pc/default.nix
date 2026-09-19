@@ -12,7 +12,6 @@ in
     ./modules/network.nix
     ./modules/fonts.nix
     ./modules/nopolkit.nix
-    ./modules/work.nix
     ./modules/tailscale
   ];
   home-manager.users.${user}.imports = [
