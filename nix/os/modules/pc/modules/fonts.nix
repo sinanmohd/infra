@@ -3,9 +3,10 @@
   ...
 }:
 let
-  fontPackages = config.global.font.monospace.packages ++ config.global.font.sans.packages;
+  fontPackages = with config.global.font; monospace.packages ++ sans.packages ++ emoji.packages;
   fontMonospace = config.global.font.monospace.name;
   fontSans = config.global.font.sans.name;
+  fontEmoji = config.global.font.emoji.name;
 in
 {
   fonts = {
@@ -18,9 +19,19 @@ in
       subpixel.rgba = "rgb";
 
       defaultFonts = {
-        monospace = [ fontMonospace ];
-        serif = [ fontSans ];
-        sansSerif = [ fontSans ];
+        monospace = [
+          fontMonospace
+          fontEmoji
+        ];
+        serif = [
+          fontSans
+          fontEmoji
+        ];
+        sansSerif = [
+          fontSans
+          fontEmoji
+        ];
+        emoji = [ fontEmoji ];
       };
     };
   };

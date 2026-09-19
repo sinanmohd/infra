@@ -89,5 +89,22 @@ in
         }
       );
     };
+
+    emoji = {
+      name = lib.mkOption (
+        name
+        // {
+          default = "Noto Color Emoji";
+        }
+      );
+      packages = lib.mkOption (
+        packages
+        // {
+          default = [
+            pkgs.noto-fonts-color-emoji
+          ];
+        }
+      );
+    };
   };
 }
