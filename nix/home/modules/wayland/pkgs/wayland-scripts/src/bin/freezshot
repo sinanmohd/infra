@@ -23,6 +23,6 @@ focused_clinet_name() {
 if [ ! -d "$out_dir" ]; then
 	mkdir -p "$out_dir"
 fi
-out="$out_dir/$(date +'%Y%m%d-%Hh%Mm%Ss')-$(focused_clinet_name).png"
+out="$out_dir/$(date +'%Y%m%d-%Hh%Mm%Ss')-$(focused_clinet_name | tr -dc ' a-zA-Z0-9').png"
 
 grim "$out" && info "Screenshot saved to $out"
