@@ -10,7 +10,6 @@ in
   imports = [
     ./modules/sway.nix
     ./modules/wayland.nix
-    ./modules/work.nix
   ];
   home-manager.users.${user}.imports = [
     ../../../home/modules/common
