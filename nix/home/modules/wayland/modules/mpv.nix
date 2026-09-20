@@ -11,6 +11,8 @@
         modernx
         visualizer
         autosubsync-mpv
+        dynamic-crop
+        quack
       ];
     })
   ];
