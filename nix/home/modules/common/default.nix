@@ -31,7 +31,6 @@ in
   nix = {
     package = lib.mkForce pkgs.nix;
     settings = {
-      use-xdg-base-directories = true;
       bash-prompt-prefix = "";
     };
   };
