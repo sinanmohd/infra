@@ -1,0 +1,94 @@
+From 9623f54d5ceb49e2a18d99a63fefe3020cf2c7e8 Mon Sep 17 00:00:00 2001
+From: sinanmohd <sinan@sinanmohd.com>
+Date: Mon, 21 Sep 2026 22:45:54 +0530
+Subject: [PATCH 2/2] fix(federation, sync): don't panic
+
+---
+ federationapi/consumers/roomserver.go | 13 ++++++++++---
+ syncapi/consumers/roomserver.go       | 16 ++++++++++------
+ 2 files changed, 20 insertions(+), 9 deletions(-)
+
+diff --git a/federationapi/consumers/roomserver.go b/federationapi/consumers/roomserver.go
+index b9e06617..3a09068d 100644
+--- a/federationapi/consumers/roomserver.go
++++ b/federationapi/consumers/roomserver.go
+@@ -116,14 +116,21 @@ func (s *OutputRoomEventConsumer) onMessage(ctx context.Context, msgs []*nats.Ms
+ 				}).Warn("Skipping federation output for purged room")
+ 				return true
+ 			}
+-			// panic rather than continue with an inconsistent database
++			// Refuse the message rather than continue with an inconsistent
++			// database. It is not acked, so JetStream redelivers it with backoff
++			// once whatever failed here recovers — often the database being
++			// briefly unreachable or out of connections rather than anything
++			// permanently wrong. Panicking would take the whole homeserver down
++			// and, since the message stays pending either way, the restarted
++			// process would just fail on it again.
+ 			log.WithFields(log.Fields{
+ 				"event_id":   ev.EventID(),
+ 				"event":      string(ev.JSON()),
+ 				"add":        output.NewRoomEvent.AddsStateEventIDs,
+ 				"del":        output.NewRoomEvent.RemovesStateEventIDs,
+ 				log.ErrorKey: err,
+-			}).Panicf("roomserver output log: write room event failure")
++			}).Error("roomserver output log: write room event failure")
++			return false
+ 		}
+ 
+ 	case api.OutputTypeNewInboundPeek:
+@@ -131,7 +138,7 @@ func (s *OutputRoomEventConsumer) onMessage(ctx context.Context, msgs []*nats.Ms
+ 			log.WithFields(log.Fields{
+ 				"event":      output.NewInboundPeek,
+ 				log.ErrorKey: err,
+-			}).Panicf("roomserver output log: remote peek event failure")
++			}).Error("roomserver output log: remote peek event failure")
+ 			return false
+ 		}
+ 
+diff --git a/syncapi/consumers/roomserver.go b/syncapi/consumers/roomserver.go
+index 38ce63b0..1cc5f24e 100644
+--- a/syncapi/consumers/roomserver.go
++++ b/syncapi/consumers/roomserver.go
+@@ -315,15 +315,18 @@ func (s *OutputRoomEventConsumer) onNewRoomEvent(
+ 
+ 	pduPos, err := s.db.WriteEvent(ctx, ev, addsStateEvents, msg.AddsStateEventIDs, msg.RemovesStateEventIDs, msg.TransactionID, false, msg.HistoryVisibility)
+ 	if err != nil {
+-		// panic rather than continue with an inconsistent database
++		// Fail the message rather than continue with an inconsistent database.
++		// onMessage refuses it, so JetStream redelivers it with backoff once
++		// whatever failed here recovers, instead of taking the process down
++		// while the message stays pending regardless.
+ 		log.WithFields(log.Fields{
+ 			"event_id":   ev.EventID(),
+ 			"event":      string(ev.JSON()),
+ 			log.ErrorKey: err,
+ 			"add":        msg.AddsStateEventIDs,
+ 			"del":        msg.RemovesStateEventIDs,
+-		}).Panicf("roomserver output log: write new event failure")
+-		return nil
++		}).Error("roomserver output log: write new event failure")
++		return fmt.Errorf("s.db.WriteEvent: %w", err)
+ 	}
+ 	if err = s.writeFTS(ev, pduPos); err != nil {
+ 		if s.cfg.Matrix.HA.Enabled {
+@@ -382,13 +385,14 @@ func (s *OutputRoomEventConsumer) onOldRoomEvent(
+ 
+ 	pduPos, err := s.db.WriteEvent(ctx, ev, []*rstypes.HeaderedEvent{}, []string{}, []string{}, nil, ev.StateKey() != nil, msg.HistoryVisibility)
+ 	if err != nil {
+-		// panic rather than continue with an inconsistent database
++		// See onNewRoomEvent: refuse and let JetStream redeliver rather than
++		// panicking the process over a possibly transient write failure.
+ 		log.WithFields(log.Fields{
+ 			"event_id":   ev.EventID(),
+ 			"event":      string(ev.JSON()),
+ 			log.ErrorKey: err,
+-		}).Panicf("roomserver output log: write old event failure")
+-		return nil
++		}).Error("roomserver output log: write old event failure")
++		return fmt.Errorf("s.db.WriteEvent: %w", err)
+ 	}
+ 
+ 	if err = s.writeFTS(ev, pduPos); err != nil {
+-- 
+2.55.0
+

@@ -12,7 +12,7 @@
     ./dendrite-nixpkgs-patch.nix
   ];
 
-  services.dendrite.package = pkgs.dendrite.overrideAttrs (o: rec {
+  services.dendrite.package = pkgs.dendrite.overrideAttrs (oldAttrs: rec {
     pname = "zendrite";
     version = "3.1.0";
 
@@ -21,6 +21,11 @@
       rev = "refs/tags/v${version}";
       hash = "sha256-EkW5eiVN6TGRbVb7w/+AEihZm9tQnToPQqsKYo4wVNE=";
     };
+
+    patches = (oldAttrs.patches or [ ]) ++ [
+      ./0001-fix-roomserver-internal-api-panic-on-startup.patch
+      ./0002-fix-federation-sync-don-t-panic.patch
+    ];
 
     subPackages = [
       # The server

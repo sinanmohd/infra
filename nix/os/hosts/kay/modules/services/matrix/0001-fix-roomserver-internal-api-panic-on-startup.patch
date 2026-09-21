@@ -1,0 +1,55 @@
+From 16db427950fbb26273f26fd8cb319c6d502b070d Mon Sep 17 00:00:00 2001
+From: sinanmohd <sinan@sinanmohd.com>
+Date: Mon, 21 Sep 2026 21:34:44 +0530
+Subject: [PATCH 1/2] fix(roomserver/internal/api): panic on startup
+
+---
+ roomserver/internal/api.go | 25 ++++++++++++++++---------
+ 1 file changed, 16 insertions(+), 9 deletions(-)
+
+diff --git a/roomserver/internal/api.go b/roomserver/internal/api.go
+index 42a75b01..1a155104 100644
+--- a/roomserver/internal/api.go
++++ b/roomserver/internal/api.go
+@@ -103,7 +103,19 @@ func NewRoomserverAPI(
+ 		defaultRoomVersion:     zendriteCfg.RoomServer.DefaultRoomVersion,
+ 		PartialStateTracker:    NewPartialStateTracker(),
+ 		PurgeTracker:           perform.NewPurgeTracker(),
+-		// perform-er structs + queryer struct get initialized when we have a federation sender to use
++		// perform-er structs get initialized when we have a federation sender to use
++	}
++	// The queryer is initialized eagerly rather than in SetFederationAPI:
++	// consumers in other components — notably the federation API's output room
++	// event consumer — are started before SetFederationAPI runs and immediately
++	// work through their JetStream backlog, calling query methods on us. Only
++	// FSAPI is genuinely late-bound; everything else is available here.
++	a.Queryer = &query.Queryer{
++		DB:                roomserverDB,
++		Cache:             caches,
++		IsLocalServerName: zendriteCfg.Global.IsLocalServerName,
++		ServerACLs:        serverACLs,
++		Cfg:               zendriteCfg,
+ 	}
+ 	return a
+ }
+@@ -115,14 +127,9 @@ func (r *RoomserverInternalAPI) SetFederationAPI(fsAPI fsAPI.RoomserverFederatio
+ 	r.fsAPI = fsAPI
+ 	r.KeyRing = keyRing
+ 
+-	r.Queryer = &query.Queryer{
+-		DB:                r.DB,
+-		Cache:             r.Cache,
+-		IsLocalServerName: r.Cfg.Global.IsLocalServerName,
+-		ServerACLs:        r.ServerACLs,
+-		Cfg:               r.Cfg,
+-		FSAPI:             fsAPI,
+-	}
++	// The queryer already exists (see NewRoomserverAPI); only the federation API
++	// is late-bound, so mutate in place rather than replacing the struct.
++	r.Queryer.FSAPI = fsAPI
+ 
+ 	r.Inputer = &input.Inputer{
+ 		Cfg:                 &r.Cfg.RoomServer,
+-- 
+2.55.0
+

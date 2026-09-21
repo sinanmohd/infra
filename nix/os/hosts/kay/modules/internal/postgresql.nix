@@ -18,7 +18,10 @@
       host  all      all     ::1/128        trust
     '';
 
-    settings.log_timezone = config.time.timeZone;
+    settings = {
+      log_timezone = config.time.timeZone;
+      max_connections = 512;
+    };
   };
 
   services.prometheus.exporters.postgres = {
