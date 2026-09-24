@@ -51,7 +51,7 @@ warn()
 	: "${1:?}"
 
 	note "$1"
-	printf "\033[33;1merr: %b\033[0m\n" "$1" 1>&2
+	printf "\033[33;1mwarn: %b\033[0m\n" "$1" 1>&2
 }
 
 dep_check()

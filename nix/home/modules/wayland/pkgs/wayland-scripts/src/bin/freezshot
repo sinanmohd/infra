@@ -2,11 +2,6 @@
 
 out_dir="${GRIM_DEFAULT_DIR:-${XDG_PICTURES_DIR:-.}}"
 
-info() {
-	notify-send "   freezhot" "$1"
-	printf "\033[32;1m%b\033[0m\n" "$1"
-}
-
 focused_clinet_name() {
 	name="$(swaymsg -t get_tree | jq -r '.. | select(.focused? == true) | .name')"
 	if [ -z "$name" ]; then
@@ -16,6 +11,13 @@ focused_clinet_name() {
 	fi
 }
 
+
+err() {
+	: "${1:?}"
+
+	printf "\033[31;1merr: %b\033[0m\n" "$1" 1>&2
+}
+
 ########
 # MAIN #
 ########
@@ -23,6 +25,22 @@ focused_clinet_name() {
 if [ ! -d "$out_dir" ]; then
 	mkdir -p "$out_dir"
 fi
-out="$out_dir/$(date +'%Y%m%d-%Hh%Mm%Ss')-$(focused_clinet_name | tr -dc ' a-zA-Z0-9').png"
+ss_name="$(date +'%Y%m%d-%Hh%Mm%Ss')-$(focused_clinet_name | tr -dc ' a-zA-Z0-9')"
+out_path="$out_dir/$ss_name.png"
 
-grim "$out" && info "Screenshot saved to $out"
+grim "$out_path" || exit 1
+echo "$out_path"
+
+action="$(notify-send -i "$out_path" --action="default=click" "  Screenshot saved" "$ss_name")"
+case "$action" in
+	"")
+		exit
+		;;
+	default)
+		wl-copy < "$out_path"
+		;;
+	*)
+		err "$action, uknown action"
+		exit 1
+		;;
+esac
