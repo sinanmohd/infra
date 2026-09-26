@@ -103,7 +103,12 @@
           inherit system;
           pkgs = import nixpkgs { inherit system; };
         };
-      forAllSystems = f: lib.genAttrs lib.platforms.unix (forSystem f);
+      supportedSystems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "aarch64-darwin"
+      ];
+      forAllSystems = f: lib.genAttrs supportedSystems (forSystem f);
     in
     {
       packages = forAllSystems (
@@ -146,6 +151,12 @@
         };
       };
 
-      checks = builtins.mapAttrs (system: deployLib: deployLib.deployChecks self.deploy) deploy-rs.lib;
+      checks =
+        let
+          deployChecks = builtins.mapAttrs (
+            system: deployLib: deployLib.deployChecks self.deploy
+          ) deploy-rs.lib;
+        in
+        lib.filterAttrs (k: v: lib.elem k supportedSystems) deployChecks;
     };
 }
