@@ -96,8 +96,23 @@
           modules = [ ./nix/home/hosts/${host} ];
           extraSpecialArgs = { inherit inputs; };
         };
+
+      forSystem =
+        f: system:
+        f {
+          inherit system;
+          pkgs = import nixpkgs { inherit system; };
+        };
+      forAllSystems = f: lib.genAttrs lib.platforms.unix (forSystem f);
     in
     {
+      packages = forAllSystems (
+        { system, pkgs }:
+        {
+          wayland-scripts = pkgs.callPackage ./nix/pkgs/com.sinanmohd.wayland-scripts { };
+        }
+      );
+
       nixosModules = lib.genAttrs [
         "common"
         "server"

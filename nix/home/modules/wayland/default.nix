@@ -1,6 +1,6 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 let
-  wayland-scripts = pkgs.callPackage ./pkgs/wayland-scripts { };
+  wayland-scripts = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.wayland-scripts;
 in
 {
   imports = [
