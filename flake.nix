@@ -43,6 +43,11 @@
       url = "github:nix-community/disko/latest";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    nixpak = {
+      url = "github:nixpak/nixpak";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -57,6 +62,7 @@
       disko,
       website,
       wrap,
+      nixpak,
     }@inputs:
     let
       lib = nixpkgs.lib;
@@ -101,7 +107,10 @@
         f: system:
         f {
           inherit system;
-          pkgs = import nixpkgs { inherit system; };
+          pkgs = import nixpkgs {
+            inherit system;
+            config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "claude-code" ];
+          };
         };
       supportedSystems = [
         "x86_64-linux"
@@ -115,6 +124,7 @@
         { system, pkgs }:
         {
           wayland-scripts = pkgs.callPackage ./nix/pkgs/com.sinanmohd.wayland-scripts { };
+          claude-code = pkgs.callPackage ./nix/pkgs/com.anthropic.claude-code.nix { inherit nixpak; };
         }
       );
 

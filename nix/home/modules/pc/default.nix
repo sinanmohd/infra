@@ -1,4 +1,7 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
+let
+  claude-code = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.claude-code;
+in
 {
   imports = [
     ./modules/vaultwarden.nix
@@ -11,5 +14,6 @@
     ffmpeg
     mosh
     deploy-rs
+    claude-code
   ];
 }
