@@ -3,6 +3,8 @@
   pkgs,
   nixpak,
   git,
+  libSinan,
+  buildEnv,
 }:
 let
   mkNixPak = nixpak.lib.nixpak {
@@ -48,46 +50,50 @@ let
     };
   };
 in
-pkgs.writeShellScriptBin "claude" ''
-  err() {
-    : "''${1:?}"
+libSinan.nixpakEnv {
+  inherit buildEnv;
+  pkg_raw = pkgs.claude-code;
+  pkg_nixpak = pkgs.writeShellScriptBin "claude" ''
+    err() {
+      : "''${1:?}"
 
-    printf "\033[31;1mnixpak-claude-code: %b\033[0m\n" "$1" 1>&2
-  }
+      printf "\033[31;1mnixpak-claude-code: %b\033[0m\n" "$1" 1>&2
+    }
 
-  export _CLAUDE_SCRATCHPAD="/tmp/claude-$(id -u)"
-  # NOTE: allows access to user bin
-  export _NIX_USER_BINS="/etc/profiles/per-user/$USER/bin"
+    export _CLAUDE_SCRATCHPAD="/tmp/claude-$(id -u)"
+    # NOTE: allows access to user bin
+    export _NIX_USER_BINS="/etc/profiles/per-user/$USER/bin"
 
-  # NOTE: RBAC isolated agent k8s access
-  export KUBECONFIG="$HOME/.kube/agent.config"
+    # NOTE: RBAC isolated agent k8s access
+    export KUBECONFIG="$HOME/.kube/agent.config"
 
-  export CLAUDE_CONFIG_DIR="''${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
-  # NOTE: inconsistency when setting $CLAUDE_CONFIG_DIR
-  if [ -f "$HOME/.claude.json" ] && [ ! -f "$CLAUDE_CONFIG_DIR/.claude.json" ]; then
-    mv "$HOME/.claude.json" "$CLAUDE_CONFIG_DIR/.claude.json"
-  fi
-
-  if [ -z "$RW_ROOT" ]; then
-    if ! rw_root="$(${lib.getExe git} rev-parse --show-toplevel 2>/dev/null)"; then
-      err "Not inside a git repository. Please navigate to a git repository or manually set \$RW_ROOT."
-      exit 1
+    export CLAUDE_CONFIG_DIR="''${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+    # NOTE: inconsistency when setting $CLAUDE_CONFIG_DIR
+    if [ -f "$HOME/.claude.json" ] && [ ! -f "$CLAUDE_CONFIG_DIR/.claude.json" ]; then
+      mv "$HOME/.claude.json" "$CLAUDE_CONFIG_DIR/.claude.json"
     fi
 
-    case "$rw_root" in
-    "$HOME/"*) ;;
-    "$HOME")
-      err "The repo root is your \$HOME directory. This is usually a mistake and could be destructive. To override, manually set \$RW_ROOT."
-      exit 1
-      ;;
-    *)
-      err "The repo root is outside your \$HOME directory. This is usually a mistake and could be destructive. To override, manually set \$RW_ROOT."
-      exit 1
-      ;;
-    esac
+    if [ -z "$RW_ROOT" ]; then
+      if ! rw_root="$(${lib.getExe git} rev-parse --show-toplevel 2>/dev/null)"; then
+        err "Not inside a git repo. Please navigate to a git repository or manually set \$RW_ROOT."
+        exit 1
+      fi
 
-    export RW_ROOT="$rw_root"
-  fi
+      case "$rw_root" in
+      "$HOME/"*) ;;
+      "$HOME")
+        err "The repo root is your \$HOME directory. This is usually a mistake and could be destructive. To override, manually set \$RW_ROOT."
+        exit 1
+        ;;
+      *)
+        err "The repo root is outside your \$HOME directory. This is usually a mistake and could be destructive. To override, manually set \$RW_ROOT."
+        exit 1
+        ;;
+      esac
 
-  exec ${lib.getExe claude-code.config.script} "$@"
-''
+      export RW_ROOT="$rw_root"
+    fi
+
+    exec ${lib.getExe claude-code.config.script} "$@"
+  '';
+}

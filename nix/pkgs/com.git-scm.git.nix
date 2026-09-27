@@ -3,6 +3,8 @@
   pkgs,
   nixpak,
   git,
+  buildEnv,
+  libSinan,
 }:
 let
   mkNixPak = nixpak.lib.nixpak {
@@ -52,17 +54,21 @@ let
     };
   };
 in
-pkgs.writeShellScriptBin "git" ''
-  # NOTE: allows access to user bin
-  export _NIX_USER_BINS="/etc/profiles/per-user/$USER/bin"
+libSinan.nixpakEnv {
+  inherit buildEnv;
+  pkg_raw = pkgs.git;
+  pkg_nixpak = pkgs.writeShellScriptBin "git" ''
+    # NOTE: allows access to user bin
+    export _NIX_USER_BINS="/etc/profiles/per-user/$USER/bin"
 
-  if [ -z "$RW_ROOT" ]; then
-    if rw_root="$(${lib.getExe git} rev-parse --show-toplevel 2>/dev/null)"; then
-      export RW_ROOT="$rw_root"
-    else
-      export RW_ROOT="$PWD"
+    if [ -z "$RW_ROOT" ]; then
+      if rw_root="$(${lib.getExe git} rev-parse --show-toplevel 2>/dev/null)"; then
+        export RW_ROOT="$rw_root"
+      else
+        export RW_ROOT="$PWD"
+      fi
     fi
-  fi
 
-  exec ${lib.getExe nixpak-git.config.script} "$@"
-''
+    exec ${lib.getExe nixpak-git.config.script} "$@"
+  '';
+}

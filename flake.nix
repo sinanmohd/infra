@@ -120,13 +120,24 @@
       forAllSystems = f: lib.genAttrs supportedSystems (forSystem f);
     in
     {
+      lib = import ./nix/lib;
+
       packages = forAllSystems (
         { system, pkgs }:
         {
           wayland-scripts = pkgs.callPackage ./nix/pkgs/com.sinanmohd.wayland-scripts { };
-          claude-code = pkgs.callPackage ./nix/pkgs/com.anthropic.claude-code.nix { inherit nixpak; };
-          opencode = pkgs.callPackage ./nix/pkgs/ly.anoma.opencode.nix { inherit nixpak; };
-          git = pkgs.callPackage ./nix/pkgs/com.git-scm.git.nix { inherit nixpak; };
+          claude-code = pkgs.callPackage ./nix/pkgs/com.anthropic.claude-code.nix {
+            inherit nixpak;
+            libSinan = self.lib;
+          };
+          opencode = pkgs.callPackage ./nix/pkgs/ly.anoma.opencode.nix {
+            inherit nixpak;
+            libSinan = self.lib;
+          };
+          git = pkgs.callPackage ./nix/pkgs/com.git-scm.git.nix {
+            inherit nixpak;
+            libSinan = self.lib;
+          };
         }
       );
 
