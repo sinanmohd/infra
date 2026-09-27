@@ -11,7 +11,7 @@ let
     inherit lib pkgs;
   };
 
-  opencode = mkNixPak {
+  wrapped = mkNixPak {
     config = { sloth, pkgs, ... }: {
       app.package = pkgs.open-code;
       etc.sslCertificates.enable = true;
@@ -83,6 +83,6 @@ libSinan.nixpakEnv {
       export RW_ROOT="$rw_root"
     fi
 
-    exec ${lib.getExe opencode.config.script} "$@"
+    exec ${lib.getExe wrapped.config.script} "$@"
   '';
 }

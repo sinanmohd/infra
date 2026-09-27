@@ -11,7 +11,7 @@ let
     inherit lib pkgs;
   };
 
-  nixpak-git = mkNixPak {
+  wrapped = mkNixPak {
     config = { sloth, pkgs, ... }: {
       app.package = pkgs.git;
 
@@ -69,6 +69,6 @@ libSinan.nixpakEnv {
       fi
     fi
 
-    exec ${lib.getExe nixpak-git.config.script} "$@"
+    exec ${lib.getExe wrapped.config.script} "$@"
   '';
 }

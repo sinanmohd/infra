@@ -11,7 +11,7 @@ let
     inherit lib pkgs;
   };
 
-  claude-code = mkNixPak {
+  wrapped = mkNixPak {
     config = { sloth, pkgs, ... }: {
       app.package = pkgs.claude-code;
       etc.sslCertificates.enable = true;
@@ -94,6 +94,6 @@ libSinan.nixpakEnv {
       export RW_ROOT="$rw_root"
     fi
 
-    exec ${lib.getExe claude-code.config.script} "$@"
+    exec ${lib.getExe wrapped.config.script} "$@"
   '';
 }
