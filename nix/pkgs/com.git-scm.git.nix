@@ -36,7 +36,6 @@ let
             "/etc/passwd"
             (sloth.concat' sloth.homeDir "/.ssh/id_ed25519")
             (sloth.concat' sloth.homeDir "/.ssh/id_ed25519.pub")
-            (sloth.concat' sloth.homeDir "/.ssh/known_hosts")
           ];
           rw = [
             (sloth.concat' sloth.xdgConfigHome "/git")
@@ -46,6 +45,7 @@ let
             (sloth.concat' sloth.xdgStateHome "/nvim")
             (sloth.concat' sloth.xdgDataHome "/nvim")
             (sloth.concat' sloth.xdgCacheHome "/nvim")
+            (sloth.concat' sloth.homeDir "/.ssh/known_hosts")
           ];
         };
       };
