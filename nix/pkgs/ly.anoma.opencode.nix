@@ -11,12 +11,18 @@ let
 
   opencode = mkNixPak {
     config = { sloth, pkgs, ... }: {
-      app.package = pkgs.opencode;
+      app.package = pkgs.open-code;
       etc.sslCertificates.enable = true;
 
       bubblewrap = {
         network = true;
         newSession = true;
+        clearEnv = true;
+        env = {
+          HOME = sloth.env "HOME";
+          TERM = sloth.env "TERM";
+          PATH = sloth.env "PATH";
+        };
         bind = {
           ro = [
             (sloth.concat' sloth.xdgConfigHome "/git/config")
@@ -60,11 +66,11 @@ pkgs.writeShellScriptBin "opencode" ''
     case "$rw_root" in
     "$HOME/"*) ;;
     "$HOME")
-      err "The repository root is your \$HOME directory. This is usually a mistake and could be destructive. To override, manually set \$RW_ROOT."
+      err "The repo root is your \$HOME directory. This is usually a mistake and could be destructive. To override, manually set \$RW_ROOT."
       exit 1
       ;;
     *)
-      err "The repository root is outside your \$HOME directory. This is usually a mistake and could be destructive. To override, manually set \$RW_ROOT."
+      err "The repo root is outside your \$HOME directory. This is usually a mistake and could be destructive. To override, manually set \$RW_ROOT."
       exit 1
       ;;
     esac

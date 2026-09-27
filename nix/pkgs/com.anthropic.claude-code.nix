@@ -17,6 +17,14 @@ let
       bubblewrap = {
         network = true;
         newSession = true;
+        clearEnv = true;
+        env = {
+          CLAUDE_CONFIG_DIR = sloth.env "CLAUDE_CONFIG_DIR";
+          HOME = sloth.env "HOME";
+          TERM = sloth.env "TERM";
+          PATH = sloth.env "PATH";
+        };
+
         bind = {
           ro = [
             (sloth.concat' sloth.xdgConfigHome "/git/config")
@@ -26,6 +34,7 @@ let
           rw = [
             (sloth.env "CLAUDE_CONFIG_DIR")
             (sloth.concat' sloth.homeDir "/.claude.json")
+            (sloth.env "_CLAUDE_SCRATCHPAD")
             # NOTE: main dev environment
             (sloth.env "RW_ROOT")
             # NOTE: agent kubeconfig
@@ -46,6 +55,7 @@ pkgs.writeShellScriptBin "claude" ''
     printf "\033[31;1mnixpak-claude-code: %b\033[0m\n" "$1" 1>&2
   }
 
+  export _CLAUDE_SCRATCHPAD="/tmp/claude-$(id -u)"
   # NOTE: allows access to user bin
   export _NIX_USER_BINS="/etc/profiles/per-user/$USER/bin"
 
@@ -67,11 +77,11 @@ pkgs.writeShellScriptBin "claude" ''
     case "$rw_root" in
     "$HOME/"*) ;;
     "$HOME")
-      err "The repository root is your \$HOME directory. This is usually a mistake and could be destructive. To override, manually set \$RW_ROOT."
+      err "The repo root is your \$HOME directory. This is usually a mistake and could be destructive. To override, manually set \$RW_ROOT."
       exit 1
       ;;
     *)
-      err "The repository root is outside your \$HOME directory. This is usually a mistake and could be destructive. To override, manually set \$RW_ROOT."
+      err "The repo root is outside your \$HOME directory. This is usually a mistake and could be destructive. To override, manually set \$RW_ROOT."
       exit 1
       ;;
     esac

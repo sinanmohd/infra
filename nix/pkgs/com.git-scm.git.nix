@@ -14,22 +14,35 @@ let
       app.package = pkgs.git;
 
       bubblewrap = {
-        newSession = true; # NOTE: git diff
+        # NOTE: git diff
+        newSession = true;
         # NOTE: ssh commit signing writes tmp files via $TMPDIR
         tmpfs = [ "/tmp" ];
+        clearEnv = true;
+        env = {
+          HOME = sloth.env "HOME";
+          TERM = sloth.env "TERM";
+          EDITOR = sloth.env "EDITOR";
+          PATH = sloth.env "PATH";
+        };
         bind = {
           ro = [
-            # NOTE: ssh-keygen getpwuid(), commit signing
-            "/etc/passwd"
-            (sloth.concat' sloth.homeDir "/.ssh")
+            # NOTE: nix hook bins
             (sloth.env "_NIX_USER_BINS")
             "/run/current-system/sw/bin"
+            # NOTE: git EDITOR
+            (sloth.concat' sloth.xdgConfigHome "/nvim")
+            # NOTE: ssh commit signing & push
+            "/etc/passwd"
+            (sloth.concat' sloth.homeDir "/.ssh/id_ed25519")
+            (sloth.concat' sloth.homeDir "/.ssh/id_ed25519.pub")
+            (sloth.concat' sloth.homeDir "/.ssh/known_hosts")
           ];
           rw = [
             (sloth.concat' sloth.xdgConfigHome "/git")
+            # NOTE: repo root
             (sloth.env "RW_ROOT")
-            # git EDITOR
-            (sloth.concat' sloth.xdgConfigHome "/nvim")
+            # NOTE: git EDITOR
             (sloth.concat' sloth.xdgStateHome "/nvim")
             (sloth.concat' sloth.xdgDataHome "/nvim")
             (sloth.concat' sloth.xdgCacheHome "/nvim")
