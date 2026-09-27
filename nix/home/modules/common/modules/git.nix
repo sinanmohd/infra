@@ -22,6 +22,7 @@ in
       };
       commit.gpgsign = true;
       tag.gpgsign = true;
+      push.gpgSign = "if-asked";
       color.ui = "auto";
       init.defaultBranch = "master";
     };
