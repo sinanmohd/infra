@@ -8,7 +8,11 @@
       pkg_nixpak,
     }:
     buildEnv {
-      name = pkg_raw.pname;
+      inherit (pkg_raw)
+        pname
+        version
+        meta
+        ;
       paths = [
         (buildEnv {
           name = "${pkg_raw.pname}-share";
