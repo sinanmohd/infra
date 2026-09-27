@@ -79,5 +79,5 @@ pkgs.writeShellScriptBin "claude" ''
     export RW_ROOT="$rw_root"
   fi
 
-  exec ${lib.getExe claude-code.config.script}
+  exec ${lib.getExe claude-code.config.script} "$@"
 ''

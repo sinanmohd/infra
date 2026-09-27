@@ -72,5 +72,5 @@ pkgs.writeShellScriptBin "opencode" ''
     export RW_ROOT="$rw_root"
   fi
 
-  exec ${lib.getExe opencode.config.script}
+  exec ${lib.getExe opencode.config.script} "$@"
 ''
