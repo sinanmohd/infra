@@ -14,10 +14,9 @@ let
   wrapped = mkNixPak {
     config = { sloth, pkgs, ... }: {
       app.package = pkgs.open-code;
-      etc.sslCertificates.enable = true;
+      imports = [ nixpak.nixpakModules.network ];
 
       bubblewrap = {
-        network = true;
         newSession = true;
         clearEnv = true;
         env = {
@@ -36,7 +35,7 @@ let
             (sloth.env "RW_ROOT")
             # NOTE: agent kubeconfig
             (sloth.concat' sloth.homeDir "/.kube/agent.config")
-            # NOTE: caught from strace -f -e openat claude 2>&1 | grep -E "\.config|\.local|\.cache"
+            # NOTE: caught from strace -f -e openat opencode 2>&1 | grep -E "\.config|\.local|\.cache"
             (sloth.concat' sloth.xdgConfigHome "/opencode")
             (sloth.concat' sloth.xdgStateHome "/opencode")
             (sloth.concat' sloth.xdgDataHome "/opencode")

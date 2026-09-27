@@ -138,6 +138,10 @@
             inherit nixpak;
             libSinan = self.lib;
           };
+          firefox = pkgs.callPackage ./nix/pkgs/org.mozilla.firefox.nix {
+            inherit nixpak;
+            libSinan = self.lib;
+          };
         }
       );
 

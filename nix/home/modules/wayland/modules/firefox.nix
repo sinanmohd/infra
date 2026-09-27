@@ -1,6 +1,10 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
+let
+  firefox = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.firefox;
+in
 {
-  home.packages = with pkgs; [ pywalfox-native ];
+  home.packages = [ pkgs.pywalfox-native ];
+
   programs.wallust.settings = {
     hooks.firefox = ''
       pywalfox install > /dev/null
@@ -36,6 +40,7 @@
 
   programs.firefox = {
     enable = true;
+    package = firefox;
     policies = {
       DisableFirefoxAccounts = true;
       DisablePocket = true;

@@ -14,10 +14,9 @@ let
   wrapped = mkNixPak {
     config = { sloth, pkgs, ... }: {
       app.package = pkgs.claude-code;
-      etc.sslCertificates.enable = true;
+      imports = [ nixpak.nixpakModules.network ];
 
       bubblewrap = {
-        network = true;
         newSession = true;
         clearEnv = true;
         env = {
