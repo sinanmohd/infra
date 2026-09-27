@@ -53,12 +53,6 @@ let
   };
 in
 pkgs.writeShellScriptBin "git" ''
-  err() {
-    : "''${1:?}"
-
-    printf "\033[31;1mnixpak-git: %b\033[0m\n" "$1" 1>&2
-  }
-
   # NOTE: allows access to user bin
   export _NIX_USER_BINS="/etc/profiles/per-user/$USER/bin"
 
