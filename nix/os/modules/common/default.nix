@@ -36,6 +36,14 @@ in
     "/share/xdg-desktop-portal"
   ];
 
+  # required by xdg-document-portal (nixpak)
+  security.wrappers.fusermount3 = {
+    source = "${pkgs.fuse3}/bin/fusermount3";
+    setuid = true;
+    owner = "root";
+    group = "root";
+  };
+
   system.stateVersion = "26.05";
   time.timeZone = "Asia/Kolkata";
   sops.age.keyFile = "/var/lib/sops-nix/key.txt";

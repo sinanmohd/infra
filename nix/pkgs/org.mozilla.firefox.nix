@@ -49,17 +49,23 @@ let
             # NOTE: xdg user dirs
             (sloth.concat' sloth.xdgConfigHome "/user-dirs.conf")
             (sloth.concat' sloth.xdgConfigHome "/user-dirs.dirs")
-            # TODO: xdgDownloadDir does not pick up ~/dl
-            (sloth.concat' sloth.homeDir "/dl")
-            sloth.xdgDownloadDir
             # NOTE: pywal support
             (sloth.concat' sloth.xdgCacheHome "/wal/colors.json")
           ];
           ro = [
+            # NOTE: [AGENT]: only consumer is firefox/glxtest, which dlopens
+            # libpci.so.3 (nixpkgs puts pciutils on LD_LIBRARY_PATH for this) and
+            # scans /sys/bus/pci/devices to report PCI_VENDOR_ID/PCI_DEVICE_ID.
+            # Used for gfx blocklist matching (WebRender, hw video decode),
+            # about:support and telemetry -- not for render node selection,
+            # which goes through libdrm via /sys/dev/char.
+            # nixpak gui-base binds /sys/dev/char + /sys/devices/pci0000:00 for
+            # libdrm, but not the /sys/bus/pci/devices enumeration dir libpci
+            # needs. Without it glxtest warns and falls back to the Mesa-
+            # reported ids (no fallback on the NVIDIA proprietary driver).
             "/sys/bus/pci"
             # NOTE: caught from strace -f -e openat firefox
             "/etc/localtime"
-            "/etc/zoneinfo"
           ];
         };
       };
@@ -70,7 +76,6 @@ let
         "org.gnome.Shell.Screencast" = "talk";
         "org.freedesktop.Notifications" = "talk";
       };
-
     };
   };
 in
