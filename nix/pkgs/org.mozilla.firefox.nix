@@ -15,6 +15,9 @@ let
 
   wrapped = mkNixPak {
     config = { sloth, pkgs, ... }: {
+      # NOTE: share fonts with host
+      fonts.enable = lib.mkForce false;
+
       app.package = pkgs.firefox.override (old: {
         # NOTE: used by home-manager module
         cfg = old.cfg or { } // cfg;
@@ -66,6 +69,12 @@ let
             "/sys/bus/pci"
             # NOTE: caught from strace -f -e openat firefox
             "/etc/localtime"
+            # NOTE: fonts.enable = false, disables nixpak packaged font, now
+            # fonts are shared with the host, this might break on non-nixos
+            # systems
+            "/etc/fonts"
+            (sloth.concat' sloth.xdgConfigHome "/fontconfig")
+            (sloth.concat' sloth.xdgCacheHome "/fontconfig")
           ];
         };
       };
