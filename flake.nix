@@ -142,6 +142,10 @@
             inherit nixpak;
             libSinan = self.lib;
           };
+          element = pkgs.callPackage ./nix/pkgs/im.riot.Riot.nix {
+            inherit nixpak;
+            libSinan = self.lib;
+          };
         }
       );
 

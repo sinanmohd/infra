@@ -1,8 +1,9 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
+let
+  element = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.element;
+in
 {
-  home.packages = with pkgs; [
-    element-desktop
-  ];
+  home.packages = [ element ];
 
   programs.wallust.settings = {
     hooks.element = ''

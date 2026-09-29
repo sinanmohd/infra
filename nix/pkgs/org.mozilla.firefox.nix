@@ -73,8 +73,6 @@ let
             # fonts are shared with the host, this might break on non-nixos
             # systems
             "/etc/fonts"
-            (sloth.concat' sloth.xdgConfigHome "/fontconfig")
-            (sloth.concat' sloth.xdgCacheHome "/fontconfig")
           ];
         };
       };
