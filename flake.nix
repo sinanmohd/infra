@@ -2,7 +2,7 @@
   description = "sinan's reproducible systems";
 
   inputs = {
-    nixpkgs.url = "github:eyJhb/nixpkgs/stalwart-webadmin-fix-wasm";
+    nixpkgs.url = "github:NixOs/nixpkgs/nixos-unstable";
 
     wrap = {
       url = "github:rti/nixwrap";
