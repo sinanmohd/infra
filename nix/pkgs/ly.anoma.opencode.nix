@@ -25,20 +25,20 @@ let
           PATH = sloth.env "PATH";
         };
         bind = {
-          ro = [
-            (sloth.concat' sloth.xdgConfigHome "/git/config")
-            (sloth.env "_NIX_USER_BINS")
-            "/run/current-system/sw/bin"
-          ];
           rw = [
             # NOTE: main dev environment
             (sloth.env "RW_ROOT")
-            # NOTE: agent kubeconfig
-            (sloth.concat' sloth.homeDir "/.kube/agent.config")
             # NOTE: caught from strace -f -e openat opencode 2>&1 | grep -E "\.config|\.local|\.cache"
             (sloth.concat' sloth.xdgConfigHome "/opencode")
             (sloth.concat' sloth.xdgStateHome "/opencode")
             (sloth.concat' sloth.xdgDataHome "/opencode")
+          ];
+          ro = [
+            (sloth.concat' sloth.xdgConfigHome "/git/config")
+            (sloth.env "_NIX_USER_BINS")
+            "/run/current-system/sw/bin"
+            # NOTE: agent kubeconfig
+            (sloth.concat' sloth.homeDir "/.kube/agent.config")
           ];
         };
       };

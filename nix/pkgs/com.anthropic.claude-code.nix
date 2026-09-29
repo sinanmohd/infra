@@ -42,13 +42,6 @@ let
         };
 
         bind = {
-          ro = [
-            (sloth.concat' sloth.xdgConfigHome "/git/config")
-            (sloth.env "_NIX_USER_BINS")
-            "/run/current-system/sw/bin"
-            # TODO: comma fails withoout this, but `nix run` does not ?
-            "/nix/var/nix"
-          ];
           rw = [
             (sloth.env "CLAUDE_CONFIG_DIR")
             (sloth.concat' sloth.homeDir "/.claude.json")
@@ -59,8 +52,15 @@ let
             (sloth.concat' sloth.xdgConfigHome "/anthropic")
             (sloth.concat' sloth.xdgCacheHome "/claude-cli-nodejs")
             # NOTE: isolated agent access
+          ];
+          ro = [
             env.SOPS_AGE_KEY_FILE
             env.KUBECONFIG
+            (sloth.concat' sloth.xdgConfigHome "/git/config")
+            (sloth.env "_NIX_USER_BINS")
+            "/run/current-system/sw/bin"
+            # TODO: comma fails withoout this, but `nix run` does not ?
+            "/nix/var/nix"
           ];
         };
       };

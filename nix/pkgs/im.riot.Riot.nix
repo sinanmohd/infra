@@ -39,11 +39,11 @@ let
         bind = {
           rw = [
             (sloth.concat' sloth.xdgConfigHome "/Element")
+          ];
+          ro = [
             # NOTE: xdg user dirs
             (sloth.concat' sloth.xdgConfigHome "/user-dirs.conf")
             (sloth.concat' sloth.xdgConfigHome "/user-dirs.dirs")
-          ];
-          ro = [
             # NOTE: [AGENT]: chromium gpu process enumerates pci devices for
             # its gpu blocklist, same as firefox/glxtest
             "/sys/bus/pci"

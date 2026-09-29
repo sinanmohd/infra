@@ -28,7 +28,17 @@ let
           PATH = sloth.env "PATH";
         };
         bind = {
+          rw = [
+            (sloth.concat' sloth.homeDir "/.ssh/known_hosts")
+            # NOTE: repo root
+            (sloth.env "RW_ROOT")
+            # NOTE: git EDITOR
+            (sloth.concat' sloth.xdgStateHome "/nvim")
+            (sloth.concat' sloth.xdgDataHome "/nvim")
+            (sloth.concat' sloth.xdgCacheHome "/nvim")
+          ];
           ro = [
+            (sloth.concat' sloth.xdgConfigHome "/git")
             # NOTE: nix hook bins
             (sloth.env "_NIX_USER_BINS")
             "/run/current-system/sw/bin"
@@ -38,16 +48,6 @@ let
             "/etc/passwd"
             (sloth.concat' sloth.homeDir "/.ssh/id_ed25519")
             (sloth.concat' sloth.homeDir "/.ssh/id_ed25519.pub")
-          ];
-          rw = [
-            (sloth.concat' sloth.xdgConfigHome "/git")
-            # NOTE: repo root
-            (sloth.env "RW_ROOT")
-            # NOTE: git EDITOR
-            (sloth.concat' sloth.xdgStateHome "/nvim")
-            (sloth.concat' sloth.xdgDataHome "/nvim")
-            (sloth.concat' sloth.xdgCacheHome "/nvim")
-            (sloth.concat' sloth.homeDir "/.ssh/known_hosts")
           ];
         };
       };

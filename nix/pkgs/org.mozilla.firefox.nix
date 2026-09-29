@@ -49,13 +49,13 @@ let
             (sloth.concat' sloth.homeDir "/.mozilla")
             (sloth.concat' sloth.xdgConfigHome "/mozilla")
             (sloth.concat' sloth.xdgCacheHome "/mozilla")
+          ];
+          ro = [
             # NOTE: xdg user dirs
             (sloth.concat' sloth.xdgConfigHome "/user-dirs.conf")
             (sloth.concat' sloth.xdgConfigHome "/user-dirs.dirs")
             # NOTE: pywal support
             (sloth.concat' sloth.xdgCacheHome "/wal/colors.json")
-          ];
-          ro = [
             # NOTE: [AGENT]: only consumer is firefox/glxtest, which dlopens
             # libpci.so.3 (nixpkgs puts pciutils on LD_LIBRARY_PATH for this) and
             # scans /sys/bus/pci/devices to report PCI_VENDOR_ID/PCI_DEVICE_ID.
