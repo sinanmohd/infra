@@ -13,17 +13,32 @@ let
 
   wrapped = mkNixPak {
     config = { sloth, pkgs, ... }: {
-      app.package = pkgs.claude-code;
       imports = [ nixpak.nixpakModules.network ];
 
-      bubblewrap = {
+      app.package = pkgs.writeShellScriptBin "fake_tty" ''
+        exec ${pkgs.util-linux}/bin/script --quiet --return /dev/null -- ${lib.getExe pkgs.claude-code} "$@"
+      '';
+
+      bubblewrap = rec {
         newSession = true;
+
+        # NOTE: even if claude does not need this, other programs that agent
+        # runs will need this
+        tmpfs = [ "/tmp" ];
+
         clearEnv = true;
         env = {
           CLAUDE_CONFIG_DIR = sloth.env "CLAUDE_CONFIG_DIR";
           HOME = sloth.env "HOME";
           TERM = sloth.env "TERM";
-          PATH = sloth.env "PATH";
+          # NOTE: nixpak inside nixpak hard
+          PATH = sloth.concat [
+            "${pkgs.git}/bin:"
+            (sloth.env "PATH")
+          ];
+          # NOTE: isolated agent access
+          SOPS_AGE_KEY_FILE = (sloth.concat' sloth.xdgConfigHome "/sops/age/agent.keys.txt");
+          KUBECONFIG = (sloth.concat' sloth.homeDir "/.kube/agent.config");
         };
 
         bind = {
@@ -31,6 +46,8 @@ let
             (sloth.concat' sloth.xdgConfigHome "/git/config")
             (sloth.env "_NIX_USER_BINS")
             "/run/current-system/sw/bin"
+            # TODO: comma fails withoout this, but `nix run` does not ?
+            "/nix/var/nix"
           ];
           rw = [
             (sloth.env "CLAUDE_CONFIG_DIR")
@@ -38,11 +55,12 @@ let
             (sloth.env "_CLAUDE_SCRATCHPAD")
             # NOTE: main dev environment
             (sloth.env "RW_ROOT")
-            # NOTE: agent kubeconfig
-            (sloth.concat' sloth.homeDir "/.kube/agent.config")
             # NOTE: caught from strace -f -e openat claude 2>&1 | grep -E "\.config|\.local|\.cache"
             (sloth.concat' sloth.xdgConfigHome "/anthropic")
             (sloth.concat' sloth.xdgCacheHome "/claude-cli-nodejs")
+            # NOTE: isolated agent access
+            env.SOPS_AGE_KEY_FILE
+            env.KUBECONFIG
           ];
         };
       };
@@ -62,9 +80,6 @@ libSinan.nixpakEnv {
     export _CLAUDE_SCRATCHPAD="/tmp/claude-$(id -u)"
     # NOTE: allows access to user bin
     export _NIX_USER_BINS="/etc/profiles/per-user/$USER/bin"
-
-    # NOTE: RBAC isolated agent k8s access
-    export KUBECONFIG="$HOME/.kube/agent.config"
 
     export CLAUDE_CONFIG_DIR="''${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
     # NOTE: inconsistency when setting $CLAUDE_CONFIG_DIR
