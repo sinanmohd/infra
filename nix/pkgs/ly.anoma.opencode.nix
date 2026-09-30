@@ -7,13 +7,14 @@
   libSinan,
 }:
 let
+  pkg_raw = pkgs.opencode;
   mkNixPak = nixpak.lib.nixpak {
     inherit lib pkgs;
   };
 
   wrapped = mkNixPak {
     config = { sloth, pkgs, ... }: {
-      app.package = pkgs.opencode;
+      app.package = pkg_raw;
       imports = [ nixpak.nixpakModules.network ];
 
       bubblewrap = {
@@ -46,9 +47,8 @@ let
   };
 in
 libSinan.nixpakEnv {
-  inherit buildEnv;
-  pkg_raw = pkgs.opencode;
-  pkg_nixpak = pkgs.writeShellScriptBin "opencode" ''
+  inherit buildEnv pkg_raw;
+  pkg_nixpak = pkgs.writeShellScriptBin pkg_raw.meta.mainProgram ''
     err() {
       : "''${1:?}"
 

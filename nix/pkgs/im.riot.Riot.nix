@@ -6,6 +6,7 @@
   libSinan,
 }:
 let
+  pkg_raw = pkgs.element-desktop;
   mkNixPak = nixpak.lib.nixpak {
     inherit lib pkgs;
   };
@@ -15,7 +16,7 @@ let
       # NOTE: share fonts with host
       fonts.enable = lib.mkForce false;
 
-      app.package = pkgs.element-desktop;
+      app.package = pkg_raw;
       flatpak.appId = "im.riot.Riot";
 
       imports = [
@@ -66,7 +67,6 @@ let
   };
 in
 libSinan.nixpakEnv {
-  inherit buildEnv;
-  pkg_raw = pkgs.element-desktop;
+  inherit buildEnv pkg_raw;
   pkg_nixpak = wrapped.config.script;
 }

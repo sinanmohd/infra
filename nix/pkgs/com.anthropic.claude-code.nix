@@ -7,6 +7,7 @@
   buildEnv,
 }:
 let
+  pkg_raw = pkgs.claude-code;
   mkNixPak = nixpak.lib.nixpak {
     inherit lib pkgs;
   };
@@ -16,7 +17,7 @@ let
       imports = [ nixpak.nixpakModules.network ];
 
       app.package = pkgs.writeShellScriptBin "fake_tty" ''
-        exec ${pkgs.util-linux}/bin/script --quiet --return /dev/null -- ${lib.getExe pkgs.claude-code} "$@"
+        exec ${pkgs.util-linux}/bin/script --quiet --return /dev/null -- ${lib.getExe pkg_raw} "$@"
       '';
 
       bubblewrap = rec {
@@ -68,8 +69,7 @@ let
   };
 in
 libSinan.nixpakEnv {
-  inherit buildEnv;
-  pkg_raw = pkgs.claude-code;
+  inherit buildEnv pkg_raw;
   pkg_nixpak = pkgs.writeShellScriptBin "claude" ''
     err() {
       : "''${1:?}"

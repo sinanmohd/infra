@@ -7,13 +7,14 @@
   libSinan,
 }:
 let
+  pkg_raw = pkgs.git;
   mkNixPak = nixpak.lib.nixpak {
     inherit lib pkgs;
   };
 
   wrapped = mkNixPak {
     config = { sloth, pkgs, ... }: {
-      app.package = pkgs.git;
+      app.package = pkg_raw;
 
       bubblewrap = {
         # NOTE: git diff
@@ -55,8 +56,7 @@ let
   };
 in
 libSinan.nixpakEnv {
-  inherit buildEnv;
-  pkg_raw = pkgs.git;
+  inherit buildEnv pkg_raw;
   pkg_nixpak = pkgs.writeShellScriptBin "git" ''
     # NOTE: allows access to user bin
     export _NIX_USER_BINS="/etc/profiles/per-user/$USER/bin"

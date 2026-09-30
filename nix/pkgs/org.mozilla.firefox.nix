@@ -9,6 +9,7 @@
   pkcs11Modules ? [ ],
 }:
 let
+  pkg_raw = pkgs.firefox;
   mkNixPak = nixpak.lib.nixpak {
     inherit lib pkgs;
   };
@@ -18,7 +19,7 @@ let
       # NOTE: share fonts with host
       fonts.enable = lib.mkForce false;
 
-      app.package = pkgs.firefox.override (old: {
+      app.package = pkg_raw.override (old: {
         # NOTE: used by home-manager module
         cfg = old.cfg or { } // cfg;
         extraPolicies = (old.extraPolicies or { }) // extraPolicies;
@@ -87,7 +88,6 @@ let
   };
 in
 libSinan.nixpakEnv {
-  inherit buildEnv;
-  pkg_raw = pkgs.firefox;
+  inherit buildEnv pkg_raw;
   pkg_nixpak = wrapped.config.script;
 }
