@@ -4,7 +4,6 @@
 
   home = {
     packages = with pkgs; [
-      neovim
       eza
       bat
       util-linux # for col
@@ -24,8 +23,6 @@
     };
 
     sessionVariables = {
-      EDITOR = "nvim";
-      VISUAL = "nvim";
       MANROFFOPT = "-c";
       MANPAGER = "sh -c 'col -bx | bat -l man -p'";
     };

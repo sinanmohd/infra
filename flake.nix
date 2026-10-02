@@ -146,6 +146,10 @@
             inherit nixpak;
             libSinan = self.lib;
           };
+          neovim = pkgs.callPackage ./nix/pkgs/io.neovim.nvim.nix {
+            inherit nixpak;
+            libSinan = self.lib;
+          };
         }
       );
 
