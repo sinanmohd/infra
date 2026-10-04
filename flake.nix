@@ -161,6 +161,7 @@
         "server"
         "pc"
         "wayland"
+        "network"
       ] makeNixosModules;
       nixosConfigurations = lib.genAttrs [
         "cez"
