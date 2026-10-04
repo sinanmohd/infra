@@ -16,13 +16,14 @@ let
   };
 
   nvimBins = buildEnv {
-    name = "neovim-bin";
+    name = "neovim-bins";
     paths =
       with pkgs;
       [
         tmux
         bash
         git
+        coreutils
       ]
       ++ extraBins;
     pathsToLink = [ "/bin" ];
@@ -40,8 +41,8 @@ let
         env = {
           HOME = sloth.env "HOME";
           TERM = sloth.env "TERM";
-          # NOTE: tmux inherits envs from sandbox
-          PATH = sloth.env "PATH";
+          PATH = sloth.env "NVIM_PATH";
+          XDG_RUNTIME_DIR = sloth.envOr "XDG_RUNTIME_DIR" "";
           # NOTE: tmux passthrough
           TMUX = sloth.envOr "TMUX" "";
           TMUX_PANE = sloth.envOr "TMUX_PANE" "";
@@ -69,7 +70,7 @@ in
 libSinan.nixpakEnv {
   inherit buildEnv pkg_raw;
   pkg_nixpak = pkgs.writeShellScriptBin "nvim" ''
-    export PATH="$PATH:${nvimBins}/bin"
+    export NVIM_PATH="$PATH:${nvimBins}/bin"
 
     if [ -z "$TMUX_TMPDIR" ]; then
       tmux_socket="''${TMUX%%,*}"
