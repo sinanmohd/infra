@@ -1,11 +1,11 @@
 { pkgs, ... }:
 {
   environment = {
-    systemPackages = with pkgs; [ neovim ];
+    systemPackages = with pkgs; [ vim ];
 
     variables = {
-      EDITOR = "nvim";
-      VISUAL = "nvim";
+      EDITOR = "vim";
+      VISUAL = "vim";
     };
   };
 
