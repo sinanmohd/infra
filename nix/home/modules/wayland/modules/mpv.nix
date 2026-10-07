@@ -24,9 +24,10 @@
       border = no
 
       hwdec=auto-safe
-      vo=dmabuf-wayland
       cache
       audio-channels=auto-safe
+      # NOTE: muted colors ?
+      # vo=dmabuf-wayland
 
       slang=en
       alang=en
