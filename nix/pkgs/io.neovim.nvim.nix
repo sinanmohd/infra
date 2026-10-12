@@ -32,6 +32,7 @@ let
   wrapped = mkNixPak {
     config = { sloth, pkgs, ... }: {
       app.package = pkg_raw;
+      dbus.enable = false;
 
       imports = [ nixpak.nixpakModules.network ];
 
