@@ -9,9 +9,9 @@
       scripts = with mpvScripts; [
         mpris
         modernx
+        thumbfast
         visualizer
         autosubsync-mpv
-        dynamic-crop
         quack
       ];
     })
@@ -60,4 +60,9 @@
     '';
     target = "~/.config/mpv/mpv.conf";
   };
+
+  # NOTE: modernx: hide x button on fullscreen
+  xdg.configFile."mpv/script-opts/osc.conf".text = ''
+    windowcontrols=no
+  '';
 }
