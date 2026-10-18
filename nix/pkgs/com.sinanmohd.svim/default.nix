@@ -31,6 +31,7 @@ neovim.override {
     mdx-language-server
     lua-language-server
     typescript
+    typescript-language-server
   ];
   configPath = "${./config}/init.lua";
 }

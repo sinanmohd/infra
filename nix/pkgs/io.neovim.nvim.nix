@@ -44,6 +44,7 @@ let
       bubblewrap = {
         newSession = true;
         clearEnv = true;
+        tmpfs = [ "/tmp" ];
         env = {
           HOME = sloth.env "HOME";
           TERM = sloth.env "TERM";
