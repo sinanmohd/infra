@@ -46,7 +46,7 @@ let
           rw = [
             (sloth.env "CLAUDE_CONFIG_DIR")
             (sloth.concat' sloth.homeDir "/.claude.json")
-            (sloth.env "_CLAUDE_SCRATCHPAD")
+            (sloth.mkdir (sloth.env "_CLAUDE_SCRATCHPAD"))
             # NOTE: main dev environment
             (sloth.env "RW_ROOT")
             # NOTE: caught from strace -f -e openat claude 2>&1 | grep -E "\.config|\.local|\.cache"

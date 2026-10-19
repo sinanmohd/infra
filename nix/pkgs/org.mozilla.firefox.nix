@@ -74,6 +74,9 @@ let
             # fonts are shared with the host, this might break on non-nixos
             # systems
             "/etc/fonts"
+            # TODO: xdgDownloadDir does not pick up ~/dl
+            (sloth.concat' sloth.homeDir "/dl")
+            sloth.xdgDownloadDir
           ];
         };
       };
