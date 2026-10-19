@@ -50,6 +50,9 @@ let
             (sloth.concat' sloth.homeDir "/.mozilla")
             (sloth.concat' sloth.xdgConfigHome "/mozilla")
             (sloth.concat' sloth.xdgCacheHome "/mozilla")
+            # TODO: xdgDownloadDir does not pick up ~/dl
+            (sloth.concat' sloth.homeDir "/dl")
+            sloth.xdgDownloadDir
           ];
           ro = [
             # NOTE: xdg user dirs
@@ -74,9 +77,6 @@ let
             # fonts are shared with the host, this might break on non-nixos
             # systems
             "/etc/fonts"
-            # TODO: xdgDownloadDir does not pick up ~/dl
-            (sloth.concat' sloth.homeDir "/dl")
-            sloth.xdgDownloadDir
           ];
         };
       };
