@@ -1,6 +1,17 @@
 { pkgs, lib, ... }:
 {
-  home.packages = with pkgs; [ tmux ];
+  home.packages = with pkgs; [
+    # TODO: drop once merged to nixpkgs, fix for sixel err
+    (tmux.overrideAttrs {
+      version = "next-3.9";
+      src = fetchFromGitHub {
+        owner = "tmux";
+        repo = "tmux";
+        rev = "c8427d6be82364823326b49d90d73952e4f63881"; # NOTE: master at time of fix
+        hash = "sha256-JVXauUm+Olwpbj9DMh/R2YseNr4EfdYbsXylb3lxz4o=";
+      };
+    })
+  ];
 
   home.sessionVariables.TMUX_TMPDIR = ''''${XDG_RUNTIME_DIR:-"/run/user/$(id -u)"}'';
   programs.bash.initExtra = lib.mkOrder 2000 ''
@@ -13,6 +24,7 @@
   xdg.configFile."tmux/tmux.conf".text = ''
     # base
     set-option -g prefix C-a
+    set -g mouse off
     unbind-key C-b
     bind-key C-a send-prefix
     set -g base-index 1
@@ -46,7 +58,7 @@
     set -g status-left ""
     set -g status-right ""
     set -g status-justify right
-    set -g window-status-current-format '#{window_index}:#(basename #{pane_current_path})(#{pane_current_command})*'
+    set -g window-status-current-format '#{window_index}:#(basename #{pane_current_path})(#{pane_current_command})'
     set -g window-status-format '#{window_index}:#(basename #{pane_current_path})(#{pane_current_command})'
 
     # nvim.checkhealth: without this |'autoread'| may not work
