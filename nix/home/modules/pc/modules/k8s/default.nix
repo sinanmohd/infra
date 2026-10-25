@@ -45,5 +45,20 @@
     })
 
     kubectl
+    kubectl-cnpg
+    kubectl-neat
+    kubectl-tree
+    kubectl-explore
+    kubectl-node-shell
+    kubectl-ktop
+    kubectl-df-pv
+    kubectl-images
+    kubectl-gadget
+    kubectl-validate
+    kubectl-graph
+    kubectl-view-secret
+    kubectl-example
+    kubectl-evict-pod
+    kubectl-view-allocations
   ];
 }
