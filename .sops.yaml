@@ -1,8 +1,8 @@
 keys:
-  - &sinan age1q5sfy74d53n6jxlgsc2zrsz4wcl9d830nxuagc3wfmdkrrp55ckq9ev6nv
-  - &machine_cez age1nur989fnjmfgfk54ctczrwg25epqqr0xgkl5d4swfxka9aw6cdrqdawvaq
-  - &machine_kay age15989j5lkkf2kn5wa2p6qc8wlxjjksc63k5ync8rz8t4e87394pzqm7h4rm
-  - &app_argocd age1rd62gt00vmx5cxq9q3gkc7h0qk3ujzx955u8hyrg3cevnmkm9q3suy32rx
+  - &sinan age12rgqqeuuu90xj2zdd0aa5yfxtd973pc4t29c40s7r5k0d8zds5usyqfjup
+  - &machine_cez age17wslvmgqa4hphhd8jmpauqz4rlauz78lhuux2x2d9hvhg7r8l90saxm07p
+  - &machine_kay age14hpl9n495qqcr5lfsxlmuthp02y86mcwcm3dd8sffaa2sje4h59qmm4xg0
+  - &app_argocd age1eu9fuw6wfn2d3p0vrv8cwhg0elju0m69mf8l42etdc87lm9zfuqqw4l05u
 
 creation_rules:
   - path_regex: nix/os/modules/pc/.*

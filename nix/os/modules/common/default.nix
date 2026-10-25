@@ -46,7 +46,7 @@ in
 
   system.stateVersion = "26.05";
   time.timeZone = "Asia/Kolkata";
-  sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+  sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
   programs.nix-index-database.comma.enable = true;
 
   zramSwap.enable = true;
