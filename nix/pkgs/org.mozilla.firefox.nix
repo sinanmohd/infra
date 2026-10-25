@@ -51,8 +51,8 @@ let
             (sloth.mkdir (sloth.concat' sloth.xdgConfigHome "/mozilla"))
             (sloth.mkdir (sloth.concat' sloth.xdgCacheHome "/mozilla"))
             # TODO: xdgDownloadDir does not pick up ~/dl
-            (sloth.mkdir (sloth.concat' sloth.homeDir "/dl"))
-            (sloth.mkdir sloth.xdgDownloadDir)
+            (sloth.concat' sloth.homeDir "/dl")
+            sloth.xdgDownloadDir
           ];
           ro = [
             # NOTE: xdg user dirs
