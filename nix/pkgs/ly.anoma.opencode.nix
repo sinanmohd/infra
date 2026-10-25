@@ -14,17 +14,32 @@ let
 
   wrapped = mkNixPak {
     config = { sloth, pkgs, ... }: {
-      app.package = pkg_raw;
+      app.package = pkgs.writeShellScriptBin "fake_tty" ''
+        exec ${pkgs.util-linux}/bin/script --quiet --return /dev/null -- ${lib.getExe pkg_raw} "$@"
+      '';
       imports = [ nixpak.nixpakModules.network ];
 
-      bubblewrap = {
+      bubblewrap = rec {
         newSession = true;
+
+        # NOTE: even if claude does not need this, other programs that agent
+        # runs will need this
+        tmpfs = [ "/tmp" ];
+
         clearEnv = true;
         env = {
           HOME = sloth.env "HOME";
           TERM = sloth.env "TERM";
-          PATH = sloth.env "PATH";
+          # NOTE: nixpak inside nixpak hard
+          PATH = sloth.concat [
+            "${pkgs.git}/bin:"
+            (sloth.env "PATH")
+          ];
+          # NOTE: isolated agent access
+          SOPS_AGE_KEY_FILE = (sloth.concat' sloth.xdgConfigHome "/sops/age/agent.keys.txt");
+          KUBECONFIG = (sloth.concat' sloth.homeDir "/.kube/agent.config");
         };
+
         bind = {
           rw = [
             # NOTE: main dev environment
@@ -35,11 +50,13 @@ let
             (sloth.concat' sloth.xdgDataHome "/opencode")
           ];
           ro = [
+            env.SOPS_AGE_KEY_FILE
+            env.KUBECONFIG
             (sloth.concat' sloth.xdgConfigHome "/git/config")
             (sloth.env "_NIX_USER_BINS")
             "/run/current-system/sw/bin"
-            # NOTE: agent kubeconfig
-            (sloth.concat' sloth.homeDir "/.kube/agent.config")
+            # TODO: comma fails withoout this, but `nix run` does not ?
+            "/nix/var/nix"
           ];
         };
       };

@@ -52,7 +52,6 @@ let
             # NOTE: caught from strace -f -e openat claude 2>&1 | grep -E "\.config|\.local|\.cache"
             (sloth.concat' sloth.xdgConfigHome "/anthropic")
             (sloth.concat' sloth.xdgCacheHome "/claude-cli-nodejs")
-            # NOTE: isolated agent access
           ];
           ro = [
             env.SOPS_AGE_KEY_FILE

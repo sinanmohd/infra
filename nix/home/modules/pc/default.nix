@@ -7,6 +7,7 @@ in
     ./modules/vaultwarden.nix
     ./modules/podman.nix
     ./modules/k8s
+    ./modules/opencode.nix
     ../../../global/modules/common
   ];
 
