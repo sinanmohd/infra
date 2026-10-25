@@ -18,8 +18,9 @@
 
       gs = "git status";
       gl = "git log";
-      gm = "git commit -a -m";
+      gm = "git commit -m";
       ga = "git commit -a --amend";
+      gd = "git diff";
     };
 
     sessionVariables = {

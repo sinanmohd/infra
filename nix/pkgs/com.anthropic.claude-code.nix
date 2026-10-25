@@ -44,14 +44,14 @@ let
 
         bind = {
           rw = [
-            (sloth.env "CLAUDE_CONFIG_DIR")
+            (sloth.mkdir (sloth.env "CLAUDE_CONFIG_DIR"))
             (sloth.concat' sloth.homeDir "/.claude.json")
             (sloth.mkdir (sloth.env "_CLAUDE_SCRATCHPAD"))
             # NOTE: main dev environment
             (sloth.env "RW_ROOT")
             # NOTE: caught from strace -f -e openat claude 2>&1 | grep -E "\.config|\.local|\.cache"
-            (sloth.concat' sloth.xdgConfigHome "/anthropic")
-            (sloth.concat' sloth.xdgCacheHome "/claude-cli-nodejs")
+            (sloth.mkdir (sloth.concat' sloth.xdgConfigHome "/anthropic"))
+            (sloth.mkdir (sloth.concat' sloth.xdgCacheHome "/claude-cli-nodejs"))
           ];
           ro = [
             env.SOPS_AGE_KEY_FILE

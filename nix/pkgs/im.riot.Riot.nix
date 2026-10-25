@@ -39,7 +39,7 @@ let
 
         bind = {
           rw = [
-            (sloth.concat' sloth.xdgConfigHome "/Element")
+            (sloth.mkdir (sloth.concat' sloth.xdgConfigHome "/Element"))
           ];
           ro = [
             # NOTE: xdg user dirs

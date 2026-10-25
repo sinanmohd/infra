@@ -58,9 +58,9 @@ let
         bind = {
           rw = [
             (sloth.env "RW_ROOT")
-            (sloth.concat' sloth.xdgStateHome "/nvim")
-            (sloth.concat' sloth.xdgDataHome "/nvim")
-            (sloth.concat' sloth.xdgCacheHome "/nvim")
+            (sloth.mkdir (sloth.concat' sloth.xdgStateHome "/nvim"))
+            (sloth.mkdir (sloth.concat' sloth.xdgDataHome "/nvim"))
+            (sloth.mkdir (sloth.concat' sloth.xdgCacheHome "/nvim"))
           ];
           ro = [
             (sloth.concat' sloth.xdgConfigHome "/nvim")

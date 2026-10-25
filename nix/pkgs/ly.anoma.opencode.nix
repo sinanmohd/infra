@@ -45,9 +45,9 @@ let
             # NOTE: main dev environment
             (sloth.env "RW_ROOT")
             # NOTE: caught from strace -f -e openat opencode 2>&1 | grep -E "\.config|\.local|\.cache"
-            (sloth.concat' sloth.xdgConfigHome "/opencode")
-            (sloth.concat' sloth.xdgStateHome "/opencode")
-            (sloth.concat' sloth.xdgDataHome "/opencode")
+            (sloth.mkdir (sloth.concat' sloth.xdgConfigHome "/opencode"))
+            (sloth.mkdir (sloth.concat' sloth.xdgStateHome "/opencode"))
+            (sloth.mkdir (sloth.concat' sloth.xdgDataHome "/opencode"))
           ];
           ro = [
             env.SOPS_AGE_KEY_FILE
