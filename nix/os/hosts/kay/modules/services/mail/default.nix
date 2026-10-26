@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 let
   ipv6 = "2001:470:ee65::1337";
   domain = config.global.userdata.domain;
@@ -49,6 +49,7 @@ in
 
   services.stalwart = {
     enable = true;
+    package = pkgs.stalwart_0_15;
     openFirewall = true;
     stateVersion = "25.11";
 
