@@ -28,4 +28,14 @@ in
     # uses dhcpcd but we use networkd
     detected.dhcp.enable = false;
   };
+
+  # NOTE: wifi latency spikes, disable power saving
+  boot.extraModprobeConfig = ''
+    options rtw88_core disable_lps_deep=y
+    options rtw88_pci disable_aspm=y
+  '';
+  services.tlp.settings = {
+    WIFI_PWR_ON_AC = "off";
+    WIFI_PWR_ON_BAT = "off";
+  };
 }
