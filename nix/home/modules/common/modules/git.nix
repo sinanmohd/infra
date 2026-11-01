@@ -1,13 +1,13 @@
 {
   config,
   pkgs,
-  inputs,
+  inputsSinan,
   ...
 }:
 let
   name = config.global.userdata.nameFq;
   email = config.global.userdata.email;
-  git = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.git;
+  git = inputsSinan.self.packages.${pkgs.stdenv.hostPlatform.system}.git;
 in
 {
   programs.git = {

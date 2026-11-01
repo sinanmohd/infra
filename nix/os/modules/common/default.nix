@@ -2,7 +2,7 @@
   config,
   pkgs,
   lib,
-  inputs,
+  inputsSinan,
   ...
 }:
 let
@@ -28,7 +28,7 @@ in
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
-    extraSpecialArgs = { inherit inputs; };
+    extraSpecialArgs = { inherit inputsSinan; };
   };
   # required by installed Home Manager via its NixOS module + useUserPackages = true
   environment.pathsToLink = [

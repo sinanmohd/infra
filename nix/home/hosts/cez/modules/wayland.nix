@@ -1,6 +1,6 @@
-{ pkgs, inputs, ... }:
+{ pkgs, inputsSinan, ... }:
 let
-  wayland-scripts = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.wayland-scripts;
+  wayland-scripts = inputsSinan.self.packages.${pkgs.stdenv.hostPlatform.system}.wayland-scripts;
 
   freezshot = "${wayland-scripts}/bin/freezshot";
   scale = 1.6;

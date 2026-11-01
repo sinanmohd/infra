@@ -1,7 +1,7 @@
-{ pkgs, inputs, ... }:
+{ pkgs, inputsSinan, ... }:
 let
   nnvim = pkgs.callPackage ./nnvim { };
-  svim = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.svim;
+  svim = inputsSinan.self.packages.${pkgs.stdenv.hostPlatform.system}.svim;
 in
 {
   home = {

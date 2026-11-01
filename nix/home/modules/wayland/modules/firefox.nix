@@ -1,6 +1,6 @@
-{ pkgs, inputs, ... }:
+{ pkgs, inputsSinan, ... }:
 let
-  firefox = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.firefox;
+  firefox = inputsSinan.self.packages.${pkgs.stdenv.hostPlatform.system}.firefox;
 in
 {
   home.packages = [ pkgs.pywalfox-native ];

@@ -1,6 +1,6 @@
-{ pkgs, inputs, ... }:
+{ pkgs, inputsSinan, ... }:
 let
-  claude-code = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.claude-code;
+  claude-code = inputsSinan.self.packages.${pkgs.stdenv.hostPlatform.system}.claude-code;
 in
 {
   imports = [

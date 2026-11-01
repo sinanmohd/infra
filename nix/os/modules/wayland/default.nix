@@ -8,6 +8,8 @@ let
 in
 {
   imports = [
+    ../common
+
     ./modules/sway.nix
     ./modules/wayland.nix
   ];

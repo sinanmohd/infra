@@ -2,7 +2,7 @@
   config,
   pkgs,
   lib,
-  inputs,
+  inputsSinan,
   ...
 }:
 let
@@ -12,7 +12,7 @@ let
   down = "j";
   up = "k";
 
-  wayland-scripts = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.wayland-scripts;
+  wayland-scripts = inputsSinan.self.packages.${pkgs.stdenv.hostPlatform.system}.wayland-scripts;
 
   font =
     config.global.font.sans.name

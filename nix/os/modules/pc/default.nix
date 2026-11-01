@@ -8,6 +8,8 @@ let
 in
 {
   imports = [
+    ../common
+
     ./modules/getty.nix
     ./modules/network.nix
     ./modules/fonts.nix

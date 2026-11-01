@@ -1,6 +1,6 @@
-{ pkgs, inputs, ... }:
+{ pkgs, inputsSinan, ... }:
 let
-  opencode = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.opencode;
+  opencode = inputsSinan.self.packages.${pkgs.stdenv.hostPlatform.system}.opencode;
 in
 {
   programs.opencode = {

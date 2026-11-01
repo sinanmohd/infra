@@ -2,7 +2,7 @@
   config,
   lib,
   pkgs,
-  inputs,
+  inputsSinan,
   ...
 }:
 
@@ -122,7 +122,7 @@ in
             ssl_early_data on;
           '';
 
-          root = inputs.website.packages.${pkgs.stdenv.hostPlatform.system}.website + "/share/www";
+          root = inputsSinan.website.packages.${pkgs.stdenv.hostPlatform.system}.website + "/share/www";
         };
 
         "bin.${domain}" = defaultOpts // {

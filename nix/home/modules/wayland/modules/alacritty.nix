@@ -80,7 +80,7 @@ in
     package = pkgs.alacritty-graphics;
     settings = {
       general.import = [ "~/.local/share/wallust/alacritty.toml" ];
-      font = {
+      font = lib.optionalAttrs (size != null) {
         inherit size;
       };
       window = {

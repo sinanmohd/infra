@@ -67,7 +67,13 @@
     let
       lib = nixpkgs.lib;
 
+      inputsModule = {
+        key = "inputs.infra.sinanmohd.com";
+        _module.args.inputsSinan = inputs;
+      };
+
       nixosImports = [
+        inputsModule
         sops-nix.nixosModules.sops
         home-manager.nixosModules.home-manager
         nix-index-database.nixosModules.default
@@ -84,7 +90,6 @@
         host: system:
         lib.nixosSystem {
           inherit system;
-          specialArgs = { inherit inputs; };
           modules = nixosImports ++ [
             ./nix/os/hosts/${host}
           ];
@@ -92,6 +97,7 @@
 
       makeHomeModules = moduleName: {
         imports = [
+          inputsModule
           ./nix/home/modules/${moduleName}
         ];
       };
@@ -99,8 +105,10 @@
         host: system:
         home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages.${system};
-          modules = [ ./nix/home/hosts/${host} ];
-          extraSpecialArgs = { inherit inputs; };
+          modules = [
+            inputsModule
+            ./nix/home/hosts/${host}
+          ];
         };
 
       forSystem =

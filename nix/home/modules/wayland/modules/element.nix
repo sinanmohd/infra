@@ -1,6 +1,6 @@
-{ pkgs, inputs, ... }:
+{ pkgs, inputsSinan, ... }:
 let
-  element-desktop = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.element-desktop;
+  element-desktop = inputsSinan.self.packages.${pkgs.stdenv.hostPlatform.system}.element-desktop;
 in
 {
   home.packages = [ element-desktop ];
