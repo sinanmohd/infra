@@ -59,7 +59,6 @@ in
 
   boot = {
     loader.timeout = 0;
-    initrd.systemd.enable = true;
     tmp.cleanOnBoot = true;
   };
 
