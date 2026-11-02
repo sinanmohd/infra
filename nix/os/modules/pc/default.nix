@@ -34,9 +34,12 @@ in
   documentation.dev.enable = true;
   users.users.${user}.extraGroups = [ "adbusers" ];
 
-  environment.systemPackages = with pkgs; [
-    android-tools
-    wiremix
-    bluetui
-  ];
+  environment = {
+    systemPackages = with pkgs; [
+      android-tools
+      wiremix
+      bluetui
+    ];
+    etc.nixos.source = "${config.users.users.${user}.home}/dev/infra";
+  };
 }

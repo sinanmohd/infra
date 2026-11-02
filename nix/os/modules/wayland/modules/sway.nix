@@ -15,7 +15,7 @@
     };
     script = ''
       swaynag \
-          -m '󰂃  Critical battery level, system hibernation imminent, please connect to a power source' \
+          -m '󰂃  Battery Critically Low. Your computer will hibernate soon unless it’s plugged in.' \
           --layer  overlay \
           --dismiss-button  'Hibernate now' &&
       systemctl hibernate
