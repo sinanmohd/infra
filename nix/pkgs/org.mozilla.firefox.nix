@@ -53,13 +53,14 @@ let
             # TODO: xdgDownloadDir does not pick up ~/dl
             (sloth.concat' sloth.homeDir "/dl")
             sloth.xdgDownloadDir
+            (sloth.mkdir (sloth.concat' sloth.runtimeDir "/pywalfox"))
           ];
           ro = [
             # NOTE: xdg user dirs
             (sloth.concat' sloth.xdgConfigHome "/user-dirs.conf")
             (sloth.concat' sloth.xdgConfigHome "/user-dirs.dirs")
             # NOTE: pywal support
-            (sloth.concat' sloth.xdgCacheHome "/wal/colors.json")
+            (sloth.mkdir (sloth.concat' sloth.xdgCacheHome "/wal"))
             # NOTE: [AGENT]: only consumer is firefox/glxtest, which dlopens
             # libpci.so.3 (nixpkgs puts pciutils on LD_LIBRARY_PATH for this) and
             # scans /sys/bus/pci/devices to report PCI_VENDOR_ID/PCI_DEVICE_ID.
