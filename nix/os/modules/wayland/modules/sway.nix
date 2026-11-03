@@ -1,7 +1,16 @@
 {
+  config,
   pkgs,
+  lib,
   ...
 }:
+let
+  font =
+    config.global.font.sans.name
+    + lib.optionalString (
+      config.global.font.sans.sizePx != null
+    ) " ${lib.toString config.global.font.sans.sizePx}px";
+in
 {
   systemd.services.swaynag_battery = {
     path = [
@@ -15,8 +24,9 @@
     };
     script = ''
       swaynag \
-          -m '󰂃  Battery Critically Low. Your computer will hibernate soon unless it’s plugged in.' \
+          -m '󰂃 Battery Critically Low. Your computer will hibernate soon unless it’s plugged in.' \
           --layer  overlay \
+          --font  '${font}' \
           --dismiss-button  'Hibernate now' &&
       systemctl hibernate
     '';
