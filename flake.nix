@@ -4,6 +4,11 @@
   inputs = {
     nixpkgs.url = "github:NixOs/nixpkgs/nixos-unstable";
 
+    bootvine = {
+      url = "git+https://codeberg.org/wvhulle/bootvine";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     wrap = {
       url = "github:rti/nixwrap";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -63,6 +68,7 @@
       website,
       wrap,
       nixpak,
+      bootvine,
     }@inputs:
     let
       lib = nixpkgs.lib;
@@ -79,6 +85,7 @@
         nix-index-database.nixosModules.default
         lanzaboote.nixosModules.lanzaboote
         disko.nixosModules.disko
+        bootvine.nixosModules.default
       ];
 
       makeNixosModules = moduleName: {

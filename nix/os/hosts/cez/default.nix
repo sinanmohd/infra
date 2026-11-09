@@ -34,8 +34,11 @@ in
     options rtw88_core disable_lps_deep=y
     options rtw88_pci disable_aspm=y
   '';
-  services.tlp.settings = {
-    WIFI_PWR_ON_AC = "off";
-    WIFI_PWR_ON_BAT = "off";
+  services = {
+    tlp.settings = {
+      WIFI_PWR_ON_AC = "off";
+      WIFI_PWR_ON_BAT = "off";
+    };
+    bootvine.enable = true;
   };
 }
