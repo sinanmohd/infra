@@ -1,0 +1,12 @@
+#!/bin/sh
+
+note()
+{
+	notify-send " Terminal" "$1"
+}
+
+########
+# MAIN #
+########
+
+note "Task completed in ${PWD##*/}"

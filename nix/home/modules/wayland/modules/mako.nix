@@ -26,6 +26,7 @@ in
         border-size=2
         default-timeout=3000
         font=${font}
+        on-notify=exec ${lib.getExe' pkgs.pipewire "pw-play"} ${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/message.oga
       '';
       target = "~/.config/mako/config";
     };
