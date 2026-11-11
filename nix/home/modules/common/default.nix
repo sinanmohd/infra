@@ -7,6 +7,12 @@
 }:
 let
   username = config.global.userdata.name;
+  wrap = inputsSinan.wrap.packages.${pkgs.stdenv.hostPlatform.system}.wrap;
+  # NOTE: nixpak git can't see ~/.cache/nix/gitv3
+  nix = pkgs.writeShellScriptBin "nix" ''
+    export PATH="${lib.makeBinPath [ pkgs.git ]}:$PATH"
+    exec ${lib.getExe pkgs.nix} "$@"
+  '';
 in
 {
   imports = [
@@ -41,6 +47,7 @@ in
     homeDirectory = "/home/${config.home.username}";
 
     packages = with pkgs; [
+      nix
       unzip
       curl
       file
@@ -51,7 +58,7 @@ in
       tcpdump
       mtr
       geoipWithDatabase
-      inputsSinan.wrap.packages.${pkgs.stdenv.hostPlatform.system}.wrap
+      wrap
     ];
   };
 }
