@@ -54,7 +54,8 @@
     kubectl-df-pv
     kubectl-images
     kubectl-gadget
-    kubectl-validate
+    # TODO: re-add afer upstream fix, checkPhase failure
+    # kubectl-validate
     kubectl-graph
     kubectl-view-secret
     kubectl-example
