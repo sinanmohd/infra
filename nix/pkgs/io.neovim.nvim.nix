@@ -24,11 +24,6 @@ let
         bash
         git
         coreutils
-        # TSinstall
-        curl
-        gnutar
-        gzip
-        tree-sitter
       ]
       ++ extraBins;
     pathsToLink = [ "/bin" ];

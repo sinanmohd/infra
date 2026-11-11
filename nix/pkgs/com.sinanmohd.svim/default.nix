@@ -10,6 +10,15 @@ neovim.override {
     gnumake
     # toggleterm
     tmux
+    # TSinstall
+    curl
+    gnutar
+    gzip
+    tree-sitter
+    # kickstart
+    unzip
+    # neo-tree-trash, gio
+    glib
     # lsp
     nix
     ccls
@@ -32,6 +41,7 @@ neovim.override {
     lua-language-server
     typescript
     typescript-language-server
+    stylua
   ];
   configPath = "${./config}/init.lua";
 }

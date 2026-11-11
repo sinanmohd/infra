@@ -98,6 +98,12 @@ stdenvNoCC.mkDerivation {
           tailscale
         ]
       }
+    wrapProgram $out/bin/yo \
+      --prefix PATH : ${
+        lib.makeBinPath [
+          libnotify
+        ]
+      }
   '';
 
   meta = {

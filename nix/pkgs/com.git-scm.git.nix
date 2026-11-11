@@ -24,6 +24,9 @@ let
         extraEntrypoints = map (bin: "/bin/${bin}") serverBins;
       };
 
+      # NOTE: CA bundle for https clone/fetch/push
+      imports = [ nixpak.nixpakModules.network ];
+
       bubblewrap = {
         # NOTE: git diff
         newSession = true;
