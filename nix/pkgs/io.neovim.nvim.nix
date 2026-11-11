@@ -49,6 +49,12 @@ let
           TMUX = sloth.envOr "TMUX" "";
           TMUX_PANE = sloth.envOr "TMUX_PANE" "";
           TMUX_TMPDIR = "TMUX_TMPDIR";
+          # NOTE: glibc builtin, needs no locale-archive in the sandbox
+          LANG = "C.UTF-8";
+        }
+        # NOTE: -u doesn't set it. checkhealth looks for the config here
+        // lib.optionalAttrs (configPath != null) {
+          MYVIMRC = configPath;
         };
         bind = {
           rw = [
@@ -63,6 +69,8 @@ let
             (sloth.concat' sloth.xdgConfigHome "/tmux")
             (sloth.env "TMUX_TMPDIR")
             (sloth.env "SHELL")
+            # NOTE: io.popen()/os.execute() hardcode /bin/sh. telescope fails
+            "/bin/sh"
           ];
         };
       };

@@ -165,7 +165,7 @@
             inherit nixpak;
             libSinan = self.lib;
           };
-          svim = pkgs.callPackage ./nix/pkgs/com.sinanmohd.svim {
+          nvim-sinan = pkgs.callPackage ./nix/pkgs/com.sinanmohd.nvim {
             neovim = self.packages.${system}.neovim;
           };
         }
