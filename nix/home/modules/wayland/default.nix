@@ -20,6 +20,7 @@ in
     ./modules/mpv.nix
     ./modules/fuzzel
     ./modules/element.nix
+    ./modules/voxtype.nix
   ];
 
   home = {

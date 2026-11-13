@@ -13,6 +13,7 @@ let
   up = "k";
 
   wayland-scripts = inputsSinan.self.packages.${pkgs.stdenv.hostPlatform.system}.wayland-scripts;
+  voxtype = lib.getExe config.services.voxtype.package;
 
   font =
     config.global.font.sans.name
@@ -222,6 +223,10 @@ in
           "${mod}+w" = "exec ${lib.getExe config.programs.firefox.finalPackage}";
           "${mod}+backslash" = "exec ${lib.getExe termux_sway_yazi}";
 
+          # voxtype
+          "--no-repeat ${mod}+shift+x" = "exec ${voxtype} record start";
+          "--release ${mod}+shift+x" = "exec ${voxtype} record stop";
+
           # menu
           "${mod}+z" = "exec ${alacritty} --class floater -e ${lib.getExe pkgs.impala}";
           "${mod}+x" = "exec ${alacritty} --class floater -e ${lib.getExe pkgs.bluetui}";
@@ -256,6 +261,26 @@ in
         ${up} = "resize shrink height 10px";
         return = "mode default";
       };
+
+      # voxtype
+      mode.voxtype_is_recording.bindsym."${mod}+shift+a" = "exec ${voxtype} record cancel; mode default";
+      # NOTE:: voxtype switches here while typing so held modifiers
+      # don't turn text into shortcuts.
+      mode.voxtype_is_typing.bindsym =
+        lib.genAttrs [
+          "Super_L"
+          "Super_R"
+          "Control_L"
+          "Control_R"
+          "Alt_L"
+          "Alt_R"
+          "Shift_L"
+          "Shift_R"
+        ] (_: "nop")
+        // {
+          # NOTE: escape hatch if voxtype dies mid-output
+          "${mod}+shift+a" = "mode default";
+        };
 
       exec = [ (lib.getExe config.services.mako.package) ];
       gaps.inner = 10;
