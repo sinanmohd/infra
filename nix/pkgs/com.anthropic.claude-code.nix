@@ -16,6 +16,9 @@ let
     config = { sloth, pkgs, ... }: {
       imports = [ nixpak.nixpakModules.network ];
 
+      # NOTE: allow hooks access to notify-send
+      dbus.policies."org.freedesktop.Notifications" = "talk";
+
       app.package = pkgs.writeShellScriptBin "fake_tty" ''
         exec ${pkgs.util-linux}/bin/script --quiet --return /dev/null -- ${lib.getExe pkg_raw} "$@"
       '';
@@ -59,6 +62,8 @@ let
             (sloth.concat' sloth.xdgConfigHome "/git/config")
             (sloth.env "_NIX_USER_BINS")
             "/run/current-system/sw/bin"
+            # NOTE: hook commands are spawned via a hardcoded /bin/sh
+            "/bin/sh"
             # TODO: comma fails withoout this, but `nix run` does not ?
             "/nix/var/nix"
           ];
