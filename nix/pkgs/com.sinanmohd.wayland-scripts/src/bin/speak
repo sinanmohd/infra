@@ -1,0 +1,103 @@
+#!/bin/sh
+
+voice="${SPEAK_VOICE:?}"
+
+dir="${XDG_RUNTIME_DIR:-/tmp}/speak"
+socket="$dir/mpv.sock"
+history=20
+
+usage() {
+	cat <<-EOF
+		usage: speak [-n NAME] [TEXT...]   queue TEXT (or stdin) to be read aloud
+		  -n NAME   prepend NAME to the title, e.g. the calling program
+		control playback with playerctl, e.g. play-pause, next, previous, stop
+	EOF
+}
+
+err() {
+	: "${1:?}"
+
+	printf "\033[31;1merr: %b\033[0m\n" "$1" 1>&2
+}
+
+# NOTE: [AGENT]: keep piper from reading raw markdown. in order, drop fenced
+# code blocks and table rows, unwrap [text](url) links, drop list markers,
+# strip inline punctuation, turn underscores into spaces and drop lines left
+# blank, so whitespace-only text comes out empty
+# shellcheck disable=SC2016
+strip_markdown() {
+	sed -E \
+		-e '/^[[:space:]]*```/,/^[[:space:]]*```/d' \
+		-e '/^[[:space:]]*\|/d' \
+		-e 's/\[([^]]*)\]\([^)]*\)/\1/g' \
+		-e 's/^[[:space:]]*([-+*]|[0-9]+\.)[[:space:]]+//' \
+		-e 's/[`*#>]+//g' \
+		-e 'y/_/ /' \
+		-e '/^[[:space:]]*$/d'
+}
+
+prune() {
+	set -- "$dir"/*.wav
+	[ -e "$1" ] || return 0
+
+	excess=$(($# - history))
+	while [ "$excess" -gt 0 ]; do
+		rm -f "$1"
+		shift
+		excess=$((excess - 1))
+	done
+}
+
+########
+# MAIN #
+########
+
+name=""
+while getopts "n:h" opt; do
+	case "$opt" in
+	n) name="$OPTARG" ;;
+	h)
+		usage
+		exit 0
+		;;
+	*)
+		usage 1>&2
+		exit 1
+		;;
+	esac
+done
+shift $((OPTIND - 1))
+
+if [ ! -S "$socket" ]; then
+	err "no player at $socket, is the speak service running?"
+	exit 1
+fi
+
+if [ "$#" -gt 0 ]; then
+	text="$*"
+else
+	text="$(cat)"
+fi
+text="$(printf '%s\n' "$text" | strip_markdown)"
+if [ -z "$text" ]; then
+	exit 0
+fi
+
+wav="$dir/$(date +%s%N).wav"
+printf '%s\n' "$text" | piper --model "$voice" --output-file "$wav" 2>/dev/null
+
+title="$(printf '%s\n' "$text" | head -n 1 | cut -c 1-80)"
+if [ -n "$name" ]; then
+	title="$name - $title"
+fi
+
+jq -nc --arg url "$wav" --arg title "$title" '{
+	command: {
+		name: "loadfile",
+		url: $url,
+		flags: "append-play",
+		options: { "force-media-title": $title }
+	}
+}' | socat - "UNIX-CONNECT:$socket" >/dev/null
+
+prune

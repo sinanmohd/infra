@@ -19,8 +19,28 @@
   wtype,
   tailscale,
   alacritty,
+  linkFarm,
+  fetchurl,
+  gnused,
+  piper-tts,
+  socat,
 }:
-
+let
+  piperVoice =
+    let
+      base = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/hfc_female/medium/en_US-hfc_female-medium";
+    in
+    linkFarm "piper-voice-en_US-hfc_female-medium" {
+      "voice.onnx" = fetchurl {
+        url = "${base}.onnx";
+        hash = "sha256-kUxHN4j8H6i2Os4c3NtEWI9K5SPTqzffFTZhaDWhQLc=";
+      };
+      "voice.onnx.json" = fetchurl {
+        url = "${base}.onnx.json";
+        hash = "sha256-A/H6BiK4BGMoNZLZesqfbomuw0WlxWtyV3I+AJPFi2w=";
+      };
+    };
+in
 stdenvNoCC.mkDerivation {
   pname = "wayland-scipts";
   version = "1717606223";
@@ -102,6 +122,17 @@ stdenvNoCC.mkDerivation {
       --prefix PATH : ${
         lib.makeBinPath [
           libnotify
+        ]
+      }
+    wrapProgram $out/bin/speak \
+      --set-default SPEAK_VOICE ${piperVoice}/voice.onnx \
+      --prefix PATH : ${
+        lib.makeBinPath [
+          coreutils
+          gnused
+          jq
+          piper-tts
+          socat
         ]
       }
   '';

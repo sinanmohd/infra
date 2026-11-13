@@ -21,6 +21,7 @@ in
     ./modules/fuzzel
     ./modules/element.nix
     ./modules/voxtype.nix
+    ./modules/speak.nix
   ];
 
   home = {

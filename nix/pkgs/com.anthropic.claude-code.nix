@@ -40,6 +40,8 @@ let
             "${pkgs.git}/bin:"
             (sloth.env "PATH")
           ];
+          # NOTE: `speak` finds the shared queue dir through this;
+          XDG_RUNTIME_DIR = sloth.runtimeDir;
           # NOTE: isolated agent access
           SOPS_AGE_KEY_FILE = (sloth.concat' sloth.xdgConfigHome "/sops/age/agent.keys.txt");
           KUBECONFIG = (sloth.concat' sloth.homeDir "/.kube/agent.config");
@@ -55,6 +57,8 @@ let
             # NOTE: caught from strace -f -e openat claude 2>&1 | grep -E "\.config|\.local|\.cache"
             (sloth.mkdir (sloth.concat' sloth.xdgConfigHome "/anthropic"))
             (sloth.mkdir (sloth.concat' sloth.xdgCacheHome "/claude-cli-nodejs"))
+            # NOTE: [AGENT]: the `speak` mpv service's IPC socket and queue
+            (sloth.mkdir (sloth.concat' sloth.runtimeDir "/speak"))
           ];
           ro = [
             env.SOPS_AGE_KEY_FILE

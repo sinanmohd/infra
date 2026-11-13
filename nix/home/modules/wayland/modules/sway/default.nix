@@ -14,6 +14,7 @@ let
 
   wayland-scripts = inputsSinan.self.packages.${pkgs.stdenv.hostPlatform.system}.wayland-scripts;
   voxtype = lib.getExe config.services.voxtype.package;
+  speak = "${wayland-scripts}/bin/speak";
 
   font =
     config.global.font.sans.name
@@ -227,6 +228,10 @@ in
           "--no-repeat ${mod}+shift+x" = "exec ${voxtype} record start";
           "--release ${mod}+shift+x" = "exec ${voxtype} record stop";
 
+          # speak
+          "${mod}+shift+z" =
+            "exec ${lib.getExe' pkgs.wl-clipboard "wl-paste"} --primary --no-newline | ${speak}";
+
           # menu
           "${mod}+z" = "exec ${alacritty} --class floater -e ${lib.getExe pkgs.impala}";
           "${mod}+x" = "exec ${alacritty} --class floater -e ${lib.getExe pkgs.bluetui}";
@@ -243,7 +248,7 @@ in
 
           # music
           XF86AudioPlay = "exec ${lib.getExe pkgs.playerctl} play-pause";
-          XF86AudioStop = "exec ${lib.getExe pkgs.playerctl} position 0";
+          XF86AudioStop = "exec ${lib.getExe pkgs.playerctl} stop";
           XF86AudioPrev = "exec ${lib.getExe pkgs.playerctl} previous";
           XF86AudioNext = "exec ${lib.getExe pkgs.playerctl} next";
 
