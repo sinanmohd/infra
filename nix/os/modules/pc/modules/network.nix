@@ -4,6 +4,7 @@
 
   systemd.network = {
     enable = true;
+    wait-online.enable = false;
     networks = {
       "99-wireless-dhcp" = {
         matchConfig.Type = "wlan";
