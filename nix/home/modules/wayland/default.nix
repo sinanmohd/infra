@@ -20,6 +20,7 @@ in
     ./modules/mpv.nix
     ./modules/fuzzel
     ./modules/element.nix
+    ./modules/gimp.nix
     ./modules/voxtype.nix
     ./modules/speak.nix
   ];
@@ -34,7 +35,7 @@ in
       xdg-utils
 
       imv
-      gimp3
+      qbittorrent
     ];
   };
 

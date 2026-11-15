@@ -28,3 +28,9 @@
 #workspaces button.focused {
   opacity: 1;
 }
+
+/* NOTE: tray menus (kdeconnect) are popups, sway doesn't draw a
+ * border around those, and the `*` rule above removes the gtk one */
+menu {
+  border: 2px solid @foreground;
+}

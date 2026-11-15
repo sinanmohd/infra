@@ -7,6 +7,8 @@ let
 in
 {
   users.users.${user}.extraGroups = [ "seat" ];
+  programs.dconf.enable = true;
+
   services = {
     seatd.enable = true;
     dbus = {

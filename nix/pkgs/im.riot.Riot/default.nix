@@ -6,7 +6,30 @@
   libSinan,
 }:
 let
-  pkg_raw = pkgs.element-desktop;
+  # NOTE: [AGENT]: hot reload custom_themes from config.json, Patches the built
+  # app.asar instead of the source to avoid rebuilding element
+  pkg_raw =
+    let
+      element = pkgs.element-desktop;
+    in
+    pkgs.runCommand element.name
+      {
+        inherit (element) pname version meta;
+        nativeBuildInputs = [ pkgs.asar ];
+      }
+      ''
+        cp -a ${element} $out
+        chmod -R u+w $out
+
+        asar extract $out/share/element/app.asar app
+        cp ${./custom-themes-reload.js} app/lib/custom-themes-reload.js
+        sed -i '1i import "./custom-themes-reload.js";' app/lib/electron-main.js
+        asar pack app $out/share/element/app.asar
+
+        substituteInPlace $out/bin/element-desktop \
+          --replace-fail ${element} $out
+      '';
+
   mkNixPak = nixpak.lib.nixpak {
     inherit lib pkgs;
   };

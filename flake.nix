@@ -157,7 +157,7 @@
             inherit nixpak;
             libSinan = self.lib;
           };
-          element-desktop = pkgs.callPackage ./nix/pkgs/im.riot.Riot.nix {
+          element-desktop = pkgs.callPackage ./nix/pkgs/im.riot.Riot {
             inherit nixpak;
             libSinan = self.lib;
           };
