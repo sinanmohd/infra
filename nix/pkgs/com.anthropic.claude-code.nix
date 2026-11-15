@@ -32,10 +32,6 @@ let
         newSession = true;
         # NOTE: /voice support
         sockets.pipewire = true;
-        # NOTE: even if claude does not need this, other programs that agent
-        # runs will need this
-        tmpfs = [ "/tmp" ];
-
         clearEnv = true;
         env = {
           CLAUDE_CONFIG_DIR = sloth.env "CLAUDE_CONFIG_DIR";
@@ -54,13 +50,19 @@ let
           # NOTE: isolated agent access
           SOPS_AGE_KEY_FILE = (sloth.concat' sloth.xdgConfigHome "/sops/age/agent.keys.txt");
           KUBECONFIG = (sloth.concat' sloth.homeDir "/.kube/agent.config");
+          # NOTE: ssh commit signing through the agent, the private key outside
+          SSH_AUTH_SOCK = (sloth.concat' sloth.runtimeDir "/ssh-agent");
         };
 
         bind = {
           rw = [
+            # NOTE: claude code scratchpad, other programs that agent runs
+            [
+              (sloth.mkdir (sloth.concat' sloth.runtimeDir "/nixpak-claude-tmp"))
+              "/tmp"
+            ]
             (sloth.mkdir (sloth.env "CLAUDE_CONFIG_DIR"))
             (sloth.concat' sloth.homeDir "/.claude.json")
-            (sloth.mkdir (sloth.env "_CLAUDE_SCRATCHPAD"))
             # NOTE: main dev environment
             (sloth.env "RW_ROOT")
             # NOTE: caught from strace -f -e openat claude 2>&1 | grep -E "\.config|\.local|\.cache"
@@ -72,6 +74,9 @@ let
           ro = [
             env.SOPS_AGE_KEY_FILE
             env.KUBECONFIG
+            env.SSH_AUTH_SOCK
+            (sloth.concat' sloth.homeDir "/.ssh/id_ed25519.pub")
+            "/etc/passwd"
             (sloth.concat' sloth.xdgConfigHome "/git/config")
             (sloth.env "_NIX_USER_BINS")
             "/run/current-system/sw/bin"
@@ -99,7 +104,6 @@ libSinan.nixpakEnv {
       printf "\033[31;1mnixpak-claude-code: %b\033[0m\n" "$1" 1>&2
     }
 
-    export _CLAUDE_SCRATCHPAD="/tmp/claude-$(id -u)"
     # NOTE: allows access to user bin
     export _NIX_USER_BINS="/etc/profiles/per-user/$USER/bin"
 

@@ -27,7 +27,7 @@ let
       # NOTE: CA bundle for https clone/fetch/push
       imports = [ nixpak.nixpakModules.network ];
 
-      bubblewrap = {
+      bubblewrap = rec {
         # NOTE: git diff
         newSession = true;
         # NOTE: ssh commit signing writes tmp files via $TMPDIR
@@ -38,6 +38,8 @@ let
           TERM = sloth.envOr "TERM" "dumb";
           EDITOR = sloth.envOr "EDITOR" "vi";
           PATH = sloth.env "PATH";
+          # NOTE: ssh commit signing through the agent, the private key outside
+          SSH_AUTH_SOCK = (sloth.concat' sloth.runtimeDir "/ssh-agent");
         };
         bind = {
           rw = [
@@ -52,7 +54,7 @@ let
             "/run/current-system/sw/bin"
             # NOTE: ssh commit signing & push
             "/etc/passwd"
-            (sloth.concat' sloth.homeDir "/.ssh/id_ed25519")
+            env.SSH_AUTH_SOCK
             (sloth.concat' sloth.homeDir "/.ssh/id_ed25519.pub")
           ];
         };
