@@ -23,10 +23,10 @@
       "audio/x-opus+ogg" = "mpv.desktop";
 
       # browser
-      "x-scheme-handler/about" = "linkhandler.desktop";
-      "x-scheme-handler/http" = "linkhandler.desktop";
-      "x-scheme-handler/https" = "linkhandler.desktop";
-      "x-scheme-handler/unknown" = "linkhandler.desktop";
+      "x-scheme-handler/about" = "firefox.desktop";
+      "x-scheme-handler/http" = "firefox.desktop";
+      "x-scheme-handler/https" = "firefox.desktop";
+      "x-scheme-handler/unknown" = "firefox.desktop";
 
       # documents
       "application/pdf" = "org.pwmt.zathura.desktop";
