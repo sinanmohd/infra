@@ -1,4 +1,25 @@
 { pkgs, ... }:
+let
+  # NOTE: remove rounded corners and dropshadow, sway draws the border instead
+  # https://github.com/swaywm/sway/wiki/GTK-3-settings-on-Wayland
+  squareCsd = ''
+    /** Some apps use titlebar class and some window */
+    .titlebar,
+    window {
+    	border-radius: 0;
+    	box-shadow: none;
+    }
+
+    /** also remove shadows */
+    decoration {
+    	box-shadow: none;
+    }
+
+    decoration:backdrop {
+    	box-shadow: none;
+    }
+  '';
+in
 {
   dconf.enable = false;
 
@@ -7,24 +28,9 @@
 
     gtk3 = {
       extraConfig.gtk-application-prefer-dark-theme = 1;
-      # remove rounded corners and dropshadow
-      # https://github.com/swaywm/sway/wiki/GTK-3-settings-on-Wayland
-      extraCss = ''
-        .titlebar,
-        window {
-                border-radius: 0;
-                box-shadow: none;
-        }
-
-        decoration {
-                box-shadow: none;
-        }
-
-        decoration:backdrop {
-                box-shadow: none;
-        }
-      '';
+      extraCss = squareCsd;
     };
+    gtk4.extraCss = squareCsd;
   };
 
   home.pointerCursor = {

@@ -132,6 +132,8 @@ in
       for_window = {
         "[app_id=\"floater\"]" = "floating enable";
         "[app_id=\"org.kde.kdeconnect.daemon\"]" = "floating enable";
+        # NOTE: client side decorated windows (gtk file picker) gets border
+        "[all]" = "border pixel 2";
       };
       assign = {
         "[app_id=Alacritty]" = 1;
