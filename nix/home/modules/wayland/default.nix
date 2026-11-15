@@ -1,6 +1,7 @@
 { pkgs, inputsSinan, ... }:
 let
-  wayland-scripts = inputsSinan.self.packages.${pkgs.stdenv.hostPlatform.system}.wayland-scripts;
+  pkgsSinan = inputsSinan.self.packages.${pkgs.stdenv.hostPlatform.system};
+  wayland-scripts = pkgsSinan.wayland-scripts;
 in
 {
   imports = [
@@ -20,6 +21,7 @@ in
     ./modules/mpv.nix
     ./modules/fuzzel
     ./modules/element.nix
+    ./modules/chromium.nix
     ./modules/gimp.nix
     ./modules/voxtype.nix
     ./modules/speak.nix
@@ -35,7 +37,7 @@ in
       xdg-utils
 
       imv
-      qbittorrent
+      pkgsSinan.qbittorrent
     ];
   };
 

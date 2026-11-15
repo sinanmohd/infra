@@ -86,6 +86,7 @@ let
         "org.mozilla.firefox.*" = "own";
         "org.mpris.MediaPlayer2.firefox.*" = "own";
         "org.gnome.Shell.Screencast" = "talk";
+        "org.freedesktop.secrets" = "talk";
         "org.freedesktop.Notifications" = "talk";
       };
     };

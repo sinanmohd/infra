@@ -161,6 +161,14 @@
             inherit nixpak;
             libSinan = self.lib;
           };
+          chromium = pkgs.callPackage ./nix/pkgs/org.chromium.Chromium.nix {
+            inherit nixpak;
+            libSinan = self.lib;
+          };
+          qbittorrent = pkgs.callPackage ./nix/pkgs/org.qbittorrent.qBittorrent.nix {
+            inherit nixpak;
+            libSinan = self.lib;
+          };
           neovim = pkgs.callPackage ./nix/pkgs/io.neovim.nvim.nix {
             inherit nixpak;
             libSinan = self.lib;
