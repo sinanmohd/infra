@@ -1,13 +1,10 @@
-{ pkgs, inputsSinan, ... }:
-let
-  claude-code = inputsSinan.self.packages.${pkgs.stdenv.hostPlatform.system}.claude-code;
-in
+{ pkgs, ... }:
 {
   imports = [
     ./modules/vaultwarden.nix
     ./modules/podman.nix
     ./modules/k8s
-    ./modules/opencode.nix
+    ./modules/agents.nix
     ../../../global/modules/common
   ];
 
@@ -15,6 +12,5 @@ in
     ffmpeg
     mosh
     deploy-rs
-    claude-code
   ];
 }
