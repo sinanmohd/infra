@@ -139,6 +139,8 @@ in
         "[app_id=Alacritty]" = 1;
         "[app_id=firefox]" = 2;
 
+        "[app_id=chromium-browser]" = 7;
+        "[app_id=org.qbittorrent.qBittorrent]" = 7;
         "[app_id=Slack]" = 8;
         "[app_id=element]" = 9;
       };
