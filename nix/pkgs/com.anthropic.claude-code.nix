@@ -18,6 +18,11 @@ let
 
       # NOTE: allow hooks access to notify-send
       dbus.policies."org.freedesktop.Notifications" = "talk";
+      # NOTE: login host portal (OpenURI)
+      dbus.rules.call."org.freedesktop.portal.Desktop" = [
+        "org.freedesktop.portal.OpenURI.*@/org/freedesktop/portal/desktop"
+        "org.freedesktop.DBus.Introspectable.Introspect@/org/freedesktop/portal/desktop"
+      ];
 
       app.package = pkgs.writeShellScriptBin "fake_tty" ''
         exec ${pkgs.util-linux}/bin/script --quiet --return /dev/null -- ${lib.getExe pkg_raw} "$@"
@@ -25,7 +30,8 @@ let
 
       bubblewrap = rec {
         newSession = true;
-
+        # NOTE: /voice support
+        sockets.pipewire = true;
         # NOTE: even if claude does not need this, other programs that agent
         # runs will need this
         tmpfs = [ "/tmp" ];
@@ -35,6 +41,9 @@ let
           CLAUDE_CONFIG_DIR = sloth.env "CLAUDE_CONFIG_DIR";
           HOME = sloth.env "HOME";
           TERM = sloth.env "TERM";
+          # NOTE: nixpkgs xdg-open only looks for
+          # $XDG_RUNTIME_DIR/flatpak-info, nixpak writes /.flatpak-info
+          NIXOS_XDG_OPEN_USE_PORTAL = "1";
           # NOTE: nixpak inside nixpak hard
           PATH = sloth.concat [
             "${pkgs.git}/bin:"
@@ -68,6 +77,11 @@ let
             "/run/current-system/sw/bin"
             # NOTE: hook commands are spawned via a hardcoded /bin/sh
             "/bin/sh"
+            # NOTE: /voice support
+            [
+              "/etc/static/alsa"
+              "/etc/alsa"
+            ]
             # TODO: comma fails withoout this, but `nix run` does not ?
             "/nix/var/nix"
           ];
