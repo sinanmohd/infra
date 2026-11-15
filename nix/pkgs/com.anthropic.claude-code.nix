@@ -111,8 +111,10 @@ libSinan.nixpakEnv {
 
     if [ -z "$RW_ROOT" ]; then
       if ! rw_root="$(${lib.getExe git} rev-parse --show-toplevel 2>/dev/null)"; then
-        err "Not inside a git repo. Please navigate to a git repository or manually set \$RW_ROOT."
-        exit 1
+        # NOTE: outside a git repo, fall back to the downloads dir
+        rw_root="$(${pkgs.xdg-user-dirs}/bin/xdg-user-dir DOWNLOAD)"
+        mkdir -p "$rw_root"
+        cd "$rw_root" || exit 1
       fi
 
       case "$rw_root" in
