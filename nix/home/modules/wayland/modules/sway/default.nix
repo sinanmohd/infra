@@ -136,6 +136,10 @@ in
         "[app_id=\"firefox\" title=\"^Library$\"]" = "floating enable";
         # NOTE: client side decorated windows (gtk file picker) gets border
         "[all]" = "border pixel 2";
+        # NOTE: the presenter pointer is a transparent fullscreen window, and
+        # sway draws nothing but black behind a fullscreen one unlike KDE.
+        "[app_id=\"org.kde.kdeconnect.daemon\" title=\"^KDE Connect Daemon$\"]" =
+          "fullscreen disable, floating enable, border none, resize set 100 ppt 100 ppt, move position center";
       };
       assign = {
         "[app_id=Alacritty]" = 1;
@@ -275,8 +279,8 @@ in
 
       # voxtype
       mode.voxtype_is_recording.bindsym."${mod}+shift+a" = "exec ${voxtype} record cancel; mode default";
-      # NOTE:: voxtype switches here while typing so held modifiers
-      # don't turn text into shortcuts.
+      # NOTE: voxtype switches here while typing so held modifiers don't turn
+      # text into shortcuts.
       mode.voxtype_is_typing.bindsym =
         lib.genAttrs [
           "Super_L"
