@@ -34,6 +34,11 @@ let
     Only tag notes you write, never add the tag to existing `NOTE:`
     comments. Leave other comment kinds (`TODO:`, `FIXME:`, `XXX:`) alone.
 
+    When the user removes the `[AGENT]` tag from a note, they have adopted
+    it as their own. Rewrap that comment so its lines fill up to the 80
+    character limit again, since dropping the tag leaves the first line
+    short. Only change line breaks, keep the wording as it is.
+
     # Commit subject
 
     Write commit subjects as `type(scope): summary`, for example:
