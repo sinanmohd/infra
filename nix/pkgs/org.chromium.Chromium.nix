@@ -5,10 +5,12 @@
   buildEnv,
   libSinan,
   commandLineArgs ? "",
+  policies ? { },
 }:
 let
   # NOTE: used by home-manager module
   pkg_raw = pkgs.chromium.override { inherit commandLineArgs; };
+  policiesDir = pkgs.writeTextDir "managed/policies.json" (builtins.toJSON policies);
   mkNixPak = nixpak.lib.nixpak {
     inherit lib pkgs;
   };
@@ -48,6 +50,10 @@ let
             sloth.xdgDownloadDir
           ];
           ro = [
+            [
+              "${policiesDir}"
+              "/etc/chromium/policies"
+            ]
             # NOTE: xdg user dirs
             (sloth.concat' sloth.xdgConfigHome "/user-dirs.conf")
             (sloth.concat' sloth.xdgConfigHome "/user-dirs.dirs")
