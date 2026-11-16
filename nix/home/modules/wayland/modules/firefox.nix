@@ -1,4 +1,9 @@
-{ pkgs, inputsSinan, ... }:
+{
+  pkgs,
+  lib,
+  inputsSinan,
+  ...
+}:
 let
   firefox = inputsSinan.self.packages.${pkgs.stdenv.hostPlatform.system}.firefox;
   pywalfox = pkgs.writeShellScriptBin "pywalfox" ''
@@ -132,6 +137,11 @@ in
     profiles."default".settings = {
       "media.ffmpeg.vaapi.enabled" = true;
       "browser.ml.chat.provider" = "https://gemini.google.com/app";
+
+      "sidebar.main.tools" = lib.concatStringsSep "," [
+        "aichat"
+        "{446900e4-71c2-419f-a6a7-df9c091e268b}"
+      ];
 
       "browser.uiCustomization.state" = builtins.toJSON {
         currentVersion = 1337;
