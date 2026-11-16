@@ -54,6 +54,14 @@ let
           pipewire = true;
         };
 
+        env = {
+          NIXOS_XDG_OPEN_USE_PORTAL = "1";
+          PATH = sloth.concat [
+            "${pkgs.xdg-utils}/bin:"
+            (sloth.env "PATH")
+          ];
+        };
+
         # NOTE: from strace -f -e openat element-desktop 2>&1 | grep -E "/dev/shm|/tmp"
         tmpfs = [
           "/tmp"
