@@ -179,8 +179,12 @@ in
     gtk.enable = true;
 
     name = "Adwaita";
+    size = 24;
     package = pkgs.adwaita-icon-theme;
   };
+  wayland.windowManager.sway.settings.seat."*".xcursor_theme =
+    with config.home.pointerCursor;
+    "${name} ${toString size}";
 
   home.packages = [ pkgs.kdePackages.breeze-icons ];
   qt =
