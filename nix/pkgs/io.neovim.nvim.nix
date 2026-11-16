@@ -49,7 +49,7 @@ let
           # NOTE: tmux passthrough
           TMUX = sloth.envOr "TMUX" "";
           TMUX_PANE = sloth.envOr "TMUX_PANE" "";
-          TMUX_TMPDIR = "TMUX_TMPDIR";
+          TMUX_TMPDIR = sloth.env "NIXPAK_TMUX_TMPDIR";
           # NOTE: glibc builtin, needs no locale-archive in the sandbox
           LANG = "C.UTF-8";
         }
@@ -68,7 +68,7 @@ let
             (sloth.concat' sloth.xdgConfigHome "/nvim")
             (sloth.concat' sloth.xdgConfigHome "/git/config")
             (sloth.concat' sloth.xdgConfigHome "/tmux")
-            (sloth.env "TMUX_TMPDIR")
+            (sloth.env "NIXPAK_TMUX_SOCKET_DIR")
             (sloth.env "SHELL")
             # NOTE: io.popen()/os.execute() hardcode /bin/sh. telescope fails
             "/bin/sh"
@@ -83,13 +83,16 @@ libSinan.nixpakEnv {
   pkg_nixpak = pkgs.writeShellScriptBin "nvim" ''
     export NVIM_PATH="$PATH:${nvimBins}/bin"
 
-    if [ -z "$TMUX_TMPDIR" ]; then
+    # NOTE:: bind the dir holding the tmux socket, not $TMUX_TMPDIR,
+    # that is its parent and usually the whole $XDG_RUNTIME_DIR. tmux looks
+    # for tmux-$UID inside $TMUX_TMPDIR, so pass the parent of what is bound
+    if [ -n "$TMUX" ]; then
       tmux_socket="''${TMUX%%,*}"
-      export TMUX_TMPDIR="''${tmux_socket%/*}"
+      export NIXPAK_TMUX_SOCKET_DIR="''${tmux_socket%/*}"
+    else
+      export NIXPAK_TMUX_SOCKET_DIR="''${TMUX_TMPDIR:-/tmp}/tmux-$(id -u)"
     fi
-    if [ -z "$TMUX_TMPDIR" ]; then
-      export TMUX_TMPDIR="/run/user/$(id -u)/tmux-$(id -u)"
-    fi
+    export NIXPAK_TMUX_TMPDIR="''${NIXPAK_TMUX_SOCKET_DIR%/*}"
 
     if [ -z "$RW_ROOT" ]; then
       if rw_root="$(${lib.getExe git} rev-parse --show-toplevel 2>/dev/null)"; then
