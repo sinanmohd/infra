@@ -90,6 +90,7 @@ in
     enable = true;
     package = pkgsSinan.claude-code;
     inherit context;
+    skills = ./skills;
   };
 
   programs.opencode = {
@@ -97,5 +98,6 @@ in
     package = pkgsSinan.opencode;
     tui.theme = "system";
     inherit context;
+    skills = ./skills;
   };
 }

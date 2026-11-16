@@ -4,7 +4,7 @@
     ./modules/vaultwarden.nix
     ./modules/podman.nix
     ./modules/k8s
-    ./modules/agents.nix
+    ./modules/agents
     ../../../global/modules/common
   ];
 
