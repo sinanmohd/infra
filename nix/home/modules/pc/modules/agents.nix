@@ -23,6 +23,23 @@ let
 
         nix-locate --minimal --at-root --regex '/bin/python[0-9.]*$'
 
+    # Commit description
+
+    Keep short commit descriptions as they are. When a description runs
+    longer than a few lines, start it with a TLDR paragraph written for
+    humans: a few plain sentences on what changed and why. After the TLDR,
+    add the full detail (context, reasoning, alternatives considered,
+    file-by-file notes) for readers who want it.
+
+    Example:
+
+        feat(nix/home/pc): init agents
+
+        TLDR: Share one context between claude-code and opencode so both
+        agents follow the same rules for missing commands and attribution.
+
+        Previously opencode had its own module with a separate context...
+
     # Attribution
 
     When AI tools contribute to a change, proper attribution helps track the
