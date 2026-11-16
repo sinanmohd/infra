@@ -39,6 +39,20 @@ let
     character limit again, since dropping the tag leaves the first line
     short. Only change line breaks, keep the wording as it is.
 
+    # Shell scripts
+
+    Write shell scripts in POSIX sh (`#!/bin/sh`) as far as possible. Use
+    a bashism only when it is necessary, meaning the POSIX way would be
+    clearly worse (arrays, `pipefail`, process substitution), and then
+    switch the shebang to bash instead of mixing bashisms into an sh
+    script. Convenience alone is not a reason: prefer `[ ]` over `[[ ]]`,
+    `.` over `source`, `$(...)` over backticks, `printf` over `echo -e`
+    and `name() { ...; }` over `function name`.
+
+    This also covers shell embedded in other files, like nix
+    `writeShellScript` bodies or CI steps. When editing an existing
+    script, keep the dialect it already uses.
+
     # Commit subject
 
     Write commit subjects as `type(scope): summary`, for example:
