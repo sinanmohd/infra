@@ -140,7 +140,9 @@
       packages = forAllSystems (
         { system, pkgs }:
         {
-          wayland-scripts = pkgs.callPackage ./nix/pkgs/com.sinanmohd.wayland-scripts { };
+          wayland-scripts = pkgs.callPackage ./nix/pkgs/com.sinanmohd.wayland-scripts {
+            alacritty = pkgs.alacritty-graphics;
+          };
           claude-code = pkgs.callPackage ./nix/pkgs/com.anthropic.claude-code.nix {
             inherit nixpak;
             libSinan = self.lib;
