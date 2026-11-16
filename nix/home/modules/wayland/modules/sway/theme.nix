@@ -66,7 +66,7 @@ in
         ${dconf} write ${key} "'${gtkTheme}'"
       fi
 
-      # NOTE: AGENT libadwaita ignores the theme name, but re-reads
+      # NOTE: [AGENT]: libadwaita ignores the theme name, but re-reads
       # ~/.config/gtk-4.0/gtk.css when the color scheme changes. Apps read the
       # value after the change signal, so give them time to see 'prefer-light'
       # before switching back
@@ -101,7 +101,7 @@ in
         ];
 
   programs.wallust.settings.templates = {
-    # NOTE: AGENT: libadwaita named colors, honoured by both adw-gtk3 (GTK 3)
+    # NOTE: [AGENT]: libadwaita named colors, honoured by both adw-gtk3 (GTK 3)
     # and libadwaita (GTK 4)
     # https://gnome.pages.gitlab.gnome.org/libadwaita/doc/main/named-colors.html
     gtk = {
@@ -150,10 +150,10 @@ in
       target = gtkColors;
     };
 
-    # NOTE: AGENT: QPalette color roles, in order:
-    # WindowText, Button, Light, Midlight, Dark, Mid, Text, BrightText, ButtonText, Base, Window,
-    # Shadow, Highlight, HighlightedText, Link, LinkVisited, AlternateBase, NoRole, ToolTipBase,
-    # ToolTipText, PlaceholderText
+    # NOTE: [AGENT]: QPalette color roles, in order: WindowText, Button, Light,
+    # Midlight, Dark, Mid, Text, BrightText, ButtonText, Base, Window, Shadow,
+    # Highlight, HighlightedText, Link, LinkVisited, AlternateBase, NoRole,
+    # ToolTipBase, ToolTipText, PlaceholderText
     qtct = {
       template = pkgs.writeText "qtct.conf" ''
         [ColorScheme]
@@ -164,10 +164,10 @@ in
       target = qtctColors;
     };
 
-    # NOTE: AGENT: Kirigami apps (kdeconnect-app, kdeconnect-settings) draw
+    # NOTE: [AGENT]: Kirigami apps (kdeconnect-app, kdeconnect-settings) draw
     # with qqc2-desktop-style, which takes its colors from KColorScheme in
-    # kdeglobals, not from the qtct palette. Without it they fall back to
-    # Breeze Light. Mirrors the qtct roles above
+    # kdeglobals, not from the qtct palette. Without it they fall back to Breeze
+    # Light. Mirrors the qtct roles above
     kdeglobals = {
       template =
         let
@@ -226,10 +226,10 @@ in
       extraCss = squareCsd;
     };
     gtk4 = {
-      # NOTE: AGENT: libadwaita ignores the theme name, it only picks up the
+      # NOTE: [AGENT]: libadwaita ignores the theme name, it only picks up the
       # named colors from user css
       theme = null;
-      # NOTE: AGENT: @import has to come before any other rule
+      # NOTE: [AGENT]: @import has to come before any other rule
       extraCss = ''
         @import url("file://${gtkColors}");
 
