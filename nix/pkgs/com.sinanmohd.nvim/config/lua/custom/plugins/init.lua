@@ -6,7 +6,7 @@
 -- Iterate over all Lua files in the plugins directory and load them.
 -- `vim.fs.dir()` iteration order is unspecified and must not be relied upon.
 -- NOTE: https://github.com/nvim-lua/kickstart.nvim/pull/2185
-local plugins_dir = vim.fs.dirname(debug.getinfo(1, 'S').source:sub(2))
+local plugins_dir = vim.api.nvim_get_runtime_file('lua/custom/plugins', false)[1]
 for file_name, type in vim.fs.dir(plugins_dir, { follow = true }) do
   if (type == 'file' or type == 'link') and file_name:match '%.lua$' and file_name ~= 'init.lua' then
     local module = file_name:gsub('%.lua$', '')
