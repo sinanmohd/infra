@@ -23,21 +23,60 @@ let
 
         nix-locate --minimal --at-root --regex '/bin/python[0-9.]*$'
 
-    # NOTE comments
+    # Block statements
 
-    When writing a NOTE comment in any file, format it as
-    `NOTE: [AGENT]: <text>` instead of plain `NOTE: <text>`, in whatever
-    comment syntax the language uses (`# NOTE: [AGENT]:`,
-    `// NOTE: [AGENT]:`, etc.). Bare `NOTE:` comments are written by the
-    user, so the tag keeps agent-written notes easy to spot, audit or strip.
+    Do not cram a block statement (an `if`, a loop, a function) into one
+    line, even when the body is a single short statement that would fit
+    within the 80 character limit. Put the body on its own indented
+    line:
 
-    Only tag notes you write, never add the tag to existing `NOTE:`
-    comments. Leave other comment kinds (`TODO:`, `FIXME:`, `XXX:`) alone.
+        if socket then
+          tmux = 'TMUX= tmux -S ' .. vim.fn.shellescape(socket)
+        end
 
-    When the user removes the `[AGENT]` tag from a note, they have adopted
-    it as their own. Rewrap that comment so its lines fill up to the 80
-    character limit again, since dropping the tag leaves the first line
-    short. Only change line breaks, keep the wording as it is.
+    instead of:
+
+        if socket then tmux = 'TMUX= tmux -S ' .. vim.fn.shellescape(socket) end
+
+    Use proper spacing as well: spaces around operators (`=`, `..`, `+`,
+    `==`) and after commas, and never drop them to shorten a line.
+
+    This applies to any language (lua, shell, nix, js, etc.). When
+    editing existing code, leave one line blocks that are already there
+    alone unless you are changing them anyway.
+
+    # Comment tags
+
+    Start every comment you add with a tag that says what kind of comment
+    it is, followed by `[AGENT]:`, so `NOTE: [AGENT]: <text>` instead of
+    plain `NOTE: <text>`, in whatever comment syntax the language uses
+    (`# TODO: [AGENT]:`, `// FIXME: [AGENT]:`, etc.). Comments with a
+    bare tag are written by the user, so `[AGENT]` keeps agent-written
+    comments easy to spot, audit or strip. The tags are:
+
+    - `NOTE:` explains why the code is the way it is, or context that is
+      not obvious from reading it
+    - `TODO:` work that is missing and should be done later
+    - `FIXME:` something known to be broken or wrong that needs a fix
+    - `HACK:` a workaround or ugly solution, say what it works around
+    - `WARN:` a pitfall where a careless change breaks things
+    - `PERF:` code written in a less obvious way for performance
+    - `XXX:` questionable code that needs a second look
+
+    Pick the tag that fits best, and fall back to `NOTE:` when none of
+    the others do. Do not add a comment without a tag, and do not invent
+    new tags. Continuation lines of a multi line comment are not tagged.
+    Doc comments that tooling reads (lua `---@param`, nix option
+    descriptions, docstrings) and shebangs are not comments in this
+    sense, leave them untagged.
+
+    Only tag comments you write. Never add a tag or `[AGENT]` to existing
+    comments, and never retag or rewrite them.
+
+    When the user removes the `[AGENT]` tag from a comment, they have
+    adopted it as their own. Rewrap that comment so its lines fill up to
+    the 80 character limit again, since dropping the tag leaves the first
+    line short. Only change line breaks, keep the wording as it is.
 
     # Shell scripts
 
