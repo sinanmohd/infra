@@ -76,6 +76,8 @@ let
             env.KUBECONFIG
             env.SSH_AUTH_SOCK
             (sloth.concat' sloth.homeDir "/.ssh/id_ed25519.pub")
+            (sloth.concat' sloth.homeDir "/.ssh/known_hosts")
+            (sloth.concat' sloth.homeDir "/.ssh/config")
             "/etc/passwd"
             (sloth.concat' sloth.xdgConfigHome "/git/config")
             (sloth.env "_NIX_USER_BINS")
