@@ -36,13 +36,22 @@ in
     "/share/xdg-desktop-portal"
   ];
 
-  # required by xdg-document-portal (nixpak)
-  security.wrappers.fusermount3 = {
-    source = "${pkgs.fuse3}/bin/fusermount3";
-    setuid = true;
-    owner = "root";
-    group = "root";
-  };
+  # NOTE: required by xdg-document-portal (nixpak), aslo
+  # kdeconnect unmounts sshfs with the fuse2 `fusermount -u`, without it
+  # a dropped connection leaves a stale mount that breaks every later mount
+  # with "Transport endpoint is not connected"
+  security.wrappers =
+    lib.genAttrs
+      [
+        "fusermount"
+        "fusermount3"
+      ]
+      (_: {
+        source = "${pkgs.fuse3}/bin/fusermount3";
+        setuid = true;
+        owner = "root";
+        group = "root";
+      });
 
   system.stateVersion = "26.05";
   time.timeZone = "Asia/Kolkata";
