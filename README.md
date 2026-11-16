@@ -5,17 +5,13 @@ secrets are encrypted using sops in repo. no, the keys are not in here.
 
 ## layout
 
-- nix/os:     nixos hosts and modules
-- nix/home:   home-manager, same idea
-- nix/global: stuff shared between os and home
+- apps:       argocd root application, syncs appsets
+- appsets:    argocd applicationsets, applied by apps/bootstrap.yaml
 - charts:     helm charts for the k8s cluster
-- appsets:    argocd applicationsets, applied by argocd.yaml
+- nix/global: stuff shared between os and home
+- nix/home:   home-manager, same idea
+- nix/os:     nixos hosts and modules
 - tofu:       opentofu modules
-
-## hosts
-
-- kay: server. dns, k8s, observability, the usual suspects
-- cez: laptop. secure boot via lanzaboote, disko, nixos-facter
 
 ## usage
 
@@ -29,4 +25,4 @@ deploy to a remote server
 
 bootstrap the k8s cluster, argocd takes it from here
 
-    kubectl apply -f argocd.yaml
+    kubectl apply -f apps/bootstrap.yaml
