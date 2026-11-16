@@ -58,17 +58,23 @@ let
     # Commit description
 
     Keep short commit descriptions as they are. When a description runs
-    longer than a few lines, start it with a TLDR paragraph written for
-    humans: a few plain sentences on what changed and why. After the TLDR,
-    add the full detail (context, reasoning, alternatives considered,
-    file-by-file notes) for readers who want it.
+    longer than a few lines, start it with an unnamed TLDR for humans: a
+    few plain sentences on what changed and why, with no `TLDR:` label.
+    After it, optionally add a section named `Context Dump` for agents,
+    holding the full detail (context, reasoning, alternatives considered,
+    file-by-file notes). In a PR description, make it collapsible with
+    `<details><summary>Context Dump</summary>`. Git commit descriptions
+    are plain text and cannot collapse, so there it is a plain
+    `Context Dump:` heading.
 
     Example:
 
         feat(nix/home/pc): init agents
 
-        TLDR: Share one context between claude-code and opencode so both
-        agents follow the same rules for missing commands and attribution.
+        Share one context between claude-code and opencode so both agents
+        follow the same rules for missing commands and attribution.
+
+        Context Dump:
 
         Previously opencode had its own module with a separate context...
 
