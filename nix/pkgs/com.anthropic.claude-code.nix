@@ -8,6 +8,7 @@
 }:
 let
   pkg_raw = pkgs.claude-code;
+  winch = pkgs.callPackage libSinan.nixpakWinch { };
   mkNixPak = nixpak.lib.nixpak {
     inherit lib pkgs;
   };
@@ -149,6 +150,6 @@ libSinan.nixpakEnv {
       export RW_ROOT="$rw_root"
     fi
 
-    exec ${lib.getExe wrapped.config.script} "$@"
+    exec ${winch} ${lib.getExe wrapped.config.script} "$@"
   '';
 }
