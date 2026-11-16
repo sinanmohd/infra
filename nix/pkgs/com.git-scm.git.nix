@@ -56,9 +56,9 @@ let
             "/etc/passwd"
             env.SSH_AUTH_SOCK
             (sloth.concat' sloth.homeDir "/.ssh/id_ed25519.pub")
-            # NOTE: ~/.ssh/config is a root owned nix store file,
-            # root is nobody inside the user namespace and ssh refuses it
-            # ("Bad owner"), bind a user owned copy instead
+            # NOTE: ~/.ssh/config is a root owned nix store file, root is nobody
+            # inside the user namespace and ssh refuses it ("Bad owner"), bind a
+            # user owned copy instead
             [
               (sloth.env "_SSH_CONFIG")
               (sloth.concat' sloth.homeDir "/.ssh/config")
