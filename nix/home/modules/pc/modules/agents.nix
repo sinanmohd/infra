@@ -23,6 +23,17 @@ let
 
         nix-locate --minimal --at-root --regex '/bin/python[0-9.]*$'
 
+    # NOTE comments
+
+    When writing a NOTE comment in any file, format it as
+    `NOTE: [AGENT]: <text>` instead of plain `NOTE: <text>`, in whatever
+    comment syntax the language uses (`# NOTE: [AGENT]:`,
+    `// NOTE: [AGENT]:`, etc.). Bare `NOTE:` comments are written by the
+    user, so the tag keeps agent-written notes easy to spot, audit or strip.
+
+    Only tag notes you write, never add the tag to existing `NOTE:`
+    comments. Leave other comment kinds (`TODO:`, `FIXME:`, `XXX:`) alone.
+
     # Commit description
 
     Keep short commit descriptions as they are. When a description runs
