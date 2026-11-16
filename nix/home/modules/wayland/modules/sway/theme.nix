@@ -76,17 +76,29 @@ in
     '';
 
   # NOTE: qt5ct/qt6ct reload their settings (and the color scheme) when an entry
-  # in their config dir is added or removed, so poke the dirs
+  # in their config dir is added or removed, so poke the dirs. Kirigami apps
+  # (kdeconnect-app) rebuild their KColorScheme on that palette change, but from
+  # a cached kdeglobals, so the kconfig notify signal has to go out first to
+  # make their KConfigWatcher reparse it
   programs.wallust.settings.hooks.qtct =
-    lib.concatMapStrings
-      (qtct: ''
-        touch ${config.xdg.configHome}/${qtct}/.wallust-reload
-        rm -f ${config.xdg.configHome}/${qtct}/.wallust-reload
-      '')
-      [
-        "qt5ct"
-        "qt6ct"
-      ];
+    let
+      gdbus = lib.getExe' pkgs.glib "gdbus";
+    in
+    ''
+      ${gdbus} emit --session --object-path /kdeglobals \
+        --signal org.kde.kconfig.notify.ConfigChanged \
+        "{'Colors:Window': [b'BackgroundNormal']}"
+    ''
+    +
+      lib.concatMapStrings
+        (qtct: ''
+          touch ${config.xdg.configHome}/${qtct}/.wallust-reload
+          rm -f ${config.xdg.configHome}/${qtct}/.wallust-reload
+        '')
+        [
+          "qt5ct"
+          "qt6ct"
+        ];
 
   programs.wallust.settings.templates = {
     # NOTE: AGENT: libadwaita named colors, honoured by both adw-gtk3 (GTK 3)
@@ -150,6 +162,58 @@ in
         disabled_colors={{foreground | darken(0.4)}}, {{background | lighten(0.1)}}, {{background | lighten(0.3)}}, {{background | lighten(0.2)}}, {{background | darken(0.2)}}, {{background | lighten(0.05)}}, {{foreground | darken(0.4)}}, {{foreground | darken(0.4)}}, {{foreground | darken(0.4)}}, {{background}}, {{background}}, #000000, {{background | lighten(0.2)}}, {{foreground | darken(0.4)}}, {{foreground | darken(0.4)}}, {{foreground | darken(0.4)}}, {{background | lighten(0.05)}}, {{background}}, {{background}}, {{foreground | darken(0.4)}}, {{foreground | darken(0.4)}}
       '';
       target = qtctColors;
+    };
+
+    # NOTE: AGENT: Kirigami apps (kdeconnect-app, kdeconnect-settings) draw
+    # with qqc2-desktop-style, which takes its colors from KColorScheme in
+    # kdeglobals, not from the qtct palette. Without it they fall back to
+    # Breeze Light. Mirrors the qtct roles above
+    kdeglobals = {
+      template =
+        let
+          mkSet =
+            name:
+            {
+              bg,
+              alt ? "{{background | lighten(0.05)}}",
+              fg ? "{{foreground}}",
+              inactive ? "{{foreground | darken(0.4)}}",
+              link ? "{{foreground}}",
+            }:
+            ''
+              [Colors:${name}]
+              BackgroundNormal=${bg}
+              BackgroundAlternate=${alt}
+              ForegroundNormal=${fg}
+              ForegroundInactive=${inactive}
+              ForegroundActive=${fg}
+              ForegroundLink=${link}
+              ForegroundVisited=${link}
+              ForegroundNegative={{color1}}
+              ForegroundNeutral={{color3}}
+              ForegroundPositive={{color2}}
+              DecorationFocus={{foreground}}
+              DecorationHover={{foreground}}
+            '';
+        in
+        pkgs.writeText "kdeglobals" (
+          lib.concatStringsSep "\n" [
+            (mkSet "Window" { bg = "{{background}}"; })
+            (mkSet "View" { bg = "{{background}}"; })
+            (mkSet "Button" { bg = "{{background | lighten(0.1)}}"; })
+            (mkSet "Header" { bg = "{{background | lighten(0.05)}}"; })
+            (mkSet "Tooltip" { bg = "{{background}}"; })
+            (mkSet "Complementary" { bg = "{{background}}"; })
+            (mkSet "Selection" {
+              bg = "{{foreground}}";
+              alt = "{{foreground | darken(0.2)}}";
+              fg = "{{background}}";
+              inactive = "{{background | lighten(0.2)}}";
+              link = "{{background}}";
+            })
+          ]
+        );
+      target = "${config.xdg.configHome}/kdeglobals";
     };
   };
 
