@@ -77,7 +77,13 @@ let
             env.SSH_AUTH_SOCK
             (sloth.concat' sloth.homeDir "/.ssh/id_ed25519.pub")
             (sloth.concat' sloth.homeDir "/.ssh/known_hosts")
-            (sloth.concat' sloth.homeDir "/.ssh/config")
+            # NOTE: ~/.ssh/config is a root owned nix store file,
+            # root is nobody inside the user namespace and ssh refuses it
+            # ("Bad owner"), bind a user owned copy instead
+            [
+              (sloth.env "_SSH_CONFIG")
+              (sloth.concat' sloth.homeDir "/.ssh/config")
+            ]
             "/etc/passwd"
             (sloth.concat' sloth.xdgConfigHome "/git/config")
             (sloth.env "_NIX_USER_BINS")
@@ -108,6 +114,11 @@ libSinan.nixpakEnv {
 
     # NOTE: allows access to user bin
     export _NIX_USER_BINS="/etc/profiles/per-user/$USER/bin"
+
+    # NOTE: user owned copy of ~/.ssh/config, see the bind
+    export _SSH_CONFIG="$XDG_RUNTIME_DIR/nixpak-claude-ssh-config"
+    rm -f "$_SSH_CONFIG"
+    (umask 077 && cat "$HOME/.ssh/config" >"$_SSH_CONFIG")
 
     export CLAUDE_CONFIG_DIR="''${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
     # NOTE: inconsistency when setting $CLAUDE_CONFIG_DIR

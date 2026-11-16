@@ -56,6 +56,13 @@ let
             "/etc/passwd"
             env.SSH_AUTH_SOCK
             (sloth.concat' sloth.homeDir "/.ssh/id_ed25519.pub")
+            # NOTE: ~/.ssh/config is a root owned nix store file,
+            # root is nobody inside the user namespace and ssh refuses it
+            # ("Bad owner"), bind a user owned copy instead
+            [
+              (sloth.env "_SSH_CONFIG")
+              (sloth.concat' sloth.homeDir "/.ssh/config")
+            ]
           ];
         };
       };
@@ -70,6 +77,13 @@ libSinan.nixpakEnv {
       (pkgs.writeShellScriptBin "git" ''
         # NOTE: allows access to user bin
         export _NIX_USER_BINS="/etc/profiles/per-user/$USER/bin"
+
+        # NOTE: user owned copy of ~/.ssh/config, git runs concurrently, so
+        # write a temp file and rename it into place
+        export _SSH_CONFIG="$XDG_RUNTIME_DIR/nixpak-git-ssh-config"
+        ssh_config_tmp="$(${pkgs.coreutils}/bin/mktemp "$_SSH_CONFIG.XXXXXX")"
+        ${pkgs.coreutils}/bin/cat "$HOME/.ssh/config" >"$ssh_config_tmp" 2>/dev/null
+        ${pkgs.coreutils}/bin/mv -f "$ssh_config_tmp" "$_SSH_CONFIG"
 
         if [ -z "$RW_ROOT" ]; then
           if rw_root="$(${lib.getExe git} rev-parse --show-toplevel 2>/dev/null)"; then
