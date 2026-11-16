@@ -106,5 +106,14 @@ in
         }
       );
     };
+
+    fallback.packages = lib.mkOption (
+      packages
+      // {
+        default = [
+          pkgs.noto-fonts
+        ];
+      }
+    );
   };
 }

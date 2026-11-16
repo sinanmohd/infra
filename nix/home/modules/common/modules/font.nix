@@ -3,7 +3,9 @@
   ...
 }:
 let
-  fontPackages = with config.global.font; monospace.packages ++ sans.packages ++ emoji.packages;
+  fontPackages =
+    with config.global.font;
+    monospace.packages ++ sans.packages ++ emoji.packages ++ fallback.packages;
   fontMonospace = config.global.font.monospace.name;
   fontSans = config.global.font.sans.name;
   fontEmoji = config.global.font.emoji.name;
