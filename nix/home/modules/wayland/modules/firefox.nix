@@ -162,7 +162,6 @@ in
           toolbar-menubar = [ "menubar-items" ];
           TabsToolbar = [
             "tabbrowser-tabs"
-            "new-tab-button"
             "alltabs-button"
           ];
         };
