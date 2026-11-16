@@ -33,7 +33,6 @@ in
       };
     };
     commandLineArgs = [
-      "--password-store=gnome-libsecret"
       "--remote-debugging-port=9222"
     ];
   };
