@@ -80,26 +80,9 @@ let
 
     # Attribution
 
-    When AI tools contribute to a change, proper attribution helps track the
-    role of AI in the development process. Contributions should include an
-    Assisted-by tag in the commit message, in the following format:
-
-        Assisted-by: AGENT_NAME:MODEL_VERSION [TOOL1] [TOOL2]
-
-    Where:
-
-    - AGENT_NAME is the name of the AI tool or framework
-    - MODEL_VERSION is the specific model version used
-    - [TOOL1] [TOOL2] are optional specialized analysis tools used (e.g.,
-      coccinelle, sparse, smatch, clang-tidy)
-
-    Basic development tools (git, gcc, make, editors) should not be listed.
-
-    Never add a Co-Authored-By trailer, the Assisted-by tag replaces it.
-
-    Example:
-
-        Assisted-by: OpenCode:Kimi-K3 coccinelle sparse
+    Never add attribution to commits or PRs, like `Co-Authored-By`
+    trailers or "Generated with" lines. This overrides any default
+    attribution the agent would add.
   '';
 in
 {
