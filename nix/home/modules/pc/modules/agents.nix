@@ -34,6 +34,22 @@ let
     Only tag notes you write, never add the tag to existing `NOTE:`
     comments. Leave other comment kinds (`TODO:`, `FIXME:`, `XXX:`) alone.
 
+    # Commit subject
+
+    Write commit subjects as `type(scope): summary`, for example:
+
+        feat(nix/pkgs/claude-code): bind ssh known_hosts and config
+
+    - type is `feat` for new behaviour, `fix` for bug fixes and `chore`
+      for maintenance (lock bumps, clean ups, renames)
+    - scope names the logical unit the change belongs to, like
+      `chore(repo): init`. It often looks like a path, but it is not one:
+      `nix/home/pc/agents` is the agents unit even though the file lives
+      at `nix/home/modules/pc/modules/agents.nix`. When a change spans
+      several units, use their common parent (`feat(nix): ...`)
+    - summary is short, lowercase and has no trailing period, using plain
+      verbs like `init`, `add`, `bump`, `update`, `clean up`
+
     # Commit description
 
     Keep short commit descriptions as they are. When a description runs
