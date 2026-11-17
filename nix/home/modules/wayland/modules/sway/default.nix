@@ -134,6 +134,9 @@ in
         "[app_id=\"org.kde.kdeconnect.daemon\"]" = "floating enable";
         "[app_id=\"org.kde.kdeconnect.app\"]" = "floating enable";
         "[app_id=\"firefox\" title=\"^Library$\"]" = "floating enable";
+        "[app_id=\"firefox\" title=\"^Picture-in-Picture$\"]" = "floating enable";
+        # NOTE: chromium's picture in picture window has no app_id
+        "[app_id=\"^$\" title=\"^Picture in picture$\"]" = "floating enable";
         # NOTE: client side decorated windows (gtk file picker) gets border
         "[all]" = "border pixel 2";
         # NOTE: the presenter pointer is a transparent fullscreen window, and
