@@ -6,8 +6,8 @@
   libSinan,
 }:
 let
-  # NOTE: [AGENT]: hot reload custom_themes from config.json, Patches the built
-  # app.asar instead of the source to avoid rebuilding element
+  # NOTE: hot reload custom_themes from config.json, Patches the built app.asar
+  # instead of the source to avoid rebuilding element
   pkg_raw =
     let
       element = pkgs.element-desktop;
