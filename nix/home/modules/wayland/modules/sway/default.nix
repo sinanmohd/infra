@@ -133,9 +133,11 @@ in
         "[app_id=\"floater\"]" = "floating enable";
         "[app_id=\"org.kde.kdeconnect.app\"]" = "floating enable";
         "[app_id=\"firefox\" title=\"^Library$\"]" = "floating enable";
-        "[app_id=\"firefox\" title=\"^Picture-in-Picture$\"]" = "floating enable, sticky enable";
+        "[app_id=\"firefox\" title=\"^Picture-in-Picture$\"]" =
+          "floating enable, sticky enable, resize set 25 ppt 23 ppt, move position 75 ppt 0 ppt, move left 75 px, move down 75 px";
         # NOTE: chromium's picture in picture window has no app_id
-        "[app_id=\"^$\" title=\"^Picture in picture$\"]" = "floating enable, sticky enable";
+        "[app_id=\"^$\" title=\"^Picture in picture$\"]" =
+          "floating enable, sticky enable, resize set 25 ppt 23 ppt, move position 75 ppt 0 ppt, move left 75 px, move down 75 px";
         # NOTE: client side decorated windows (gtk file picker) gets border
         "[all]" = "border pixel 2";
         # NOTE: the presenter pointer is a transparent fullscreen window, and
