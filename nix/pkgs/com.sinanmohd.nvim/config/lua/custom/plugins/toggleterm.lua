@@ -19,12 +19,6 @@ local cmd = tmux
   .. [[ \; set -t ]]
   .. session_name
   .. ' destroy-unattached '
-  .. [[ \; set -t ]]
-  .. session_name
-  .. " window-status-current-format '#{window_index}:#{pane_current_command}' "
-  .. [[ \; set -t ]]
-  .. session_name
-  .. " window-status-format '#{window_index}:#{pane_current_command}' "
   .. [[ \; attach -t ]]
   .. session_name
 
