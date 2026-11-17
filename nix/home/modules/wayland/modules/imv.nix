@@ -5,6 +5,6 @@ in
 {
   programs.imv = {
     enable = true;
-    settings.binds.w = ''exec ${wayland-scripts}/bin/cwall "$imv_current_file"'';
+    settings.binds."<Ctrl+w>" =''exec ${wayland-scripts}/bin/cwall "$imv_current_file"'';
   };
 }

@@ -14,6 +14,7 @@ in
     ./modules/firefox.nix
     ./modules/mimeapps.nix
     ./modules/imv.nix
+    ./modules/yazi.nix
     ./modules/ttyasrt.nix
     ./modules/sway
     ./modules/waybar
