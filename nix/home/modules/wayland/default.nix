@@ -27,7 +27,7 @@ in
     ./modules/gimp.nix
     ./modules/voxtype.nix
     ./modules/speak.nix
-    ./modules/crash-notify.nix
+    ./modules/crash-handler.nix
   ];
 
   home = {

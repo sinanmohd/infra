@@ -9,8 +9,8 @@ let
   # journal entry. same on every machine
   coredump_message_id = "fc2e22bc6ee647b6b90729ab34a250b1";
 
-  crash_notify = pkgs.writeShellApplication {
-    name = "crash-notify";
+  crash_handler = pkgs.writeShellApplication {
+    name = "crash-handler";
 
     runtimeInputs = [
       pkgs.systemd
@@ -55,14 +55,14 @@ let
   };
 in
 {
-  systemd.user.services.crash-notify = {
+  systemd.user.services.crash-handler = {
     Unit = {
       Description = "Notify when a program crashes";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
     };
     Service = {
-      ExecStart = lib.getExe crash_notify;
+      ExecStart = lib.getExe crash_handler;
       Restart = "on-failure";
     };
     Install.WantedBy = [ "graphical-session.target" ];
