@@ -17,6 +17,7 @@ let
       pkgs.jq
       pkgs.libnotify
       pkgs.less
+      pkgs.wl-clipboard
       config.programs.alacritty.package
     ];
 
@@ -34,6 +35,7 @@ let
         # NOTE: default less flags quit right away when the text fits on one
         # screen
         if [ "$action" = default ]; then
+          coredumpctl --no-pager info "$1" | wl-copy || :
           SYSTEMD_LESS=RSMK \
             alacritty --class floater -e coredumpctl info "$1"
         fi
