@@ -1,4 +1,9 @@
-{ pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   # NOTE: SD_MESSAGE_COREDUMP, the id systemd gives every "process dumped core"
   # journal entry. same on every machine
@@ -7,20 +12,42 @@ let
   crash_notify = pkgs.writeShellApplication {
     name = "crash-notify";
 
-    runtimeInputs = with pkgs; [
-      systemd
-      jq
-      libnotify
+    runtimeInputs = [
+      pkgs.systemd
+      pkgs.jq
+      pkgs.libnotify
+      pkgs.less
+      config.programs.alacritty.package
     ];
 
     text = ''
+      # NOTE: [AGENT]: usage: notify <pid> <text>
+      # notify-send waits until the notification is closed and prints
+      # "default" when it was clicked, so this is run in the background
+      notify() {
+        action="$(
+          notify-send --urgency=critical --expire-time=0 \
+            --action=default=Details \
+            "  Application crashed" "$2" || :
+        )"
+
+        # NOTE: default less flags quit right away when the text fits on one
+        # screen
+        if [ "$action" = default ]; then
+          SYSTEMD_LESS=RSMK \
+            alacritty --class floater -e coredumpctl info "$1"
+        fi
+      }
+
       journalctl --follow --lines=0 --output=json \
         MESSAGE_ID=${coredump_message_id} |
         jq --unbuffered -r '
-          "\(.COREDUMP_COMM // "unknown") (\(.COREDUMP_SIGNAL_NAME // "crash"))"
+          "\(.COREDUMP_PID) "
+            + "\(.COREDUMP_COMM // "unknown") "
+            + "(\(.COREDUMP_SIGNAL_NAME // "crash"))"
         ' |
-        while read -r program; do
-          notify-send --urgency=critical "  Application crashed" "$program" || :
+        while read -r pid program; do
+          notify "$pid" "$program" &
         done
     '';
   };
