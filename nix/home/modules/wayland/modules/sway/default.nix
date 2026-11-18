@@ -191,6 +191,7 @@ in
       for_window = {
         "[app_id=\"floater\"]" = "floating enable";
         "[app_id=\"org.kde.kdeconnect.app\"]" = "floating enable";
+        "[app_id=\"xdg-desktop-portal-gtk\"]" = "floating enable";
         "[app_id=\"firefox\" title=\"^Library$\"]" = "floating enable";
         "[app_id=\"firefox\" title=\"^Picture-in-Picture$\"]" = picture_in_picture;
         # NOTE: chromium's picture in picture window has no app_id
