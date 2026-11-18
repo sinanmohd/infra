@@ -22,6 +22,65 @@ let
       config.global.font.sans.sizePx != null
     ) " ${lib.toString config.global.font.sans.sizePx}px";
 
+  # NOTE: browsers resize the picture in picture window whenever the video
+  # changes, and sway grows a floating window from its top left corner, so it
+  # drifts off the top right one. poll while such a window is open and put it
+  # back
+  pip_margin = 75;
+  pip_anchor = pkgs.writeShellApplication {
+    name = "sway-pip-anchor";
+
+    runtimeInputs = with pkgs; [
+      coreutils
+      jq
+      sway
+    ];
+
+    text = ''
+      # NOTE: prints one line per picture in picture window, like "267 288x164
+      # 1227 109": the window id, its current size, and the x and y to move it
+      # to so that it sits in the top right corner. Exits non zero when no such
+      # window is open, which ends the loop below
+      windows() {
+        swaymsg -t get_tree | jq -er --argjson margin ${toString pip_margin} '
+          .. | objects | select(.type == "workspace") | .rect as $ws
+            | .floating_nodes[]
+            | select(.fullscreen_mode == 0)
+            | select(.name // "" | test("^Picture[- ]in[- ][Pp]icture$"))
+            | [
+                .id,
+                "\(.rect.width)x\(.rect.height)",
+                $ws.x + $ws.width - .rect.width - $margin,
+                $ws.y + $margin
+              ]
+            | join(" ")
+        '
+      }
+
+      # NOTE: only move a window when its not manually dragged away
+      seen=
+      while current="$(windows)"; do
+        printf '%s\n' "$current" | while read -r id size x y; do
+          case "$seen" in
+          *"$id $size $x $y"*) ;;
+          *)
+            swaymsg "[con_id=$id] move absolute position $x $y" > /dev/null || :
+            ;;
+          esac
+        done
+
+        seen="$current"
+        sleep 0.5
+      done
+    '';
+  };
+
+  picture_in_picture =
+    "floating enable, sticky enable, resize set 25 ppt 23 ppt, "
+    + "move position 75 ppt 0 ppt, "
+    + "move left ${toString pip_margin} px, move down ${toString pip_margin} px, "
+    + "exec ${lib.getExe pip_anchor}";
+
   termux_sway_yazi = pkgs.writeShellApplication {
     name = "termux_sway_yazi";
 
@@ -133,11 +192,9 @@ in
         "[app_id=\"floater\"]" = "floating enable";
         "[app_id=\"org.kde.kdeconnect.app\"]" = "floating enable";
         "[app_id=\"firefox\" title=\"^Library$\"]" = "floating enable";
-        "[app_id=\"firefox\" title=\"^Picture-in-Picture$\"]" =
-          "floating enable, sticky enable, resize set 25 ppt 23 ppt, move position 75 ppt 0 ppt, move left 75 px, move down 75 px";
+        "[app_id=\"firefox\" title=\"^Picture-in-Picture$\"]" = picture_in_picture;
         # NOTE: chromium's picture in picture window has no app_id
-        "[app_id=\"^$\" title=\"^Picture in picture$\"]" =
-          "floating enable, sticky enable, resize set 25 ppt 23 ppt, move position 75 ppt 0 ppt, move left 75 px, move down 75 px";
+        "[app_id=\"^$\" title=\"^Picture in picture$\"]" = picture_in_picture;
         # NOTE: client side decorated windows (gtk file picker) gets border
         "[all]" = "border pixel 2";
         # NOTE: the presenter pointer is a transparent fullscreen window, and
