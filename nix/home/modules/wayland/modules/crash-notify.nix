@@ -29,7 +29,7 @@ let
         action="$(
           notify-send --urgency=critical --expire-time=0 \
             --action=default=Details \
-            "  Application crashed" "$2" || :
+            "  Program crashed" "$2" || :
         )"
 
         # NOTE: default less flags quit right away when the text fits on one
@@ -57,7 +57,7 @@ in
 {
   systemd.user.services.crash-notify = {
     Unit = {
-      Description = "Notify when an application crashes";
+      Description = "Notify when a program crashes";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
     };
