@@ -12,6 +12,9 @@
     ];
 
   nix = {
+    daemonCPUSchedPolicy = "idle";
+    daemonIOSchedClass = "idle";
+
     gc = {
       automatic = true;
       dates = "weekly";
