@@ -26,7 +26,6 @@ in
     ./modules/chromium.nix
     ./modules/gimp.nix
     ./modules/voxtype.nix
-    ./modules/speak.nix
     ./modules/crash-handler.nix
   ];
 

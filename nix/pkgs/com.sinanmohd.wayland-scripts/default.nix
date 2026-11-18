@@ -23,7 +23,6 @@
   fetchurl,
   gnused,
   piper-tts,
-  socat,
 }:
 let
   piperVoice =
@@ -40,6 +39,16 @@ let
         hash = "sha256-A/H6BiK4BGMoNZLZesqfbomuw0WlxWtyV3I+AJPFi2w=";
       };
     };
+
+  # NOTE: own mpris bus name, so waybar shows the speak icon and playerctl can
+  # target speak apart from other mpv players
+  speakMpris = mpvScripts.mpris.overrideAttrs (old: {
+    postPatch = (old.postPatch or "") + ''
+      substituteInPlace mpris.c \
+        --replace-fail '"org.mpris.MediaPlayer2.mpv"' '"org.mpris.MediaPlayer2.speak"'
+    '';
+  });
+  speakMpv = mpv.override { scripts = [ speakMpris ]; };
 in
 stdenvNoCC.mkDerivation {
   pname = "wayland-scipts";
@@ -130,9 +139,8 @@ stdenvNoCC.mkDerivation {
         lib.makeBinPath [
           coreutils
           gnused
-          jq
+          speakMpv
           piper-tts
-          socat
         ]
       }
   '';
