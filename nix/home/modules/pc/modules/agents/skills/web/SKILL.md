@@ -1,6 +1,15 @@
 ---
 name: web
-description: Collect data from websites and write PDF reports, using curl when it works and the user's own Chromium (remote debugging port 9222) when the user should watch or curl gets blocked. Covers deal hunting with best picks and likely scams (like "find good RAM deals on OLX"), and official online processes (like "apply for an international driving permit"), which are only explored with dummy data and turned into a PDF guide for the user to complete themselves.
+description: >-
+  Collect data from websites and write PDF reports, using curl when it
+  works and the user's own Chromium (remote debugging port 9222) when the
+  user should watch or curl gets blocked. Covers deal hunting with best
+  picks and likely scams (like "find good RAM deals on OLX"), and official
+  online processes (like "apply for an international driving permit"),
+  which are only explored with dummy data and turned into a PDF guide for
+  the user to complete themselves.
+metadata:
+  author: sinanmohd
 ---
 
 # Web
