@@ -12,6 +12,8 @@ metadata:
   author: sinanmohd
 ---
 
+<!-- markdownlint-configure-file { "MD013": { "code_blocks": false } } -->
+
 # Web
 
 Use curl when it is faster and gets the data, like plain pages or JSON
@@ -98,7 +100,10 @@ broken layout, wrapped columns or wrong numbers:
 Every number in the text (medians, "cheapest", "only other") must come
 from the data, recompute it after any filtering change.
 
-## Deal hunting (examples: "find good RAM deals on OLX", "good deals on a MacBook Pro 16 M1 Pro")
+## Deal hunting
+
+Examples: "find good RAM deals on OLX", "good deals on a MacBook Pro 16
+M1 Pro".
 
 1. Search several phrasings of the query and merge the results by
    listing id, one phrasing misses listings another finds.

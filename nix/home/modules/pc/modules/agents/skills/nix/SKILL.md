@@ -56,15 +56,15 @@ more spaces and wrapped at 80 columns.
    comment on the function, do not keep both.
 2. **`# Inputs`**: one entry per argument, in the order the function
    takes them. The argument name in backticks on its own line, a blank
-   line, then the description as a markdown definition starting with
-   `: `.
+   line, then the description as a markdown definition, a line starting
+   with a colon and a space.
 3. **`# Type`**: the signature in a fenced block without a language,
    named after the binding, like `toJsonList :: String -> Path ->
    Derivation`.
 4. **`# Examples`** (optional): add one when the input or output shape
    is not obvious from the type, in the nixpkgs form:
 
-   ````
+   ````markdown
    # Examples
    :::{.example}
    ## `toJsonList` usage example
