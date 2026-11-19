@@ -187,6 +187,7 @@
         "pc"
         "wayland"
         "network"
+        "k8s"
       ] makeNixosModules;
       nixosConfigurations = lib.genAttrs [
         "cez"
