@@ -26,6 +26,33 @@ let
     ```
     toJsonList :: String -> Path -> Derivation
     ```
+
+    # Examples
+    :::{.example}
+    ## `toJsonList` usage example
+
+    ```nix
+    # demo.yaml:
+    #   apiVersion: v1
+    #   kind: Namespace
+    #   metadata:
+    #     name: demo
+    #   ---
+    #   apiVersion: v1
+    #   kind: ConfigMap
+    #   metadata:
+    #     name: demo
+    #     namespace: demo
+    #   ---
+
+    lib.importJSON (toJsonList "demo" ./demo.yaml)
+    => [
+      { apiVersion = "v1"; kind = "Namespace"; metadata.name = "demo"; }
+      { apiVersion = "v1"; kind = "ConfigMap"; metadata = { name = "demo"; namespace = "demo"; }; }
+    ]
+    ```
+
+    :::
   */
   toJsonList =
     name: src:
@@ -51,6 +78,34 @@ let
     ```
     reconcile :: AttrSet -> AttrSet
     ```
+
+    # Examples
+    :::{.example}
+    ## `reconcile` usage example
+
+    ```nix
+    reconcile {
+      apiVersion = "v1";
+      kind = "Namespace";
+      metadata = {
+        name = "demo";
+        labels.app = "demo";
+      };
+    }
+    => {
+      apiVersion = "v1";
+      kind = "Namespace";
+      metadata = {
+        name = "demo";
+        labels = {
+          app = "demo";
+          "addonmanager.kubernetes.io/mode" = "Reconcile";
+        };
+      };
+    }
+    ```
+
+    :::
   */
   reconcile =
     object:
