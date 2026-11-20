@@ -231,12 +231,12 @@
         };
       };
 
-      checks =
-        let
-          deployChecks = builtins.mapAttrs (
-            system: deployLib: deployLib.deployChecks self.deploy
-          ) deploy-rs.lib;
-        in
-        lib.filterAttrs (k: v: lib.elem k supportedSystems) deployChecks;
+      checks = forAllSystems (
+        { system, pkgs }:
+        {
+          cert-toolkit = pkgs.callPackage ./nix/os/tests/cert-toolkit.nix { };
+        }
+        // (deploy-rs.lib.${system}.deployChecks self.deploy)
+      );
     };
 }
