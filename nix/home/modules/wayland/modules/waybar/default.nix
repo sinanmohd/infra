@@ -15,7 +15,6 @@ in
     (pkgs.wttrbar.overrideAttrs (oldAttrs: {
       patches = (oldAttrs.patches or [ ]) ++ [
         ./0001-fix-align-toolbar-text.patch
-        ./0002-use-nerd-icon-if-cannot-acces-wttr.in.patch
       ];
     }))
   ];

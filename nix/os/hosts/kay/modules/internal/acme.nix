@@ -15,8 +15,6 @@ in
       extraDomainNames = [ "*.${domain}" ];
 
       dnsProvider = "rfc2136";
-      dnsPropagationCheck = false; # local DNS server
-
       inherit environmentFile;
       group = config.services.nginx.group;
     };
