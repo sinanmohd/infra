@@ -124,7 +124,12 @@
           inherit system;
           pkgs = import nixpkgs {
             inherit system;
-            config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "claude-code" ];
+            config.allowUnfreePredicate =
+              pkg:
+              builtins.elem (lib.getName pkg) [
+                "claude-code"
+                "antigravity-cli"
+              ];
           };
         };
       supportedSystems = [
@@ -148,6 +153,10 @@
             libSinan = self.lib;
           };
           opencode = pkgs.callPackage ./nix/pkgs/ly.anoma.opencode.nix {
+            inherit nixpak;
+            libSinan = self.lib;
+          };
+          antigravity-cli = pkgs.callPackage ./nix/pkgs/com.google.antigravity-cli.nix {
             inherit nixpak;
             libSinan = self.lib;
           };

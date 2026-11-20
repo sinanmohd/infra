@@ -153,4 +153,11 @@ in
     inherit context;
     skills = ./skills;
   };
+
+  programs.antigravity-cli = {
+    enable = true;
+    package = pkgsSinan.antigravity-cli;
+    context.GEMINI = context;
+    skills = ./skills;
+  };
 }
