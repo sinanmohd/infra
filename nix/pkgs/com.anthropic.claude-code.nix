@@ -95,8 +95,6 @@ let
               "/etc/static/alsa"
               "/etc/alsa"
             ]
-            # TODO: comma fails withoout this, but `nix run` does not ?
-            "/nix/var/nix"
           ];
         };
       };
