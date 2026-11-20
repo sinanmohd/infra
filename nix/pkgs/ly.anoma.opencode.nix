@@ -23,17 +23,23 @@ let
       '';
       imports = [ nixpak.nixpakModules.network ];
 
+      # NOTE: allow plugins access to notify-send
+      dbus.policies."org.freedesktop.Notifications" = "talk";
+      # NOTE: login host portal (OpenURI)
+      dbus.rules.call."org.freedesktop.portal.Desktop" = [
+        "org.freedesktop.portal.OpenURI.*@/org/freedesktop/portal/desktop"
+        "org.freedesktop.DBus.Introspectable.Introspect@/org/freedesktop/portal/desktop"
+      ];
+
       bubblewrap = rec {
         newSession = true;
-
-        # NOTE: even if claude does not need this, other programs that agent
-        # runs will need this
-        tmpfs = [ "/tmp" ];
-
         clearEnv = true;
         env = {
           HOME = sloth.env "HOME";
           TERM = sloth.env "TERM";
+          # NOTE:: nixpkgs xdg-open only looks for
+          # $XDG_RUNTIME_DIR/flatpak-info, nixpak writes /.flatpak-info
+          NIXOS_XDG_OPEN_USE_PORTAL = "1";
           # NOTE: nixpak inside nixpak hard
           PATH = sloth.concat [
             "${pkgs.git}/bin:"
@@ -42,10 +48,18 @@ let
           # NOTE: isolated agent access
           SOPS_AGE_KEY_FILE = (sloth.concat' sloth.xdgConfigHome "/sops/age/agent.keys.txt");
           KUBECONFIG = (sloth.concat' sloth.homeDir "/.kube/agent.config");
+          # NOTE: ssh commit signing through the agent, the private
+          # key outside
+          SSH_AUTH_SOCK = (sloth.concat' sloth.runtimeDir "/ssh-agent");
         };
 
         bind = {
           rw = [
+            # NOTE: other programs that agent runs might need this
+            [
+              (sloth.mkdir (sloth.concat' sloth.runtimeDir "/nixpak-opencode-tmp"))
+              "/tmp"
+            ]
             # NOTE: main dev environment
             (sloth.env "RW_ROOT")
             # NOTE: caught from strace -f -e openat opencode 2>&1 | grep -E "\.config|\.local|\.cache"
@@ -56,11 +70,22 @@ let
           ro = [
             env.SOPS_AGE_KEY_FILE
             env.KUBECONFIG
+            env.SSH_AUTH_SOCK
+            (sloth.concat' sloth.homeDir "/.ssh/id_ed25519.pub")
+            (sloth.concat' sloth.homeDir "/.ssh/known_hosts")
+            # NOTE: ~/.ssh/config is a root owned nix store file, root
+            # is nobody inside the user namespace and ssh refuses it ("Bad
+            # owner"), bind a user owned copy instead
+            [
+              (sloth.env "NIXPAK_SSH_CONFIG")
+              (sloth.concat' sloth.homeDir "/.ssh/config")
+            ]
+            "/etc/passwd"
             (sloth.concat' sloth.xdgConfigHome "/git/config")
             (sloth.env "_NIX_USER_BINS")
             "/run/current-system/sw/bin"
-            # TODO: comma fails withoout this, but `nix run` does not ?
-            "/nix/var/nix"
+            # NOTE: commands are spawned via a hardcoded /bin/sh
+            "/bin/sh"
           ];
         };
       };
@@ -82,10 +107,17 @@ libSinan.nixpakEnv {
     # NOTE: RBAC isolated agent k8s access
     export KUBECONFIG="$HOME/.kube/agent.config"
 
+    # NOTE: user owned copy of ~/.ssh/config, see the bind
+    export NIXPAK_SSH_CONFIG="$XDG_RUNTIME_DIR/nixpak-opencode-ssh-config"
+    rm -f "$NIXPAK_SSH_CONFIG"
+    (umask 077 && cat "$HOME/.ssh/config" >"$NIXPAK_SSH_CONFIG")
+
     if [ -z "$RW_ROOT" ]; then
       if ! rw_root="$(${lib.getExe git} rev-parse --show-toplevel 2>/dev/null)"; then
-        err "Not inside a git repo. Please navigate to a git repository or manually set \$RW_ROOT."
-        exit 1
+        # NOTE: outside a git repo, fall back to the downloads dir
+        rw_root="$(${pkgs.xdg-user-dirs}/bin/xdg-user-dir DOWNLOAD)"
+        mkdir -p "$rw_root"
+        cd "$rw_root" || exit 1
       fi
 
       case "$rw_root" in
