@@ -234,7 +234,7 @@
       checks = forAllSystems (
         { system, pkgs }:
         {
-          cert-toolkit = pkgs.callPackage ./nix/os/tests/cert-toolkit.nix { };
+          cert-toolkit = pkgs.callPackage ./nix/os/tests/cert-toolkit.nix { inherit self; };
         }
         // (deploy-rs.lib.${system}.deployChecks self.deploy)
       );

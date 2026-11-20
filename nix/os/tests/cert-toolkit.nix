@@ -1,11 +1,13 @@
 {
   lib,
   runCommand,
+  nixos,
+  self,
 }:
 let
   /**
-    Evaluate the cert toolkit on its own, outside of a NixOS system, with
-    stand ins for the NixOS and sops-nix options it reads.
+    Evaluate the cert toolkit in a NixOS system that imports the k8s
+    module of this flake, the way a host gets it.
 
     # Inputs
 
@@ -32,19 +34,9 @@ let
   */
   evalToolkit =
     settings:
-    (lib.evalModules {
-      modules = [
-        ../modules/k8s/modules/cert-toolkit
-        {
-          options.networking.hostName = lib.mkOption { default = "host"; };
-          options.sops.secrets = lib.mkOption {
-            type = lib.types.attrsOf lib.types.anything;
-            default = { };
-          };
-          config._module.args.inputsSinan.self.outPath = "/nonexistent";
-          config.certToolkit = settings;
-        }
-      ];
+    (nixos {
+      imports = [ self.nixosModules.k8s ];
+      certToolkit = settings;
     }).config.certToolkit;
 
   failures = lib.runTests {
