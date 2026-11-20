@@ -84,8 +84,6 @@ let
             (sloth.concat' sloth.xdgConfigHome "/git/config")
             (sloth.env "_NIX_USER_BINS")
             "/run/current-system/sw/bin"
-            # NOTE: commands are spawned via a hardcoded /bin/sh
-            "/bin/sh"
           ];
         };
       };

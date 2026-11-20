@@ -87,8 +87,6 @@ let
             (sloth.concat' sloth.xdgConfigHome "/git/config")
             (sloth.env "NIXPAK_NIX_USER_BINS")
             "/run/current-system/sw/bin"
-            # NOTE: agy has /bin/sh hardcoded for running commands
-            "/bin/sh"
             # NOTE: microphone input
             [
               "/etc/static/alsa"
