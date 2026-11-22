@@ -12,6 +12,39 @@ let
   wallustColors = "${config.xdg.dataHome}/wallust/swayimg.lua";
   wl-copy = lib.getExe' pkgs.wl-clipboard "wl-copy";
   gio = lib.getExe' pkgs.glib "gio";
+  restoreTrash = pkgs.writeShellScript "swayimg-restore-trash" ''
+    target="$1"
+    if [ -z "$target" ]; then
+      exit 0
+    fi
+
+    tab="$(printf '\t')"
+    name="$(${gio} trash --list 2>/dev/null | while IFS="$tab" read -r t_name t_path; do
+      if [ "$t_path" = "$target" ]; then
+        printf '%s' "$t_name"
+        break
+      fi
+    done)"
+
+    if [ -n "$name" ]; then
+      ${gio} trash --restore "trash:///$name" 2>/dev/null
+    else
+      for info in "${config.xdg.dataHome}/Trash/info"/*.trashinfo; do
+        if [ ! -f "$info" ]; then
+          continue
+        fi
+
+        if grep -q "^Path=$target$" "$info" 2>/dev/null; then
+          base="''${info##*/}"
+          base="''${base%.trashinfo}"
+          if mv "${config.xdg.dataHome}/Trash/files/$base" "$target" 2>/dev/null; then
+            rm -f "$info"
+          fi
+          break
+        fi
+      done
+    fi
+  '';
 in
 {
   programs.swayimg = {
@@ -84,33 +117,57 @@ in
       end)
 
       -- NOTE: trash
+      local trash_history = {}
+
       local function trash_image(img)
         if img then
+          table.insert(trash_history, img.path)
           os.execute(string.format("${gio} trash %q &", img.path))
           swayimg.imagelist.remove(img.path)
         end
       end
+
+      local function undo_trash()
+        if #trash_history > 0 then
+          local path = table.remove(trash_history)
+          os.execute(string.format("${restoreTrash} %q", path))
+          if swayimg.mode == "viewer" then
+            swayimg.viewer.open_path(path)
+          elseif swayimg.mode == "gallery" then
+            swayimg.gallery.reload()
+            swayimg.gallery.select_path(path)
+          elseif swayimg.mode == "slideshow" then
+            swayimg.slideshow.open_path(path)
+          end
+        end
+      end
+
       swayimg.viewer.on_key("d", function()
         trash_image(swayimg.viewer.get_image())
       end)
+      swayimg.viewer.on_key("u", undo_trash)
+
       swayimg.gallery.on_key("d", function()
         trash_image(swayimg.gallery.get_image())
       end)
+      swayimg.gallery.on_key("u", undo_trash)
+
       swayimg.slideshow.on_key("d", function()
         trash_image(swayimg.slideshow.get_image())
       end)
+      swayimg.slideshow.on_key("u", undo_trash)
 
       -- NOTE: vim
       swayimg.viewer.on_key({ "Down", "KP_Down", "Right", "KP_Right", "l", "j" }, function()
         swayimg.viewer.open("next")
       end)
-      swayimg.viewer.on_key({  "Up", "KP_Up" , "Left", "KP_Left", "h", "k" }, function()
+      swayimg.viewer.on_key({ "Up", "KP_Up", "Left", "KP_Left", "h", "k" }, function()
         swayimg.viewer.open("prev")
       end)
       swayimg.viewer.on_key("g", function()
         swayimg.viewer.open("first")
       end)
-      swayimg.viewer.on_key({ "G", "Shift+g", "Shift-g" }, function()
+      swayimg.viewer.on_key({ "Shift+g", "Shift-g" }, function()
         swayimg.viewer.open("last")
       end)
 
@@ -129,10 +186,9 @@ in
       swayimg.gallery.on_key("g", function()
         swayimg.gallery.select("first")
       end)
-      swayimg.gallery.on_key({ "G", "Shift+g", "Shift-g" }, function()
+      swayimg.gallery.on_key({ "Shift+g", "Shift-g" }, function()
         swayimg.gallery.select("last")
       end)
-
 
       swayimg.slideshow.on_key({ "Right", "KP_Right", "l", "j", "Down", "KP_Down" }, function()
         swayimg.slideshow.open("next")
@@ -141,9 +197,9 @@ in
         swayimg.slideshow.open("prev")
       end)
       swayimg.slideshow.on_key("g", function()
-          swayimg.slideshow.open("first")
+        swayimg.slideshow.open("first")
       end)
-      swayimg.slideshow.on_key({ "G", "Shift+g", "Shift-g" }, function()
+      swayimg.slideshow.on_key({ "Shift+g", "Shift-g" }, function()
         swayimg.slideshow.open("last")
       end)
     '';
