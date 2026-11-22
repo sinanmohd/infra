@@ -27,7 +27,7 @@ in
     ./modules/ssh.nix
     ./modules/dev.nix
     ./modules/neovim
-    ./modules/yazi.nix
+    ./modules/yazi
     ./modules/btop.nix
     ./modules/font.nix
   ];

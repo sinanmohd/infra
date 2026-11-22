@@ -1,0 +1,21 @@
+--- a/yazi-emulator/src/emulator.rs
++++ b/yazi-emulator/src/emulator.rs
+@@ -142,8 +142,17 @@
+ 		result
+ 	}
+ 
++	// NOTE: never probe the outer terminal through tmux
++	// passthrough. tmux writes passthrough to every client showing the pane
++	// and treats the replies as keys, so another client attached to the same
++	// window (a phone over mosh) becomes the latest one and the window gets
++	// resized to it. Take tmux's own answers instead, supports sixel since 3.4
++	// WARN: this will break preview on kitty and ghostty (only KGP, no sixel support)
+ 	pub fn needs_passthrough(&self) -> bool {
+-		self.brand.get() == Brand::Tmux && self.mux.get().is_none()
++		if self.brand.get() == Brand::Tmux && self.mux.get().is_none() {
++			self.mux.set(Some(Mux { sixel: self.sixel.get() }));
++		}
++		false
+ 	}
+ 
+ 	fn force_16t((w, h): (u16, u16)) -> bool {
