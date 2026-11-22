@@ -13,7 +13,7 @@ in
     ./modules/zathura.nix
     ./modules/firefox.nix
     ./modules/mimeapps.nix
-    ./modules/imv.nix
+    ./modules/swayimg.nix
     ./modules/yazi.nix
     ./modules/ttyasrt.nix
     ./modules/sway

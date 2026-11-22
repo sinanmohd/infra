@@ -4,15 +4,15 @@
     enable = true;
     defaultApplications = {
       # image
-      "image/avif" = "imv-dir.desktop";
+      "image/avif" = "swayimg.desktop";
       "image/gif" = "mpv.desktop";
-      "image/heic" = "imv-dir.desktop";
-      "image/heif" = "imv-dir.desktop";
-      "image/jpeg" = "imv-dir.desktop";
-      "image/png" = "imv-dir.desktop";
-      "image/svg+xml" = "imv-dir.desktop";
-      "image/webp" = "imv-dir.desktop";
-      "image/x-jxl" = "imv-dir.desktop";
+      "image/heic" = "swayimg.desktop";
+      "image/heif" = "swayimg.desktop";
+      "image/jpeg" = "swayimg.desktop";
+      "image/png" = "swayimg.desktop";
+      "image/svg+xml" = "swayimg.desktop";
+      "image/webp" = "swayimg.desktop";
+      "image/x-jxl" = "swayimg.desktop";
 
       # media
       "audio/basic" = "mpv.desktop";
