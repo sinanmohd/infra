@@ -6,6 +6,8 @@ in
   programs.swayimg = {
     enable = true;
     initLua = ''
+      swayimg.imagelist.adjacent = true
+
       local function set_wallpaper(img)
         if img then
           os.execute(string.format("${wayland-scripts}/bin/cwall %q &", img.path))
