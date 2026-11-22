@@ -1,6 +1,14 @@
-{ pkgs, inputsSinan, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  inputsSinan,
+  ...
+}:
 let
   wayland-scripts = inputsSinan.self.packages.${pkgs.stdenv.hostPlatform.system}.wayland-scripts;
+  fontName = config.global.font.sans.name;
+  fontSize = config.global.font.sans.sizePx;
 in
 {
   programs.swayimg = {
@@ -8,6 +16,12 @@ in
     initLua = ''
       swayimg.overlay = false
       swayimg.imagelist.adjacent = true
+      swayimg.text.visible = false
+      swayimg.text.timeout = 0
+      swayimg.text.font = "${fontName}"
+      ${lib.optionalString (fontSize != null) ''
+        swayimg.text.size = ${lib.toString fontSize}
+      ''}
 
       local function set_wallpaper(img)
         if img then
