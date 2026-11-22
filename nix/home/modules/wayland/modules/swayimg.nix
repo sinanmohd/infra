@@ -6,45 +6,15 @@
   ...
 }:
 let
-  wayland-scripts = inputsSinan.self.packages.${pkgs.stdenv.hostPlatform.system}.wayland-scripts;
   fontName = config.global.font.sans.name;
   fontSize = config.global.font.sans.sizePx;
   wallustColors = "${config.xdg.dataHome}/wallust/swayimg.lua";
+
+  wayland-scripts = inputsSinan.self.packages.${pkgs.stdenv.hostPlatform.system}.wayland-scripts;
+  cwall = lib.getExe' wayland-scripts "cwall";
   wl-copy = lib.getExe' pkgs.wl-clipboard "wl-copy";
-  gio = lib.getExe' pkgs.glib "gio";
-  restoreTrash = pkgs.writeShellScript "swayimg-restore-trash" ''
-    target="$1"
-    if [ -z "$target" ]; then
-      exit 0
-    fi
-
-    tab="$(printf '\t')"
-    name="$(${gio} trash --list 2>/dev/null | while IFS="$tab" read -r t_name t_path; do
-      if [ "$t_path" = "$target" ]; then
-        printf '%s' "$t_name"
-        break
-      fi
-    done)"
-
-    if [ -n "$name" ]; then
-      ${gio} trash --restore "trash:///$name" 2>/dev/null
-    else
-      for info in "${config.xdg.dataHome}/Trash/info"/*.trashinfo; do
-        if [ ! -f "$info" ]; then
-          continue
-        fi
-
-        if grep -q "^Path=$target$" "$info" 2>/dev/null; then
-          base="''${info##*/}"
-          base="''${base%.trashinfo}"
-          if mv "${config.xdg.dataHome}/Trash/files/$base" "$target" 2>/dev/null; then
-            rm -f "$info"
-          fi
-          break
-        fi
-      done
-    fi
-  '';
+  notify-send = lib.getExe' pkgs.libnotify "notify-send";
+  trash = lib.getExe pkgs.trashy;
 in
 {
   programs.swayimg = {
@@ -71,7 +41,7 @@ in
       -- NOTE: cwall
       local function set_wallpaper(img)
         if img then
-          os.execute(string.format("${wayland-scripts}/bin/cwall %q &", img.path))
+          os.execute(string.format("${cwall} %q &", img.path))
         end
       end
       swayimg.viewer.on_key({ "Ctrl+w", "Ctrl-w" }, function()
@@ -87,7 +57,11 @@ in
       -- NOTE: cp img
       local function copy_image(img)
         if img then
-          os.execute(string.format("${wl-copy} < %q &", img.path))
+          os.execute(string.format(
+            "(${wl-copy} < %q && ${notify-send} -a swayimg -i %q swayimg 'Copied image to clipboard') &",
+            img.path,
+            img.path
+          ))
         end
       end
       swayimg.viewer.on_key("c", function()
@@ -103,7 +77,11 @@ in
       -- NOTE: cp path
       local function copy_path(img)
         if img then
-          os.execute(string.format("printf '%%s' %q | ${wl-copy} &", img.path))
+          os.execute(string.format(
+            "(printf '%%s' %q | ${wl-copy} && ${notify-send} -a swayimg -i %q swayimg 'Copied path to clipboard') &",
+            img.path,
+            img.path
+          ))
         end
       end
       swayimg.viewer.on_key("p", function()
@@ -118,46 +96,48 @@ in
 
       -- NOTE: trash
       local trash_history = {}
-
       local function trash_image(img)
-        if img then
-          table.insert(trash_history, img.path)
-          os.execute(string.format("${gio} trash %q &", img.path))
-          swayimg.imagelist.remove(img.path)
+        if not img then
+          return
         end
+
+        table.insert(trash_history, img.path)
+        os.execute(string.format("${trash} put %q", img.path))
+        swayimg.imagelist.remove(img.path)
       end
 
       local function undo_trash()
-        if #trash_history > 0 then
-          local path = table.remove(trash_history)
-          os.execute(string.format("${restoreTrash} %q", path))
-          if swayimg.mode == "viewer" then
-            swayimg.viewer.open_path(path)
-          elseif swayimg.mode == "gallery" then
-            swayimg.gallery.reload()
-            swayimg.gallery.select_path(path)
-          elseif swayimg.mode == "slideshow" then
-            swayimg.slideshow.open_path(path)
-          end
+        if #trash_history == 0 then
+          return
+        end
+
+        local path = table.remove(trash_history)
+        os.execute(string.format("${trash} restore --exact %q --force", path))
+
+        swayimg.imagelist.add(path)
+        if swayimg.mode == "viewer" then
+          swayimg.viewer.open_path(path)
+        elseif swayimg.mode == "gallery" then
+          swayimg.gallery.reload()
+          swayimg.gallery.select_path(path)
+        elseif swayimg.mode == "slideshow" then
+          swayimg.slideshow.open_path(path)
         end
       end
-
       swayimg.viewer.on_key("d", function()
         trash_image(swayimg.viewer.get_image())
       end)
       swayimg.viewer.on_key("u", undo_trash)
-
       swayimg.gallery.on_key("d", function()
         trash_image(swayimg.gallery.get_image())
       end)
       swayimg.gallery.on_key("u", undo_trash)
-
       swayimg.slideshow.on_key("d", function()
         trash_image(swayimg.slideshow.get_image())
       end)
       swayimg.slideshow.on_key("u", undo_trash)
 
-      -- NOTE: vim
+      -- NOTE: vim like kbs
       swayimg.viewer.on_key({ "Down", "KP_Down", "Right", "KP_Right", "l", "j" }, function()
         swayimg.viewer.open("next")
       end)
@@ -188,6 +168,9 @@ in
       end)
       swayimg.gallery.on_key({ "Shift+g", "Shift-g" }, function()
         swayimg.gallery.select("last")
+      end)
+      swayimg.gallery.on_key("m", function()
+        swayimg.gallery.mark_image()
       end)
 
       swayimg.slideshow.on_key({ "Right", "KP_Right", "l", "j", "Down", "KP_Down" }, function()
