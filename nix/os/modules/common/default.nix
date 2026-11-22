@@ -57,6 +57,11 @@ in
   time.timeZone = "Asia/Kolkata";
   sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
   programs.nix-index-database.comma.enable = true;
+  programs.nix-index = {
+    enableBashIntegration = false;
+    enableFishIntegration = false;
+    enableZshIntegration = false;
+  };
 
   zramSwap.enable = true;
   swapDevices = lib.mkDefault [
