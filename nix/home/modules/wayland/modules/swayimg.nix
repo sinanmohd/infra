@@ -194,12 +194,17 @@ in
       template = pkgs.writeText "swayimg.lua" ''
         swayimg.text.color = 0xff{{foreground | strip}}
         swayimg.text.shadow = 0x80{{background | strip}}
+
         swayimg.viewer.set_window_background(0xff{{background | strip}})
         swayimg.slideshow.set_window_background(0xff{{background | strip}})
         swayimg.gallery.window_color = 0xff{{background | strip}}
         swayimg.gallery.border_color = 0xff{{foreground | strip}}
-        swayimg.gallery.selected_color = 0xff{{background | lighten(0.15) | strip}}
-        swayimg.gallery.unselected_color = 0xff{{background | lighten(0.05) | strip}}
+        swayimg.gallery.selected_color = 0xff{{background | strip}}
+        swayimg.gallery.unselected_color = 0xff{{background | strip}}
+
+        swayimg.viewer.mark_color = 0xff{{foreground | strip}}
+        swayimg.gallery.mark_color = 0xff{{foreground | strip}}
+        swayimg.slideshow.mark_color = 0xff{{foreground | strip}}
       '';
       target = wallustColors;
     };
