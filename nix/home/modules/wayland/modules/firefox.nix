@@ -13,7 +13,10 @@ let
   '';
 in
 {
-  home.packages = [ pywalfox ];
+  home = {
+    packages = [ pywalfox ];
+    sessionVariables.BROWSER = "firefox";
+  };
 
   # NOTE: `pywalfox install` points the manifest at pywalfox-native directly,
   # bypassing the TMPDIR wrapper, so manage it here instead

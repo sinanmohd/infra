@@ -5,7 +5,7 @@
     defaultApplications = {
       # image
       "image/avif" = "swayimg.desktop";
-      "image/gif" = "mpv.desktop";
+      "image/gif" = "swayimg.desktop";
       "image/heic" = "swayimg.desktop";
       "image/heif" = "swayimg.desktop";
       "image/jpeg" = "swayimg.desktop";
@@ -20,7 +20,7 @@
       "audio/ogg" = "mpv.desktop";
       "video/mp4" = "mpv.desktop";
       "video/webm" = "mpv.desktop";
-      "video/x-matroska" = "mpv.desktop";
+      "video/matroska" = "mpv.desktop";
       "audio/x-opus+ogg" = "mpv.desktop";
 
       # browser
