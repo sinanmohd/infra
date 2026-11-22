@@ -94,6 +94,8 @@ let
             ]
             "/etc/localtime"
           ];
+          # NOTE: allow nixos vm tests
+          dev = [ "/dev/kvm" ];
         };
       };
     };

@@ -96,6 +96,8 @@ let
               "/etc/alsa"
             ]
           ];
+          # NOTE: allow nixos vm tests
+          dev = [ "/dev/kvm" ];
         };
       };
     };

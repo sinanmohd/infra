@@ -85,6 +85,8 @@ let
             (sloth.env "_NIX_USER_BINS")
             "/run/current-system/sw/bin"
           ];
+          # NOTE: allow nixos vm tests
+          dev = [ "/dev/kvm" ];
         };
       };
     };
