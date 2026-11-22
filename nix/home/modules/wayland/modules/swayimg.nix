@@ -6,6 +6,7 @@ in
   programs.swayimg = {
     enable = true;
     initLua = ''
+      swayimg.overlay = false
       swayimg.imagelist.adjacent = true
 
       local function set_wallpaper(img)
