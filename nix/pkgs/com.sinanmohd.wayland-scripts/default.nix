@@ -79,6 +79,7 @@ stdenvNoCC.mkDerivation {
           ffmpeg
           libnotify
           sway
+          util-linux
         ]
       }
     wrapProgram $out/bin/ttyasrt \

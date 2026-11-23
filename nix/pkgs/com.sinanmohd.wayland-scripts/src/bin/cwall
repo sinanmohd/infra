@@ -76,6 +76,10 @@ updatewall() {
 # MAIN #
 ########
 
+# NOTE: run at idle cpu and io priority
+chrt --idle --pid 0 "$$"
+ionice --class idle --pid "$$"
+
 if [ "$#" -eq 0 ]; then
 	input="$walldir"
 elif [ "$1" = "-h" ]; then
