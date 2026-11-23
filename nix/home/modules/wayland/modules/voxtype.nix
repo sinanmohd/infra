@@ -54,7 +54,11 @@ in
       moonshine.model = toString model;
 
       audio.feedback = {
-        enabled = true;
+        # TODO: UPSTREAM: feedback keeps a rodio output stream open for the
+        # daemon's lifetime, burning ~6% cpu at idle. fixed in 1.3.2 by
+        # https://github.com/peteonrails/voxtype/commit/6c3ff96a6d3a616fc7680d13d28ff76e6a515f14
+        # turn it back on after updating
+        enabled = false;
         volume = 0.32;
       };
 
