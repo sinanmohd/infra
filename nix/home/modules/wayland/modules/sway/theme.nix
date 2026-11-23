@@ -269,10 +269,24 @@ in
           # meant for light backgrounds (kdeconnect tray menu)
           icon_theme = "breeze-dark";
         };
-        # NOTE: unset, qtct reports ToolButtonFollowStyle and apps like
-        # qbittorrent draw (truncated) text beside toolbar icons. 0 = IconOnly,
-        # Qt's default without qtct
-        Interface.toolbutton_style = 0;
+        Interface = {
+          # NOTE: unset, qtct reports ToolButtonFollowStyle and apps like
+          # qbittorrent draw (truncated) text beside toolbar icons. 0 = IconOnly,
+          # Qt's default without qtct
+          toolbutton_style = 0;
+          # NOTE: [AGENT]: Fusion fills checkboxes with Base and outlines them
+          # with Window darkened, both the wallust background, so empty boxes
+          # vanish on dark themes (qbittorrent add torrent file list). Only the
+          # unchecked state is styled, a styled indicator loses its native
+          # check mark
+          stylesheets = "${pkgs.writeText "checkbox.qss" ''
+            QCheckBox::indicator:unchecked,
+            QAbstractItemView::indicator:unchecked {
+              border: 1px solid palette(text);
+              background: palette(base);
+            }
+          ''}";
+        };
         Fonts = {
           general = mkQtFont config.global.font.sans;
           fixed = mkQtFont config.global.font.monospace;
