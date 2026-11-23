@@ -189,25 +189,27 @@ in
       include = "~/.local/share/wallust/sway.conf";
       font = "pango:${font}";
       for_window = {
-        "[app_id=\"floater\"]" = "floating enable";
-        "[app_id=\"org.kde.kdeconnect.app\"]" = "floating enable";
-        "[app_id=\"xdg-desktop-portal-gtk\"]" = "floating enable";
-        "[app_id=\"firefox\" title=\"^Library$\"]" = "floating enable";
-        "[app_id=\"firefox\" title=\"^Picture-in-Picture$\"]" = picture_in_picture;
+        "[app_id=floater]" = "floating enable";
+        "[app_id=org.kde.kdeconnect.app]" = "floating enable";
+        "[app_id=xdg-desktop-portal-gtk]" = "floating enable";
+        "[app_id=firefox title=^Library$]" = "floating enable";
+        "[app_id=firefox title=^Picture-in-Picture$]" = picture_in_picture;
+        # NOTE: float qbit's add torrent dialog is titled after the torrent
+        "[app_id=org.qbittorrent.qBittorrent title=\"^(?!.*qBittorrent v[0-9])\"]" = "floating enable";
         # NOTE: chromium's picture in picture window has no app_id
-        "[app_id=\"^$\" title=\"^Picture in picture$\"]" = picture_in_picture;
+        "[app_id=^$ title=\"^Picture in picture$\"]" = picture_in_picture;
         # NOTE: client side decorated windows (gtk file picker) gets border
         "[all]" = "border pixel 2";
         # NOTE: the presenter pointer is a transparent fullscreen window, and
         # sway draws nothing but black behind a fullscreen one unlike KDE.
-        "[app_id=\"org.kde.kdeconnect.daemon\" title=\"^KDE Connect Daemon$\"]" =
+        "[app_id=org.kde.kdeconnect.daemon title=\"^KDE Connect Daemon$\"]" =
           "fullscreen disable, floating enable, border none, resize set 100 ppt 100 ppt, move position center";
       };
       assign = {
         "[app_id=Alacritty]" = 1;
         "[app_id=firefox]" = 2;
 
-        "[app_id=org.qbittorrent.qBittorrent]" = 6;
+        "[app_id=org.qbittorrent.qBittorrent title=\"qBittorrent v[0-9]\"]" = 6;
         "[app_id=chromium-browser]" = 7;
         "[app_id=Slack]" = 8;
         "[app_id=element]" = 9;
