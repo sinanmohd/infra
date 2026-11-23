@@ -38,6 +38,9 @@ let
         sockets.pipewire = true;
         clearEnv = true;
         env = {
+          # NOTE: binding the daemon socket makes /nix/var/nix a writable tmpfs,
+          # so nix would pick a local store on its own
+          NIX_REMOTE = "daemon";
           CLAUDE_CONFIG_DIR = sloth.env "CLAUDE_CONFIG_DIR";
           HOME = sloth.env "HOME";
           TERM = sloth.env "TERM";
@@ -58,6 +61,10 @@ let
 
         bind = {
           rw = [
+            # NOTE: lets nix build into the real store through the daemon,
+            # without it nix falls back to a store in the home directory, which
+            # is a small tmpfs here
+            "/nix/var/nix/daemon-socket"
             # NOTE: claude code scratchpad, other programs that agent runs
             [
               (sloth.mkdir (sloth.concat' sloth.runtimeDir "/nixpak-claude-tmp"))

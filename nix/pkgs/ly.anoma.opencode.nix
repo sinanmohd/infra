@@ -35,6 +35,9 @@ let
         newSession = true;
         clearEnv = true;
         env = {
+          # NOTE: binding the daemon socket makes /nix/var/nix a writable tmpfs,
+          # so nix would pick a local store on its own
+          NIX_REMOTE = "daemon";
           HOME = sloth.env "HOME";
           TERM = sloth.env "TERM";
           # NOTE:: nixpkgs xdg-open only looks for
@@ -55,6 +58,10 @@ let
 
         bind = {
           rw = [
+            # NOTE: lets nix build into the real store through the daemon,
+            # without it nix falls back to a store in the home directory, which
+            # is a small tmpfs here
+            "/nix/var/nix/daemon-socket"
             # NOTE: other programs that agent runs might need this
             [
               (sloth.mkdir (sloth.concat' sloth.runtimeDir "/nixpak-opencode-tmp"))
