@@ -244,6 +244,7 @@
         { system, pkgs }:
         {
           cert-toolkit = pkgs.callPackage ./nix/os/tests/cert-toolkit.nix { inherit self; };
+          k8s = pkgs.callPackage ./nix/os/tests/k8s.nix { inherit self; };
         }
         // (deploy-rs.lib.${system}.deployChecks self.deploy)
       );
