@@ -247,6 +247,12 @@
           k8s = pkgs.callPackage ./nix/os/tests/k8s.nix { inherit self; };
         }
         // (deploy-rs.lib.${system}.deployChecks self.deploy)
+        // (lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux (
+          import ./nix/os/tests/vm-k8s.nix {
+            inherit lib self;
+            inherit (pkgs) testers;
+          }
+        ))
       );
     };
 }
