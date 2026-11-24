@@ -116,7 +116,6 @@ let
       type = lib.types.str;
       example = "876000h";
     };
-    usages = lib.mkOption usagesOption;
     names = lib.mkOption { type = namesType; };
     commonName = lib.mkOption {
       type = lib.types.str;
@@ -149,6 +148,11 @@ let
     };
   };
 
+  # NOTE: only leaves take usages, cfssl hardcode root usage
+  leafOptions = certOptions // {
+    usages = lib.mkOption usagesOption;
+  };
+
   defaultsOptions = sopsOptions // {
     key = lib.mkOption {
       type = lib.types.nullOr keyType;
@@ -163,6 +167,9 @@ let
       default = { };
     };
     hosts = lib.mkOption hostsOption;
+  };
+
+  leafDefaultsOptions = defaultsOptions // {
     usages = lib.mkOption usagesOption;
   };
 
@@ -178,6 +185,11 @@ let
 
     : Override priority of the definitions, higher is weaker
 
+    `options`
+
+    : Options of the receiving set, only fields it declares are passed
+      down
+
     `base`
 
     : Evaluated defaults to pass down
@@ -185,7 +197,7 @@ let
     # Type
 
     ```
-    mkDerivedConfig :: Int -> AttrSet -> AttrSet
+    mkDerivedConfig :: Int -> AttrSet -> AttrSet -> AttrSet
     ```
 
     # Examples
@@ -193,7 +205,7 @@ let
     ## `mkDerivedConfig` usage example
 
     ```nix
-    mkDerivedConfig (mkDefaultPriority + 9) {
+    mkDerivedConfig (mkDefaultPriority + 9) leafDefaultsOptions {
       expiry = "42h";
       key = null;
       hosts = [ "h1" ];
@@ -220,16 +232,17 @@ let
     :::
   */
   mkDerivedConfig =
-    priority: base:
+    priority: options: base:
     let
       fromBase = name: lib.mkIf (base.${name} != null) (lib.mkOverride priority base.${name});
+      fields = lib.filter (name: options ? ${name}) [
+        "expiry"
+        "key"
+        "hosts"
+        "usages"
+      ];
     in
-    lib.genAttrs [
-      "expiry"
-      "key"
-      "hosts"
-      "usages"
-    ] fromBase
+    lib.genAttrs fields fromBase
     // {
       sops = lib.mapAttrs (_: lib.mkOverride priority) base.sops;
       names = lib.mapAttrs (_: lib.mkOverride priority) base.names;
@@ -244,6 +257,11 @@ let
 
     : Override priority of the inherited definitions
 
+    `options`
+
+    : Options of the new defaults set, `defaultsOptions` or
+      `leafDefaultsOptions`
+
     `base`
 
     : Evaluated defaults to inherit from
@@ -251,7 +269,7 @@ let
     # Type
 
     ```
-    mkDerivedDefaults :: Int -> AttrSet -> Option
+    mkDerivedDefaults :: Int -> AttrSet -> AttrSet -> Option
     ```
 
     # Examples
@@ -260,7 +278,7 @@ let
 
     ```nix
     # options
-    sinan.certToolkit.rootDefaults = mkDerivedDefaults (mkDefaultPriority + 9) config.sinan.certToolkit.defaults;
+    sinan.certToolkit.rootDefaults = mkDerivedDefaults (mkDefaultPriority + 9) defaultsOptions config.sinan.certToolkit.defaults;
 
     # config
     sinan.certToolkit.defaults.expiry = "42h";
@@ -272,11 +290,11 @@ let
     :::
   */
   mkDerivedDefaults =
-    priority: base:
+    priority: options: base:
     lib.mkOption {
       type = lib.types.submodule {
-        options = defaultsOptions;
-        config = mkDerivedConfig priority base;
+        inherit options;
+        config = mkDerivedConfig priority options base;
       };
       default = { };
     };
@@ -324,9 +342,9 @@ let
     lib.types.submodule (
       { name, config, ... }:
       {
-        options = certOptions;
+        options = leafOptions;
         config = lib.mkMerge [
-          (mkDerivedConfig (mkDefaultPriority + 7) ca.leafDefaults)
+          (mkDerivedConfig (mkDefaultPriority + 7) leafOptions ca.leafDefaults)
           {
             names = lib.mkDefault { };
             id = "leaf-${hostName}-${caName}-${name}";
@@ -388,7 +406,7 @@ let
       {
         options = certOptions;
         config = lib.mkMerge [
-          (mkDerivedConfig (mkDefaultPriority + 7) cfg.rootDefaults)
+          (mkDerivedConfig (mkDefaultPriority + 7) certOptions cfg.rootDefaults)
           {
             names = lib.mkDefault { };
             hosts = lib.mkDefault [ ];
@@ -419,7 +437,7 @@ let
     { name, config, ... }:
     {
       options = {
-        leafDefaults = mkDerivedDefaults (mkDefaultPriority + 8) cfg.leafDefaults;
+        leafDefaults = mkDerivedDefaults (mkDefaultPriority + 8) leafDefaultsOptions cfg.leafDefaults;
         root = lib.mkOption { type = rootCertType name; };
         leaves = lib.mkOption {
           type = lib.types.attrsOf (leafCertType name config);
@@ -459,11 +477,11 @@ in
       '';
     };
     defaults = lib.mkOption {
-      type = lib.types.submodule { options = defaultsOptions; };
+      type = lib.types.submodule { options = leafDefaultsOptions; };
       default = { };
     };
-    rootDefaults = mkDerivedDefaults (mkDefaultPriority + 9) cfg.defaults;
-    leafDefaults = mkDerivedDefaults (mkDefaultPriority + 9) cfg.defaults;
+    rootDefaults = mkDerivedDefaults (mkDefaultPriority + 9) defaultsOptions cfg.defaults;
+    leafDefaults = mkDerivedDefaults (mkDefaultPriority + 9) leafDefaultsOptions cfg.defaults;
     cas = lib.mkOption {
       type = lib.types.attrsOf caType;
       default = { };
