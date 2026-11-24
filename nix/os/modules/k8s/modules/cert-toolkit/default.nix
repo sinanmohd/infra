@@ -1,11 +1,19 @@
 {
   config,
   lib,
+  pkgs,
   inputsSinan,
   ...
 }:
 let
-  cfg = config.certToolkit;
+  cfg = config.sinan.certToolkit;
+  mkDefaultPriority = (lib.mkDefault null).priority;
+
+  inherit (import ./lib.nix { inherit lib; })
+    mkRootCsrFile
+    mkLeafCsrFile
+    mkSigningConfigFile
+    ;
 
   /**
     Copy a file of this flake into its own store path, so a host only
@@ -28,7 +36,7 @@ let
     ## `flakeFile` usage example
 
     ```nix
-    flakeFile "nix/os/modules/k8s/certs/ca/etcd.crt"
+    flakeFile "nix/os/modules/k8s/certs/root/etcd.crt"
     => "/nix/store/3lgfq21nci0l432g5g5xbh48j0i7xxqh-etcd.crt"
     ```
 
@@ -96,6 +104,13 @@ let
   };
 
   certOptions = sopsOptions // {
+    package = lib.mkOption {
+      type = lib.types.package;
+      description = ''
+        The derivation creating the certificate and its key, only used
+        with `sinan.certToolkit.createCerts`
+      '';
+    };
     key = lib.mkOption { type = keyType; };
     expiry = lib.mkOption {
       type = lib.types.str;
@@ -108,7 +123,7 @@ let
       description = "Common Name";
     };
     hosts = lib.mkOption hostsOption;
-    path = lib.mkOption {
+    certPath = lib.mkOption {
       type = lib.types.path;
       description = "The store path of the certificate";
     };
@@ -116,21 +131,21 @@ let
       type = lib.types.str;
       description = "The path of the decrypted key on the host";
     };
-    sopsFile = lib.mkOption {
+    sopsKeyPath = lib.mkOption {
       type = lib.types.path;
       description = "The store path of the sops encrypted key";
     };
-    relativePath = lib.mkOption {
+    relativeCertPath = lib.mkOption {
       type = lib.types.str;
       description = "The path of the certificate relative to the flake root";
     };
-    relativeSopsFile = lib.mkOption {
+    relativeSopsKeyPath = lib.mkOption {
       type = lib.types.str;
       description = "The path of the sops encrypted key relative to the flake root";
     };
     id = lib.mkOption {
       type = lib.types.str;
-      description = "A unique id to identify the cert";
+      description = "A unique id to identify the root or leaf cert";
     };
   };
 
@@ -152,10 +167,10 @@ let
   };
 
   /**
-    Definitions that pass defaults down to a cert, CA or a more specific
-    defaults set. Each level uses a lower priority than the one below it,
-    so the most specific definition wins and anything set directly wins
-    over all defaults.
+    Definitions that pass defaults down to a root or leaf cert, a CA or a
+    more specific defaults set. Each level uses a lower priority than the
+    one below it, so the most specific definition wins and anything set
+    directly wins over all defaults.
 
     # Inputs
 
@@ -178,7 +193,7 @@ let
     ## `mkDerivedConfig` usage example
 
     ```nix
-    mkDerivedConfig 1009 {
+    mkDerivedConfig (mkDefaultPriority + 9) {
       expiry = "42h";
       key = null;
       hosts = [ "h1" ];
@@ -245,12 +260,12 @@ let
 
     ```nix
     # options
-    certToolkit.caDefaults = mkDerivedDefaults 1009 config.certToolkit.defaults;
+    sinan.certToolkit.rootDefaults = mkDerivedDefaults (mkDefaultPriority + 9) config.sinan.certToolkit.defaults;
 
     # config
-    certToolkit.defaults.expiry = "42h";
+    sinan.certToolkit.defaults.expiry = "42h";
 
-    config.certToolkit.caDefaults.expiry
+    config.sinan.certToolkit.rootDefaults.expiry
     => "42h"
     ```
 
@@ -267,9 +282,9 @@ let
     };
 
   /**
-    Type of `certToolkit.cas.<ca>.certs.<name>`, a leaf cert of this host
-    signed by the root cert of its CA. Its key is deployed to the host
-    with sops-nix.
+    Type of `sinan.certToolkit.cas.<ca>.leaves.<name>`, a leaf cert of
+    this host signed by the root cert of its CA. Its key is deployed to
+    the host with sops-nix.
 
     # Inputs
 
@@ -279,7 +294,7 @@ let
 
     `ca`
 
-    : Evaluated `certToolkit.cas.<ca>`, for its cert defaults
+    : Evaluated `sinan.certToolkit.cas.<ca>`, for its `leafDefaults`
 
     # Type
 
@@ -292,8 +307,8 @@ let
     ## `leafCertType` usage example
 
     ```nix
-    # in the type of certToolkit.cas.etcd
-    certs = lib.mkOption {
+    # in the type of sinan.certToolkit.cas.etcd
+    leaves = lib.mkOption {
       type = lib.types.attrsOf (leafCertType "etcd" config);
     };
     ```
@@ -311,23 +326,37 @@ let
       {
         options = certOptions;
         config = lib.mkMerge [
-          (mkDerivedConfig 1007 ca.certDefaults)
+          (mkDerivedConfig (mkDefaultPriority + 7) ca.leafDefaults)
           {
             names = lib.mkDefault { };
-            id = "derived-${hostName}-${caName}-${name}";
-            relativePath = "${cfg.dir}/derived/${hostName}/${caName}-${name}.crt";
-            relativeSopsFile = "${cfg.dir}/derived/${hostName}/${caName}-${name}.key.sops";
-            path = flakeFile config.relativePath;
-            sopsFile = flakeFile config.relativeSopsFile;
-            keyPath = secrets."certtoolkit-${config.id}".path;
+            id = "leaf-${hostName}-${caName}-${name}";
+            relativeCertPath = "${cfg.dir}/leaf/${hostName}/${caName}-${name}.crt";
+            relativeSopsKeyPath = "${cfg.dir}/leaf/${hostName}/${caName}-${name}.key.sops";
+            package = lib.mkDefault (
+              pkgs.runCommand "certtoolkit-${config.id}" { nativeBuildInputs = [ pkgs.cfssl ]; } ''
+                cfssl gencert -loglevel 2 \
+                  -ca ${ca.root.package}/ca.crt \
+                  -ca-key ${ca.root.package}/ca.key \
+                  -config ${mkSigningConfigFile config} \
+                  ${mkLeafCsrFile config} \
+                  | cfssljson -bare cert
+                install -D --mode 444 cert.pem "$out/cert.crt"
+                install -D --mode 444 cert-key.pem "$out/cert.key"
+              ''
+            );
+            certPath =
+              if cfg.createCerts then "${config.package}/cert.crt" else flakeFile config.relativeCertPath;
+            sopsKeyPath = flakeFile config.relativeSopsKeyPath;
+            keyPath =
+              if cfg.createCerts then "${config.package}/cert.key" else secrets."certtoolkit-${config.id}".path;
           }
         ];
       }
     );
 
   /**
-    Type of `certToolkit.cas.<ca>.root`, the self signed root cert of a CA.
-    Its key stays in the repo and is never deployed to a host.
+    Type of `sinan.certToolkit.cas.<ca>.root`, the self signed root cert
+    of a CA. Its key stays in the repo and is never deployed to a host.
 
     # Inputs
 
@@ -346,7 +375,7 @@ let
     ## `rootCertType` usage example
 
     ```nix
-    # in the type of certToolkit.cas.etcd
+    # in the type of sinan.certToolkit.cas.etcd
     root = lib.mkOption { type = rootCertType "etcd"; };
     ```
 
@@ -359,67 +388,100 @@ let
       {
         options = certOptions;
         config = lib.mkMerge [
-          (mkDerivedConfig 1007 cfg.caDefaults)
+          (mkDerivedConfig (mkDefaultPriority + 7) cfg.rootDefaults)
           {
             names = lib.mkDefault { };
             hosts = lib.mkDefault [ ];
-            id = "ca-${caName}";
-            relativePath = "${cfg.dir}/ca/${caName}.crt";
-            relativeSopsFile = "${cfg.dir}/ca/${caName}.key.sops";
-            path = flakeFile config.relativePath;
+            id = "root-${caName}";
+            relativeCertPath = "${cfg.dir}/root/${caName}.crt";
+            relativeSopsKeyPath = "${cfg.dir}/root/${caName}.key.sops";
+            package = lib.mkDefault (
+              pkgs.runCommand "certtoolkit-${config.id}" { nativeBuildInputs = [ pkgs.cfssl ]; } ''
+                cfssl gencert -loglevel 2 -initca ${mkRootCsrFile config} \
+                  | cfssljson -bare ca
+                install -D --mode 444 ca.pem "$out/ca.crt"
+                install -D --mode 444 ca-key.pem "$out/ca.key"
+              ''
+            );
+            certPath =
+              if cfg.createCerts then "${config.package}/ca.crt" else flakeFile config.relativeCertPath;
           }
         ];
       }
     );
 
   /**
-    Type of `certToolkit.cas.<ca>`, a CA: its root cert (`root`), the leaf
-    certs it signs for this host (`certs`) and defaults for those certs
-    (`certDefaults`).
+    Type of `sinan.certToolkit.cas.<ca>`, a CA: its root cert (`root`), the
+    leaf certs it signs for this host (`leaves`) and defaults for those
+    leaf certs (`leafDefaults`).
   */
   caType = lib.types.submodule (
     { name, config, ... }:
     {
       options = {
-        certDefaults = mkDerivedDefaults 1008 cfg.certDefaults;
+        leafDefaults = mkDerivedDefaults (mkDefaultPriority + 8) cfg.leafDefaults;
         root = lib.mkOption { type = rootCertType name; };
-        certs = lib.mkOption {
+        leaves = lib.mkOption {
           type = lib.types.attrsOf (leafCertType name config);
           default = { };
         };
+      };
+      config = lib.mkIf (cfg.clusterFrom != null && cfg.clusterFrom.cas ? ${name}) {
+        root.package = lib.mkOverride (mkDefaultPriority - 100) cfg.clusterFrom.cas.${name}.root.package;
       };
     }
   );
 in
 {
-  options.certToolkit = {
+  options.sinan.certToolkit = {
     dir = lib.mkOption {
       type = lib.types.str;
-      description = "Directory of the certs relative to the flake root";
+      description = "Directory of the root and leaf certs relative to the flake root";
       example = "nix/os/modules/k8s/certs";
+    };
+    createCerts = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Whether to create the root and leaf certs and their keys in
+        derivations instead of reading them from `dir`. The keys end up
+        world readable in the nix store, so this is only meant for tests.
+      '';
+    };
+    clusterFrom = lib.mkOption {
+      type = lib.types.nullOr lib.types.attrs;
+      default = null;
+      description = ''
+        The `config.sinan.certToolkit` of another host to take the root cert
+        packages from, so hosts using `createCerts` share their CAs. It does
+        nothing without `createCerts`, so like it, this is only meant for
+        tests.
+      '';
     };
     defaults = lib.mkOption {
       type = lib.types.submodule { options = defaultsOptions; };
       default = { };
     };
-    caDefaults = mkDerivedDefaults 1009 cfg.defaults;
-    certDefaults = mkDerivedDefaults 1009 cfg.defaults;
+    rootDefaults = mkDerivedDefaults (mkDefaultPriority + 9) cfg.defaults;
+    leafDefaults = mkDerivedDefaults (mkDefaultPriority + 9) cfg.defaults;
     cas = lib.mkOption {
       type = lib.types.attrsOf caType;
       default = { };
     };
   };
 
-  config.sops.secrets = lib.pipe cfg.cas [
-    lib.attrValues
-    (lib.concatMap (ca: lib.attrValues ca.certs))
-    (map (cert: {
-      name = "certtoolkit-${cert.id}";
-      value = cert.sops // {
-        inherit (cert) sopsFile;
-        format = "binary";
-      };
-    }))
-    lib.listToAttrs
-  ];
+  config.sops.secrets = lib.mkIf (!cfg.createCerts) (
+    lib.pipe cfg.cas [
+      lib.attrValues
+      (lib.concatMap (ca: lib.attrValues ca.leaves))
+      (map (leaf: {
+        name = "certtoolkit-${leaf.id}";
+        value = leaf.sops // {
+          sopsFile = leaf.sopsKeyPath;
+          format = "binary";
+        };
+      }))
+      lib.listToAttrs
+    ]
+  );
 }

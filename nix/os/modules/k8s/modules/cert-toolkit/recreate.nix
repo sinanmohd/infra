@@ -8,66 +8,23 @@
   nixosConfigurations,
 }:
 let
+  inherit (import ./lib.nix { inherit lib; })
+    mkRootCsrFile
+    mkLeafCsrFile
+    mkSigningConfigFile
+    ;
+
   /**
-    Build the cfssl CSR for a cert or CA. cfssl ignores `expiry` and
-    `usages` in a CSR, a CA takes its expiry from `ca.expiry` (see
-    `mkRootScript`) and a cert takes both from its signing config (see
-    `mkLeafScript`). Unset subject names are left out.
+    Shell to save the JSON that `cfssl gencert` printed into
+    `$cfssl_json`: encrypt its private key with sops and write its
+    certificate next to it. Recipients come from the `.sops.yaml`
+    creation rule matching `relativeSopsKeyPath`.
 
     # Inputs
 
     `cert`
 
-    : Evaluated cert or CA options
-
-    # Type
-
-    ```
-    mkCsr :: AttrSet -> AttrSet
-    ```
-
-    # Examples
-    :::{.example}
-    ## `mkCsr` usage example
-
-    ```nix
-    mkCsr {
-      commonName = "etcd";
-      key = { algo = "ecdsa"; size = 256; };
-      hosts = [ "h1" "127.0.0.1" ];
-      names = { C = "IN"; ST = null; L = null; O = null; OU = null; };
-      expiry = "720h";
-      usages = [ "server auth" ];
-    }
-    => {
-      CN = "etcd";
-      key = { algo = "ecdsa"; size = 256; };
-      hosts = [ "h1" "127.0.0.1" ];
-      names = [ { C = "IN"; } ];
-    }
-    ```
-
-    :::
-  */
-  mkCsr = cert: {
-    CN = cert.commonName;
-    inherit (cert)
-      key
-      hosts
-      ;
-    names = [ (lib.filterAttrs (_: value: value != null) cert.names) ];
-  };
-
-  /**
-    Shell to encrypt the private key of a cfssl json result in `$cert`
-    with sops and write the certificate next to it. Recipients come from
-    the `.sops.yaml` creation rule matching `relativeSopsFile`.
-
-    # Inputs
-
-    `cert`
-
-    : Evaluated cert or CA options
+    : Evaluated root or leaf cert options
 
     # Type
 
@@ -81,15 +38,15 @@ let
 
     ```nix
     mkWriteScript {
-      relativePath = "certs/derived/h1/etcd-server.crt";
-      relativeSopsFile = "certs/derived/h1/etcd-server.key.sops";
+      relativeCertPath = "certs/leaf/h1/etcd-server.crt";
+      relativeSopsKeyPath = "certs/leaf/h1/etcd-server.key.sops";
     }
     => ''
-      mkdir --parents "$(dirname certs/derived/h1/etcd-server.crt)"
-      printf '%s' "$cert" \
+      mkdir --parents "$(dirname certs/leaf/h1/etcd-server.crt)"
+      printf '%s' "$cfssl_json" \
         | jq --raw-output .key \
-        | sops encrypt --filename-override certs/derived/h1/etcd-server.key.sops --output certs/derived/h1/etcd-server.key.sops /dev/stdin
-      printf '%s' "$cert" | jq --raw-output .cert > certs/derived/h1/etcd-server.crt
+        | sops encrypt --filename-override certs/leaf/h1/etcd-server.key.sops --output certs/leaf/h1/etcd-server.key.sops /dev/stdin
+      printf '%s' "$cfssl_json" | jq --raw-output .cert > certs/leaf/h1/etcd-server.crt
     ''
     ```
 
@@ -98,15 +55,15 @@ let
   mkWriteScript =
     cert:
     let
-      sopsFile = lib.escapeShellArg cert.relativeSopsFile;
-      certFile = lib.escapeShellArg cert.relativePath;
+      sopsFile = lib.escapeShellArg cert.relativeSopsKeyPath;
+      certFile = lib.escapeShellArg cert.relativeCertPath;
     in
     ''
       mkdir --parents "$(dirname ${certFile})"
-      printf '%s' "$cert" \
+      printf '%s' "$cfssl_json" \
         | jq --raw-output .key \
         | sops encrypt --filename-override ${sopsFile} --output ${sopsFile} /dev/stdin
-      printf '%s' "$cert" | jq --raw-output .cert > ${certFile}
+      printf '%s' "$cfssl_json" | jq --raw-output .cert > ${certFile}
     '';
 
   /**
@@ -117,7 +74,7 @@ let
 
     `root`
 
-    : Evaluated `certToolkit.cas.<ca>.root`
+    : Evaluated `sinan.certToolkit.cas.<ca>.root`
 
     # Type
 
@@ -130,14 +87,14 @@ let
     ## `mkRootScript` usage example
 
     ```nix
-    mkRootScript config.certToolkit.cas.etcd.root
+    mkRootScript config.sinan.certToolkit.cas.etcd.root
     => ''
-      echo ca-etcd
-      if [ -e certs/ca/etcd.key.sops ]; then
-        sops updatekeys --yes certs/ca/etcd.key.sops
+      echo root-etcd
+      if [ -e certs/root/etcd.key.sops ]; then
+        sops updatekeys --yes certs/root/etcd.key.sops
       else
-        cert=$(cfssl gencert -loglevel 2 -initca /nix/store/...-csr-ca-etcd.json)
-        mkdir --parents "$(dirname certs/ca/etcd.crt)"
+        cfssl_json=$(cfssl gencert -loglevel 2 -initca /nix/store/...-csr-root-etcd.json)
+        mkdir --parents "$(dirname certs/root/etcd.crt)"
         ...
       fi
     ''
@@ -148,19 +105,14 @@ let
   mkRootScript =
     root:
     let
-      sopsFile = lib.escapeShellArg root.relativeSopsFile;
-      # NOTE: cfssl ignores `usages` for a CA
-      csr = mkCsr root // {
-        ca.expiry = root.expiry;
-      };
-      csrFile = builtins.toFile "csr-${root.id}.json" (builtins.toJSON csr);
+      sopsFile = lib.escapeShellArg root.relativeSopsKeyPath;
     in
     ''
       echo ${lib.escapeShellArg root.id}
       if [ -e ${sopsFile} ]; then
         sops updatekeys --yes ${sopsFile}
       else
-        cert=$(cfssl gencert -loglevel 2 -initca ${csrFile})
+        cfssl_json=$(cfssl gencert -loglevel 2 -initca ${mkRootCsrFile root})
         ${mkWriteScript root}
       fi
     '';
@@ -174,11 +126,11 @@ let
 
     `root`
 
-    : Evaluated `certToolkit.cas.<ca>.root` to sign with
+    : Evaluated `sinan.certToolkit.cas.<ca>.root` to sign with
 
-    `cert`
+    `leaf`
 
-    : Evaluated `certToolkit.cas.<ca>.certs.<name>`
+    : Evaluated `sinan.certToolkit.cas.<ca>.leaves.<name>`
 
     # Type
 
@@ -191,48 +143,36 @@ let
     ## `mkLeafScript` usage example
 
     ```nix
-    mkLeafScript config.certToolkit.cas.etcd.root config.certToolkit.cas.etcd.certs.server
+    mkLeafScript config.sinan.certToolkit.cas.etcd.root config.sinan.certToolkit.cas.etcd.leaves.server
     => ''
-      echo derived-h1-etcd-server
-      ca_key=$(sops decrypt certs/ca/etcd.key.sops)
-      cert=$(
+      echo leaf-h1-etcd-server
+      ca_key=$(sops decrypt certs/root/etcd.key.sops)
+      cfssl_json=$(
         CA_KEY="$ca_key" cfssl gencert -loglevel 2 \
-          -ca certs/ca/etcd.crt \
+          -ca certs/root/etcd.crt \
           -ca-key env:CA_KEY \
-          -config /nix/store/...-signing-derived-h1-etcd-server.json \
-          /nix/store/...-csr-derived-h1-etcd-server.json
+          -config /nix/store/...-signing-leaf-h1-etcd-server.json \
+          /nix/store/...-csr-leaf-h1-etcd-server.json
       )
-      mkdir --parents "$(dirname certs/derived/h1/etcd-server.crt)"
+      mkdir --parents "$(dirname certs/leaf/h1/etcd-server.crt)"
       ...
     ''
     ```
 
     :::
   */
-  mkLeafScript =
-    root: cert:
-    let
-      csrFile = builtins.toFile "csr-${cert.id}.json" (builtins.toJSON (mkCsr cert));
-      signingConfigFile = builtins.toFile "signing-${cert.id}.json" (
-        builtins.toJSON {
-          signing.default = {
-            inherit (cert) expiry usages;
-          };
-        }
-      );
-    in
-    ''
-      echo ${lib.escapeShellArg cert.id}
-      ca_key=$(sops decrypt ${lib.escapeShellArg root.relativeSopsFile})
-      cert=$(
-        CA_KEY="$ca_key" cfssl gencert -loglevel 2 \
-          -ca ${lib.escapeShellArg root.relativePath} \
-          -ca-key env:CA_KEY \
-          -config ${signingConfigFile} \
-          ${csrFile}
-      )
-      ${mkWriteScript cert}
-    '';
+  mkLeafScript = root: leaf: ''
+    echo ${lib.escapeShellArg leaf.id}
+    ca_key=$(sops decrypt ${lib.escapeShellArg root.relativeSopsKeyPath})
+    cfssl_json=$(
+      CA_KEY="$ca_key" cfssl gencert -loglevel 2 \
+        -ca ${lib.escapeShellArg root.relativeCertPath} \
+        -ca-key env:CA_KEY \
+        -config ${mkSigningConfigFile leaf} \
+        ${mkLeafCsrFile leaf}
+    )
+    ${mkWriteScript leaf}
+  '';
 in
 writeShellApplication {
   name = "recreate-certs";
@@ -246,12 +186,12 @@ writeShellApplication {
     let
       cas = lib.pipe nixosConfigurations [
         lib.attrValues
-        (lib.filter (host: host.options ? certToolkit))
-        (lib.concatMap (host: lib.attrValues host.config.certToolkit.cas))
+        (lib.filter (host: host.options ? sinan.certToolkit))
+        (lib.concatMap (host: lib.attrValues host.config.sinan.certToolkit.cas))
       ];
 
       rootScripts = lib.unique (map (ca: mkRootScript ca.root) cas);
-      leafScripts = lib.concatMap (ca: map (mkLeafScript ca.root) (lib.attrValues ca.certs)) cas;
+      leafScripts = lib.concatMap (ca: map (mkLeafScript ca.root) (lib.attrValues ca.leaves)) cas;
     in
     ''
       cd "$(git rev-parse --show-toplevel)"

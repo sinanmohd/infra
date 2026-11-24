@@ -13,7 +13,7 @@ let
 
     `settings`
 
-    : Value of the `certToolkit` option
+    : Value of the `sinan.certToolkit` option
 
     # Type
 
@@ -26,7 +26,7 @@ let
     ## `evalToolkit` usage example
 
     ```nix
-    (evalToolkit { defaults.expiry = "42h"; }).caDefaults.expiry
+    (evalToolkit { defaults.expiry = "42h"; }).rootDefaults.expiry
     => "42h"
     ```
 
@@ -36,8 +36,8 @@ let
     settings:
     (nixos {
       imports = [ self.nixosModules.k8s ];
-      certToolkit = settings;
-    }).config.certToolkit;
+      sinan.certToolkit = settings;
+    }).config.sinan.certToolkit;
 
   failures = lib.runTests {
     testDir = {
@@ -45,26 +45,26 @@ let
       expected = "./my-dir";
     };
 
-    testCaDefaultsDeriveFromDefaults = {
-      expr = (evalToolkit { defaults.expiry = "42h"; }).caDefaults.expiry;
+    testRootDefaultsDeriveFromDefaults = {
+      expr = (evalToolkit { defaults.expiry = "42h"; }).rootDefaults.expiry;
       expected = "42h";
     };
 
-    testCaDefaultsWithoutDefaults = {
-      expr = (evalToolkit { caDefaults.expiry = "42h"; }).caDefaults.expiry;
+    testRootDefaultsWithoutDefaults = {
+      expr = (evalToolkit { rootDefaults.expiry = "42h"; }).rootDefaults.expiry;
       expected = "42h";
     };
 
-    testCaDefaultNamesMergeWithDefaultNames = {
+    testRootDefaultNamesMergeWithDefaultNames = {
       expr =
         let
           toolkit = evalToolkit {
             defaults.names.L = "CH";
-            caDefaults.names.O = "MyOrga";
+            rootDefaults.names.O = "MyOrga";
           };
         in
         {
-          inherit (toolkit.caDefaults.names) L O;
+          inherit (toolkit.rootDefaults.names) L O;
         };
       expected = {
         L = "CH";
@@ -72,16 +72,16 @@ let
       };
     };
 
-    testCertDefaultNamesMergeWithDefaultNames = {
+    testLeafDefaultNamesMergeWithDefaultNames = {
       expr =
         let
           toolkit = evalToolkit {
             defaults.names.L = "CH";
-            certDefaults.names.O = "MyOrga";
+            leafDefaults.names.O = "MyOrga";
           };
         in
         {
-          inherit (toolkit.certDefaults.names) L O;
+          inherit (toolkit.leafDefaults.names) L O;
         };
       expected = {
         L = "CH";
@@ -89,32 +89,32 @@ let
       };
     };
 
-    testDefaultsReachCertDefaultsOfCa = {
+    testDefaultsReachLeafDefaultsOfCa = {
       expr =
         (evalToolkit {
           defaults.expiry = "42h";
           cas.my-ca = { };
-        }).cas.my-ca.certDefaults.expiry;
+        }).cas.my-ca.leafDefaults.expiry;
       expected = "42h";
     };
 
-    testCaDefaultsReachRoot = {
+    testRootDefaultsReachRoot = {
       expr =
         (evalToolkit {
-          caDefaults.expiry = "42h";
+          rootDefaults.expiry = "42h";
           cas.my-ca.root = { };
         }).cas.my-ca.root.expiry;
       expected = "42h";
     };
 
-    testCertDefaultsOfCaReachCerts = {
+    testLeafDefaultsOfCaReachLeaves = {
       expr =
         (evalToolkit {
           cas.my-ca = {
-            certDefaults.expiry = "42h";
-            certs.my-cert = { };
+            leafDefaults.expiry = "42h";
+            leaves.my-cert = { };
           };
-        }).cas.my-ca.certs.my-cert.expiry;
+        }).cas.my-ca.leaves.my-cert.expiry;
       expected = "42h";
     };
 
@@ -128,22 +128,22 @@ let
               L = "BAD";
               O = "BAD";
             };
-            certDefaults.names = {
+            leafDefaults.names = {
               ST = "Bern";
               L = "BAD";
               O = "BAD";
             };
             cas.my-ca = {
-              certDefaults.names = {
+              leafDefaults.names = {
                 L = "Thun";
                 O = "BAD";
               };
-              certs.my-cert.names.O = "MyOrg";
+              leaves.my-cert.names.O = "MyOrg";
             };
           };
         in
         {
-          inherit (toolkit.cas.my-ca.certs.my-cert.names)
+          inherit (toolkit.cas.my-ca.leaves.my-cert.names)
             C
             ST
             L
@@ -165,8 +165,8 @@ let
             owner = "root";
             mode = "0440";
           };
-          cas.my-ca.certs.my-cert.sops.owner = "etcd";
-        }).cas.my-ca.certs.my-cert.sops;
+          cas.my-ca.leaves.my-cert.sops.owner = "etcd";
+        }).cas.my-ca.leaves.my-cert.sops;
       expected = {
         owner = "etcd";
         mode = "0440";

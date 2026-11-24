@@ -195,7 +195,7 @@
         {
           certs-recreate = {
             type = "app";
-            meta.description = "Create the certs declared with certToolkit";
+            meta.description = "Create the root and leaf certs declared with sinan.certToolkit";
             program = lib.getExe (
               pkgs.callPackage ./nix/os/modules/k8s/modules/cert-toolkit/recreate.nix {
                 inherit (self) nixosConfigurations;
