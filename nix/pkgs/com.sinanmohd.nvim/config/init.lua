@@ -439,6 +439,14 @@ do
   vim.pack.add { gh 'Mofiqul/dracula.nvim' }
   require('dracula').setup {
     transparent_bg = true,
+    -- NOTE: comments default to colors.comment (bright black), too dark to read
+    -- on the transparent background, use the light gray white instead
+    overrides = function(colors)
+      return {
+        Comment = { fg = colors.white },
+        SpecialComment = { fg = colors.white, italic = true },
+      }
+    end,
   }
 
   -- Load the colorscheme here.
