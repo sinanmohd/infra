@@ -1,4 +1,12 @@
 {
+  pkgs,
+  nix-kube-generators,
+}:
+let
+  inherit (pkgs) lib;
+  kubelib = nix-kube-generators.lib { inherit pkgs; };
+in
+{
   # NOTE: this function links /share, doc, etc... from raw pkgs, so
   # bash-completion, Desktop entries, etc... can be reused
   nixpakEnv =
@@ -121,4 +129,152 @@
 
       exec "$@"
     '';
+
+  /**
+    Pull an OCI image pinned by digest, for the architecture of the host
+    it is built for. Meant for `services.kubernetes.kubelet.seedDockerImages`,
+    so nodes never pull it and VM tests work offline.
+
+    # Inputs
+
+    `args`
+
+    : An attribute set containing:
+
+      `name`
+
+      : Full image name, like `ghcr.io/kube-vip/kube-vip`
+
+      `tag`
+
+      : Image tag, the pods refer to the image by it
+
+      `digest`
+
+      : Digest of the multi architecture image index
+
+      `hashes`
+
+      : Hash of the pulled image per go architecture (`amd64`, `arm64`)
+
+    # Type
+
+    ```
+    ociImagePull :: { name :: String; tag :: String; digest :: String; hashes :: { [String] :: String }; } -> Derivation
+    ```
+
+    # Examples
+    :::{.example}
+    ## `ociImagePull` usage example
+
+    ```nix
+    ociImagePull {
+      name = "ghcr.io/kube-vip/kube-vip";
+      tag = "v1.2.4";
+      digest = "sha256:dde4...";
+      hashes = {
+        amd64 = "sha256-THDo...";
+        arm64 = "sha256-/Ywp...";
+      };
+    }
+    ```
+
+    :::
+  */
+  ociImagePull =
+    {
+      name,
+      tag,
+      digest,
+      hashes,
+    }:
+    pkgs.dockerTools.pullImage {
+      imageName = name;
+      imageDigest = digest;
+      hash = hashes.${pkgs.go.GOARCH};
+      finalImageName = name;
+      finalImageTag = tag;
+      os = "linux";
+      arch = pkgs.go.GOARCH;
+    };
+
+  /**
+    The `image` values of a Helm chart for an image pulled with
+    `ociImagePull`, by tag, so the pods run exactly the seeded image.
+
+    # Inputs
+
+    `image`
+
+    : Image derivation from `ociImagePull`
+
+    # Type
+
+    ```
+    ociImageValues :: Derivation -> AttrSet
+    ```
+
+    # Examples
+    :::{.example}
+    ## `ociImageValues` usage example
+
+    ```nix
+    ociImageValues kubeVipImage
+    => {
+      repository = "ghcr.io/kube-vip/kube-vip";
+      tag = "v1.2.4";
+      pullPolicy = "IfNotPresent";
+    }
+    ```
+
+    :::
+  */
+  ociImageValues = image: {
+    repository = image.imageName;
+    tag = image.imageTag;
+    pullPolicy = "IfNotPresent";
+  };
+
+  /**
+    Render a Helm chart and key its resources by chart, kind and name, the
+    shape `services.kubernetes.addonManager.bootstrapAddons` takes. The
+    chart is rendered while evaluating (import from derivation).
+
+    # Inputs
+
+    `helmArgs`
+
+    : Arguments of `kubelib.buildHelmChart`
+
+    # Type
+
+    ```
+    mkChartAddons :: AttrSet -> AttrSet
+    ```
+
+    # Examples
+    :::{.example}
+    ## `mkChartAddons` usage example
+
+    ```nix
+    mkChartAddons { name = "kube-vip"; chart = ...; values = ...; }
+    => {
+      kube-vip-daemonset-kube-vip = { kind = "DaemonSet"; ... };
+      kube-vip-clusterrole-kube-vip = { kind = "ClusterRole"; ... };
+      ...
+    }
+    ```
+
+    :::
+  */
+  mkChartAddons =
+    helmArgs:
+    lib.pipe helmArgs [
+      kubelib.fromHelm
+      (map (resource: {
+        name = lib.toLower "${helmArgs.name}-${resource.kind}-${resource.metadata.name}";
+        value = resource;
+      }))
+      lib.listToAttrs
+    ];
 }

@@ -12,107 +12,15 @@ let
   isMaster = lib.elem "master" k8sCfg.roles;
   mkDefaultPriority = (lib.mkDefault null).priority;
   kubelib = inputsSinan.nix-kube-generators.lib { inherit pkgs; };
+  libSinan = inputsSinan.self.lib { inherit pkgs; };
 
   # NOTE: kube-vip talks to the apiserver on localhost and holds its virtual
   # address, so it may only run on masters, which get this label
   kubeVipControlPlaneLabel = "kube-vip.infra.sinanmohd.com/control-plane";
 
-  /**
-    Render a Helm chart and key its resources by chart, kind and name, the
-    shape `services.kubernetes.addonManager.bootstrapAddons` takes. The
-    chart is rendered while evaluating (import from derivation).
-
-    # Inputs
-
-    `args`
-
-    : Arguments of `kubelib.buildHelmChart`
-
-    # Type
-
-    ```
-    mkChartAddons :: AttrSet -> AttrSet
-    ```
-
-    # Examples
-    :::{.example}
-    ## `mkChartAddons` usage example
-
-    ```nix
-    mkChartAddons { name = "kube-vip"; chart = ...; values = ...; }
-    => {
-      kube-vip-daemonset-kube-vip = { kind = "DaemonSet"; ... };
-      kube-vip-clusterrole-kube-vip = { kind = "ClusterRole"; ... };
-      ...
-    }
-    ```
-
-    :::
-  */
-  mkChartAddons =
-    args:
-    lib.pipe args [
-      kubelib.fromHelm
-      (map (resource: {
-        name = lib.toLower "${args.name}-${resource.kind}-${resource.metadata.name}";
-        value = resource;
-      }))
-      lib.listToAttrs
-    ];
-
-  /**
-    Pull an image of the kube-vip project from ghcr.io, pinned by digest,
-    for the architecture of this host. Seeded into containerd by the
-    kubelet, so nodes never pull it and VM tests work offline.
-
-    # Inputs
-
-    `args`
-
-    : An attribute set containing:
-
-      `name`
-
-      : Image name under `ghcr.io/kube-vip/`
-
-      `tag`
-
-      : Image tag, the pods refer to the image by it
-
-      `digest`
-
-      : Digest of the multi architecture image index
-
-      `hashes`
-
-      : Hash of the pulled image per go architecture (`amd64`, `arm64`)
-
-    # Type
-
-    ```
-    pullKubeVipImage :: { name :: String; tag :: String; digest :: String; hashes :: { [String] :: String }; } -> Derivation
-    ```
-  */
-  pullKubeVipImage =
-    {
-      name,
-      tag,
-      digest,
-      hashes,
-    }:
-    pkgs.dockerTools.pullImage {
-      imageName = "ghcr.io/kube-vip/${name}";
-      imageDigest = digest;
-      hash = hashes.${pkgs.go.GOARCH};
-      finalImageName = "ghcr.io/kube-vip/${name}";
-      finalImageTag = tag;
-      os = "linux";
-      arch = pkgs.go.GOARCH;
-    };
-
   # NOTE: the appVersion of the chart release below
-  kubeVipImage = pullKubeVipImage {
-    name = "kube-vip";
+  kubeVipImage = libSinan.ociImagePull {
+    name = "ghcr.io/kube-vip/kube-vip";
     tag = "v1.2.4";
     digest = "sha256:dde4c0669d9058c74c69c0bc2f0122e26900e1e4b913c03577cb6e4e28083079";
     hashes = {
@@ -120,36 +28,14 @@ let
       arm64 = "sha256-/YwpG36aQXK6kqZDVPO4yGafJ3HkEIyuonb92B+GE14=";
     };
   };
-  cloudProviderImage = pullKubeVipImage {
-    name = "kube-vip-cloud-provider";
+  cloudProviderImage = libSinan.ociImagePull {
+    name = "ghcr.io/kube-vip/kube-vip-cloud-provider";
     tag = "v0.0.13";
     digest = "sha256:b8b6a5180e678b410e2c5dba86b87fa8099ada16e2f067d83f04e749f8ea54ab";
     hashes = {
       amd64 = "sha256-fEon2cv7b4AXnwrdiQBnskAVw2cn1Bppx76oIW8JlII=";
       arm64 = "sha256-kBF/s72/MJ/zCG5wHwWPY5q3BUbc4g/W+dEhF8HLToc=";
     };
-  };
-
-  /**
-    The `image` values of a chart for an image pulled with
-    `pullKubeVipImage`, so the pods run exactly the seeded image.
-
-    # Inputs
-
-    `image`
-
-    : Image derivation from `pullKubeVipImage`
-
-    # Type
-
-    ```
-    imageValues :: Derivation -> AttrSet
-    ```
-  */
-  imageValues = image: {
-    repository = image.imageName;
-    tag = image.imageTag;
-    pullPolicy = "IfNotPresent";
   };
 in
 {
@@ -188,7 +74,7 @@ in
     # NOTE: applied as cluster admin, both charts hold ClusterRoles the addon
     # manager may not grant
     services.kubernetes.addonManager.bootstrapAddons = lib.mkMerge [
-      (mkChartAddons {
+      (libSinan.mkChartAddons {
         name = "kube-vip";
         namespace = "kube-system";
         chart = kubelib.downloadHelmChart {
@@ -199,7 +85,7 @@ in
         };
         kubeVersion = "v${k8sCfg.package.version}";
         values = {
-          image = imageValues kubeVipImage;
+          image = libSinan.ociImageValues kubeVipImage;
           config.address = cfg.address;
           env = {
             port = toString k8sCfg.apiserver.securePort;
@@ -228,7 +114,7 @@ in
           envValueFrom.vip_nodename.fieldRef.fieldPath = "spec.nodeName";
         };
       })
-      (mkChartAddons {
+      (libSinan.mkChartAddons {
         name = "kube-vip-cloud-provider";
         namespace = "kube-system";
         chart = kubelib.downloadHelmChart {
@@ -239,7 +125,7 @@ in
         };
         kubeVersion = "v${k8sCfg.package.version}";
         values = {
-          image = imageValues cloudProviderImage;
+          image = libSinan.ociImageValues cloudProviderImage;
           cm.data.range-global = cfg.loadBalancerRange;
         };
       })

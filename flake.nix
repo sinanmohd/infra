@@ -146,7 +146,7 @@
       forAllSystems = f: lib.genAttrs supportedSystems (forSystem f);
     in
     {
-      lib = import ./nix/lib;
+      lib = { pkgs }: import ./nix/lib { inherit pkgs nix-kube-generators; };
 
       packages = forAllSystems (
         { system, pkgs }:
@@ -156,39 +156,39 @@
           };
           claude-code = pkgs.callPackage ./nix/pkgs/com.anthropic.claude-code.nix {
             inherit nixpak;
-            libSinan = self.lib;
+            libSinan = self.lib { inherit pkgs; };
           };
           opencode = pkgs.callPackage ./nix/pkgs/ly.anoma.opencode.nix {
             inherit nixpak;
-            libSinan = self.lib;
+            libSinan = self.lib { inherit pkgs; };
           };
           antigravity-cli = pkgs.callPackage ./nix/pkgs/com.google.antigravity-cli.nix {
             inherit nixpak;
-            libSinan = self.lib;
+            libSinan = self.lib { inherit pkgs; };
           };
           git = pkgs.callPackage ./nix/pkgs/com.git-scm.git.nix {
             inherit nixpak;
-            libSinan = self.lib;
+            libSinan = self.lib { inherit pkgs; };
           };
           firefox = pkgs.callPackage ./nix/pkgs/org.mozilla.firefox.nix {
             inherit nixpak;
-            libSinan = self.lib;
+            libSinan = self.lib { inherit pkgs; };
           };
           element-desktop = pkgs.callPackage ./nix/pkgs/im.riot.Riot {
             inherit nixpak;
-            libSinan = self.lib;
+            libSinan = self.lib { inherit pkgs; };
           };
           chromium = pkgs.callPackage ./nix/pkgs/org.chromium.Chromium.nix {
             inherit nixpak;
-            libSinan = self.lib;
+            libSinan = self.lib { inherit pkgs; };
           };
           qbittorrent = pkgs.callPackage ./nix/pkgs/org.qbittorrent.qBittorrent.nix {
             inherit nixpak;
-            libSinan = self.lib;
+            libSinan = self.lib { inherit pkgs; };
           };
           neovim = pkgs.callPackage ./nix/pkgs/io.neovim.nvim.nix {
             inherit nixpak;
-            libSinan = self.lib;
+            libSinan = self.lib { inherit pkgs; };
           };
           nvim-sinan = pkgs.callPackage ./nix/pkgs/com.sinanmohd.nvim {
             neovim = self.packages.${system}.neovim;
