@@ -29,7 +29,7 @@ creation_rules:
       - age:
           - *sinan
           - *machine_kay
-  - path_regex: charts/.*
+  - path_regex: values/.*
     key_groups:
       - age:
           - *sinan

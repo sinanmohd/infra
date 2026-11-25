@@ -11,92 +11,107 @@ spec:
         elements:
           - name: argocd
             namespace: argocd
-            valueFiles:
-              - "secrets://secrets.sinan.yaml"
-          # - name: dapr
-          #   namespace: dapr-system
-          #   valueFiles:
-          #     - "values.sinan.yaml"
-          # - name: keel
-          #   namespace: keel
-          #   valueFiles: []
-          # - name: kafka
-          #   namespace: kafka
-          #   valueFiles:
-          #     - "values.minimal.yaml"
-          # - name: mongodb
-          #   namespace: mongodb
-          #   valueFiles:
-          #     - "values.minimal.yaml"
-          #     - "values.sinan.yaml"
-          #     - "secrets://secrets.sinan.yaml"
-          # - name: harbor
-          #   namespace: harbor
-          #   valueFiles:
-          #     - "values.sinan.yaml"
-          #     - "secrets://secrets.sinan.yaml"
-          # - name: istio
-          #   namespace: istio-system
-          #   valueFiles:
-          #     - "values.sinan.yaml"
+            sources:
+              - repoURL: "https://github.com/sinanmohd/infra.git"
+                targetRevision: HEAD
+                path: "charts/argocd"
+                helm:
+                  releaseName: argocd
+                  valueFiles:
+                    - "/values/argocd/secrets.sinan.yaml"
           - name: cert-manager
             namespace: cert-manager
-            valueFiles: []
+            sources:
+              - repoURL: "https://github.com/sinanmohd/infra.git"
+                targetRevision: HEAD
+                path: "charts/cert-manager"
+                helm:
+                  releaseName: cert-manager
+                  valueFiles: []
           - name: clickhouse
             namespace: clickhouse
-            valueFiles:
-              - "values.minimal.yaml"
-              - "values.sinan.yaml"
-              - "secrets://secrets.sinan.yaml"
+            sources:
+              - repoURL: "https://github.com/sinanmohd/infra.git"
+                targetRevision: HEAD
+                path: "charts/clickhouse"
+                helm:
+                  releaseName: clickhouse
+                  valueFiles:
+                    - "values.minimal.yaml"
+                    - "/values/clickhouse/values.sinan.yaml"
+                    - "/values/clickhouse/secrets.sinan.yaml"
           - name: keycloak
             namespace: keycloak
-            valueFiles:
-              - "secrets://secrets.sinan.yaml"
-              - "values.sinan.yaml"
+            sources:
+              - repoURL: "https://github.com/sinanmohd/infra.git"
+                targetRevision: HEAD
+                path: "charts/keycloak"
+                helm:
+                  releaseName: keycloak
+                  valueFiles:
+                    - "/values/keycloak/secrets.sinan.yaml"
+                    - "/values/keycloak/values.sinan.yaml"
           - name: openebs
             namespace: openebs
-            valueFiles:
-              - "values.minimal.yaml"
+            sources:
+              - repoURL: "https://github.com/sinanmohd/infra.git"
+                targetRevision: HEAD
+                path: "charts/openebs"
+                helm:
+                  releaseName: openebs
+                  valueFiles:
+                    - "values.minimal.yaml"
           - name: otel
             namespace: otel
-            valueFiles:
-              - "values.sinan.yaml"
-              - "secrets://secrets.sinan.yaml"
+            sources:
+              - repoURL: "https://github.com/sinanmohd/infra.git"
+                targetRevision: HEAD
+                path: "charts/otel"
+                helm:
+                  releaseName: otel
+                  valueFiles:
+                    - "/values/otel/values.sinan.yaml"
+                    - "/values/otel/secrets.sinan.yaml"
           - name: postgres
             namespace: postgres
-            valueFiles:
-              - "values.minimal.yaml"
-              - "values.sinan.yaml"
-              - "secrets://secrets.sinan.yaml"
-          - name: seaweedfs
-            namespace: seaweedfs
-            valueFiles:
-              - "values.minimal.yaml"
-              - "values.sinan.yaml"
-              - "secrets://secrets.sinan.yaml"
+            sources:
+              - repoURL: "https://github.com/sinanmohd/infra.git"
+                targetRevision: HEAD
+                path: "charts/postgres"
+                helm:
+                  releaseName: postgres
+                  valueFiles:
+                    - "values.minimal.yaml"
+                    - "/values/postgres/values.sinan.yaml"
+                    - "/values/postgres/secrets.sinan.yaml"
           - name: signoz
             namespace: signoz
-            valueFiles:
-              - "values.sinan.yaml"
-              - "secrets://secrets.sinan.yaml"
+            sources:
+              - repoURL: "https://github.com/sinanmohd/infra.git"
+                targetRevision: HEAD
+                path: "charts/signoz"
+                helm:
+                  releaseName: signoz
+                  valueFiles:
+                    - "/values/signoz/values.sinan.yaml"
+                    - "/values/signoz/secrets.sinan.yaml"
           - name: valkey
             namespace: valkey
-            valueFiles: []
+            sources:
+              - repoURL: "https://github.com/sinanmohd/infra.git"
+                targetRevision: HEAD
+                path: "charts/valkey"
+                helm:
+                  releaseName: valkey
+                  valueFiles: []
   template:
     metadata:
       name: "{{.name}}"
     spec:
       project: default
-
-      source:
-        repoURL: "https://github.com/sinanmohd/infra.git"
-        targetRevision: HEAD
-        path: "charts/{{.name}}"
-
       destination:
         server: "https://kubernetes.default.svc"
         namespace: "{{.namespace}}"
-
       syncPolicy:
         syncOptions:
           - CreateNamespace=true
@@ -106,10 +121,5 @@ spec:
           selfHeal: true
   templatePatch: |
     spec:
-      source:
-        helm:
-          valueFiles:
-            - "values.yaml"
-          {{- range $valueFile := .valueFiles }}
-            - {{ $valueFile }}
-          {{- end }}
+      sources:
+        {{- .sources | toYaml | nindent 6 }}

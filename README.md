@@ -12,6 +12,7 @@ secrets are encrypted using sops in repo. no, the keys are not in here.
 - nix/home:   home-manager, same idea
 - nix/os:     nixos hosts and modules
 - tofu:       opentofu modules
+- values:     per chart values and sops secrets
 
 ## usage
 
