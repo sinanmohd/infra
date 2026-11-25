@@ -1,3 +1,0 @@
-cilium:
-  operator:
-    replicas: 1
