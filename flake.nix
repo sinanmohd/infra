@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOs/nixpkgs/nixos-unstable";
+    nix-kube-generators.url = "github:farcaller/nix-kube-generators";
 
     bootvine = {
       url = "git+https://codeberg.org/wvhulle/bootvine";
@@ -51,11 +52,6 @@
 
     nixpak = {
       url = "github:nixpak/nixpak";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    nix-kube-generators = {
-      url = "github:farcaller/nix-kube-generators";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
