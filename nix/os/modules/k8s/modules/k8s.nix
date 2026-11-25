@@ -207,6 +207,9 @@ in
             };
             serviceAccount = {
               commonName = "system:service-account-signer";
+              # NOTE: tokens are checked against this exact key, not a CA, so
+              # every apiserver must sign and verify with the same
+              shared = true;
               usages = [
                 "signing"
                 "key encipherment"
