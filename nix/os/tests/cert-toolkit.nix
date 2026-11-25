@@ -158,6 +158,33 @@ let
       };
     };
 
+    testSharedLeafNamesNoHost = {
+      expr =
+        let
+          leaves =
+            (evalToolkit {
+              dir = "certs";
+              cas.my-ca.leaves = {
+                mine = { };
+                ours.shared = true;
+              };
+            }).cas.my-ca.leaves;
+        in
+        lib.mapAttrs (_: leaf: { inherit (leaf) id relativeCertPath relativeSopsKeyPath; }) leaves;
+      expected = {
+        mine = {
+          id = "leaf-nixos-my-ca-mine";
+          relativeCertPath = "certs/leaf/nixos/my-ca-mine.crt";
+          relativeSopsKeyPath = "certs/leaf/nixos/my-ca-mine.key.sops";
+        };
+        ours = {
+          id = "leaf-shared-my-ca-ours";
+          relativeCertPath = "certs/leaf/shared/my-ca-ours.crt";
+          relativeSopsKeyPath = "certs/leaf/shared/my-ca-ours.key.sops";
+        };
+      };
+    };
+
     testSopsSettingsMergePerKey = {
       expr =
         (evalToolkit {

@@ -191,7 +191,19 @@ writeShellApplication {
       ];
 
       rootScripts = lib.unique (map (ca: mkRootScript ca.root) cas);
-      leafScripts = lib.concatMap (ca: map (mkLeafScript ca.root) (lib.attrValues ca.leaves)) cas;
+      # NOTE: a shared leaf shows up once per host, listToAttrs
+      # keeps the first one of each id so it is only created once
+      leafScripts = lib.pipe cas [
+        (lib.concatMap (
+          ca:
+          map (leaf: {
+            name = leaf.id;
+            value = mkLeafScript ca.root leaf;
+          }) (lib.attrValues ca.leaves)
+        ))
+        lib.listToAttrs
+        lib.attrValues
+      ];
     in
     ''
       cd "$(git rev-parse --show-toplevel)"

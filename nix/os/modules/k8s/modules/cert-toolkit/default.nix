@@ -151,6 +151,16 @@ let
   # NOTE: only leaves take usages, cfssl hardcode root usage
   leafOptions = certOptions // {
     usages = lib.mkOption usagesOption;
+    shared = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Whether every host gets the same leaf instead of one of its own,
+        for keys all masters must hold, like the Kubernetes key service
+        account tokens are signed with. Its path and id name `shared` in
+        place of the host.
+      '';
+    };
   };
 
   defaultsOptions = sopsOptions // {
@@ -301,8 +311,8 @@ let
 
   /**
     Type of `sinan.certToolkit.cas.<ca>.leaves.<name>`, a leaf cert of
-    this host signed by the root cert of its CA. Its key is deployed to
-    the host with sops-nix.
+    this host, or shared by all hosts, signed by the root cert of its CA.
+    Its key is deployed to the host with sops-nix.
 
     # Inputs
 
@@ -341,15 +351,18 @@ let
     caName: ca:
     lib.types.submodule (
       { name, config, ... }:
+      let
+        owner = if config.shared then "shared" else hostName;
+      in
       {
         options = leafOptions;
         config = lib.mkMerge [
           (mkDerivedConfig (mkDefaultPriority + 7) leafOptions ca.leafDefaults)
           {
             names = lib.mkDefault { };
-            id = "leaf-${hostName}-${caName}-${name}";
-            relativeCertPath = "${cfg.dir}/leaf/${hostName}/${caName}-${name}.crt";
-            relativeSopsKeyPath = "${cfg.dir}/leaf/${hostName}/${caName}-${name}.key.sops";
+            id = "leaf-${owner}-${caName}-${name}";
+            relativeCertPath = "${cfg.dir}/leaf/${owner}/${caName}-${name}.crt";
+            relativeSopsKeyPath = "${cfg.dir}/leaf/${owner}/${caName}-${name}.key.sops";
             package = lib.mkDefault (
               pkgs.runCommand "certtoolkit-${config.id}" { nativeBuildInputs = [ pkgs.cfssl ]; } ''
                 cfssl gencert -loglevel 2 \
@@ -368,6 +381,16 @@ let
             keyPath =
               if cfg.createCerts then "${config.package}/cert.key" else secrets."certtoolkit-${config.id}".path;
           }
+          (lib.mkIf
+            (
+              config.shared && cfg.clusterFrom != null && (cfg.clusterFrom.cas.${caName}.leaves or { }) ? ${name}
+            )
+            {
+              package = lib.mkOverride (
+                mkDefaultPriority - 100
+              ) cfg.clusterFrom.cas.${caName}.leaves.${name}.package;
+            }
+          )
         ];
       }
     );
@@ -471,9 +494,9 @@ in
       default = null;
       description = ''
         The `config.sinan.certToolkit` of another host to take the root cert
-        packages from, so hosts using `createCerts` share their CAs. It does
-        nothing without `createCerts`, so like it, this is only meant for
-        tests.
+        and shared leaf packages from, so hosts using `createCerts` share
+        their CAs and shared leaves. It does nothing without `createCerts`,
+        so like it, this is only meant for tests.
       '';
     };
     defaults = lib.mkOption {
