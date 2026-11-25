@@ -463,11 +463,24 @@ in
       serviceConfig.PermissionsStartOnly = true;
       preStart =
         let
-          files = lib.mapAttrsToList (
-            name: addon: pkgs.writeText "${name}.json" (lib.toJSON addon)
-          ) k8sCfg.addonManager.bootstrapAddons;
+          addons = k8sCfg.addonManager.bootstrapAddons;
+          # NOTE: kubectl refuses an applyset whose objects sit in
+          # another namespace than its parent
+          byNamespace = lib.groupBy (name: addons.${name}.metadata.namespace or "kube-system") (
+            lib.attrNames addons
+          );
+          namespaces =
+            lib.optional (byNamespace ? kube-system) "kube-system"
+            ++ lib.remove "kube-system" (lib.attrNames byNamespace);
+          applyNamespace = namespace: ''
+            ${kubectl} apply --validate=false --prune \
+              --applyset=bootstrap-addons --namespace ${namespace} \
+              ${lib.concatMapStringsSep " " (
+                name: "--filename ${pkgs.writeText "${name}.json" (lib.toJSON addons.${name})}"
+              ) byNamespace.${namespace}}
+          '';
         in
-        lib.mkIf (files != [ ]) ''
+        lib.mkIf (addons != { }) ''
           export KUBECONFIG=${adminKubeconfig}
           # NOTE: runs as root with the HOME of the kubernetes user, kubectl
           # would cache into a root owned ~/.kube there that kube-addons can no
@@ -477,7 +490,9 @@ in
           until ${kubectl} cluster-info > /dev/null 2>&1; do
             sleep 1
           done
-          ${kubectl} apply --validate=false ${lib.concatMapStringsSep " " (file: "--filename ${file}") files}
+
+          export KUBECTL_APPLYSET=true
+          ${lib.concatMapStrings applyNamespace namespaces}
         '';
     };
 
