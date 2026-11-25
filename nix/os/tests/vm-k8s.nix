@@ -217,21 +217,25 @@ let
               )
 
 
+          def load_balancer_ip(machine: BaseMachine) -> str:
+              """The address of the coredns-health service, empty until it has one"""
+              return machine.succeed(
+                  "kubectl --namespace kube-system get service coredns-health"
+                  " --output jsonpath='{.status.loadBalancer.ingress[0].ip}'"
+              ).strip()
+
+
           with subtest("a LoadBalancer service gets an ip from the pool"):
               master1.succeed(
                   "kubectl --namespace kube-system expose deployment coredns"
                   " --name coredns-health --type LoadBalancer --port 10054"
               )
-              lb_ip = (
-                  "kubectl --namespace kube-system get service coredns-health"
-                  " --output jsonpath='{.status.loadBalancer.ingress[0].ip}'"
-              )
-              master1.wait_until_succeeds(f"{lb_ip} | grep .")
-              ip = master1.succeed(lb_ip).strip()
-              assert ip.startswith("192.168.1.")
-              assert ${toString loadBalancerRange.first} <= int(ip.rsplit(".", 1)[1]) <= ${toString loadBalancerRange.last}
+              retry(lambda _: load_balancer_ip(master1) != "")
+              lb_address = load_balancer_ip(master1)
+              assert lb_address.startswith("192.168.1.")
+              assert ${toString loadBalancerRange.first} <= int(lb_address.rsplit(".", 1)[1]) <= ${toString loadBalancerRange.last}
               for machine in machines:
-                  machine.wait_until_succeeds(f"curl --silent --fail http://{ip}:10054/health")
+                  machine.wait_until_succeeds(f"curl --silent --fail http://{lb_address}:10054/health")
 
 
           with subtest("a NodePort service answers on every node, test firewall rules"):
@@ -260,6 +264,7 @@ let
           if len(masters) > 1:
               with subtest("the cluster keeps working when the master holding the virtual ip goes down"):
                   holder = next(master for master in masters if holds(master, "${virtualIp}"))
+                  lb_address = load_balancer_ip(master1)
                   assert isinstance(holder, QemuMachine)
                   holder.crash()
                   survivors = [master for master in masters if master is not holder]
@@ -270,7 +275,7 @@ let
 
                   # NOTE: the LoadBalancer ip from the subtest above moves to a
                   # survivor once its lease expires, check that
-                  retry(lambda _: any(holds(master, ip) for master in survivors))
+                  retry(lambda _: any(holds(master, lb_address) for master in survivors))
 
                   # NOTE: the agents reach the apiserver through the virtual ip,
                   # every survivor has to reconnect once it moves, cilium-dbg
