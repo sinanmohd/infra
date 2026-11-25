@@ -53,6 +53,11 @@
       url = "github:nixpak/nixpak";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    nix-kube-generators = {
+      url = "github:farcaller/nix-kube-generators";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -69,6 +74,7 @@
       wrap,
       nixpak,
       bootvine,
+      nix-kube-generators,
     }@inputs:
     let
       lib = nixpkgs.lib;

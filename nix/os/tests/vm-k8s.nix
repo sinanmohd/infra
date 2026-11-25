@@ -13,6 +13,12 @@ let
     "worker1"
     "worker2"
   ];
+  # NOTE: a free addresses on eth1, the vms take 192.168.1.1-5
+  virtualIp = "192.168.1.69";
+  loadBalancerRange = {
+    first = 200;
+    last = 210;
+  };
 
   common =
     { config, nodes, ... }:
@@ -23,6 +29,12 @@ let
       sinan.k8s = {
         enable = true;
         openFirewall = true;
+        kubeVip = {
+          enable = true;
+          address = virtualIp;
+          interface = "eth1";
+          loadBalancerRange = "192.168.1.${toString loadBalancerRange.first}-192.168.1.${toString loadBalancerRange.last}";
+        };
       };
       sinan.certToolkit = {
         createCerts = true;
@@ -173,6 +185,43 @@ let
               )
               for master in masters:
                   master.wait_until_succeeds(f"curl --silent --fail http://$({pod_ip}):10054/health")
+
+
+          with subtest("the apiserver answers on the virtual ip"):
+              master1.wait_until_succeeds(
+                  "kubectl --server https://${virtualIp}:6443 get --raw /healthz | grep ok"
+              )
+
+
+          with subtest("a LoadBalancer service gets an ip from the pool"):
+              master1.succeed(
+                  "kubectl --namespace kube-system expose deployment coredns"
+                  " --name coredns-health --type LoadBalancer --port 10054"
+              )
+              lb_ip = (
+                  "kubectl --namespace kube-system get service coredns-health"
+                  " --output jsonpath='{.status.loadBalancer.ingress[0].ip}'"
+              )
+              master1.wait_until_succeeds(f"{lb_ip} | grep .")
+              ip = master1.succeed(lb_ip).strip()
+              assert ip.startswith("192.168.1.")
+              assert ${toString loadBalancerRange.first} <= int(ip.rsplit(".", 1)[1]) <= ${toString loadBalancerRange.last}
+              for machine in machines:
+                  machine.wait_until_succeeds(f"curl --silent --fail http://{ip}:10054/health")
+
+
+          if len(masters) > 1:
+              with subtest("the virtual ip moves when its master goes down"):
+                  holder = next(
+                      master for master in masters
+                      if master.execute("ip -4 address show eth1 | grep --fixed-strings ' ${virtualIp}/'")[0] == 0
+                  )
+                  assert isinstance(holder, QemuMachine)
+                  holder.crash()
+                  survivor = next(master for master in masters if master is not holder)
+                  survivor.wait_until_succeeds(
+                      "kubectl --server https://${virtualIp}:6443 get --raw /healthz | grep ok"
+                  )
         '';
     };
 in
