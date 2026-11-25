@@ -68,7 +68,6 @@ rec {
   mkRootCsrFile =
     root:
     let
-      # NOTE: cfssl ignores `usages` for a CA
       csr = mkCsr root // {
         ca.expiry = root.expiry;
       };
