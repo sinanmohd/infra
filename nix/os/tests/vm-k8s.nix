@@ -29,6 +29,7 @@ let
       sinan.k8s = {
         enable = true;
         openFirewall = true;
+        cilium.enable = true;
         kubeVip = {
           enable = true;
           address = virtualIp;
@@ -44,12 +45,15 @@ let
         masterAddress = "master1";
         kubelet.nodeIp = config.networking.primaryIPAddress;
       };
-      # NOTE: eth0 is the same qemu user network on every vm,
-      # the vms only reach each other over eth1
-      services.flannel.iface = "eth1";
 
-      # NOTE: vm-k8s-5 test went down to 132s -> 85s
-      virtualisation.cores = 2;
+      virtualisation = {
+        # NOTE: vm-k8s-5 test went down to 132s -> 85s
+        cores = 2;
+        # NOTE: the seeded images are getting big with cillium
+        diskSize = 6 * 1024;
+        # NOTE: room for the cilium agent next to the control plane
+        memorySize = 2 * 1024;
+      };
     };
 
   master =
@@ -210,18 +214,38 @@ let
                   machine.wait_until_succeeds(f"curl --silent --fail http://{ip}:10054/health")
 
 
+          def holds(machine: BaseMachine, address: str) -> bool:
+              """Whether kube-vip announces the address from this machine"""
+              return machine.execute(f"ip -4 address show eth1 | grep --fixed-strings ' {address}/'")[0] == 0
+
+
           if len(masters) > 1:
-              with subtest("the virtual ip moves when its master goes down"):
-                  holder = next(
-                      master for master in masters
-                      if master.execute("ip -4 address show eth1 | grep --fixed-strings ' ${virtualIp}/'")[0] == 0
-                  )
+              with subtest("the cluster keeps working when the master holding the virtual ip goes down"):
+                  holder = next(master for master in masters if holds(master, "${virtualIp}"))
                   assert isinstance(holder, QemuMachine)
                   holder.crash()
-                  survivor = next(master for master in masters if master is not holder)
-                  survivor.wait_until_succeeds(
+                  survivors = [master for master in masters if master is not holder]
+
+                  survivors[0].wait_until_succeeds(
                       "kubectl --server https://${virtualIp}:6443 get --raw /healthz | grep ok"
                   )
+
+                  # NOTE: the LoadBalancer ip from the subtest above moves to a
+                  # survivor once its lease expires, check that
+                  retry(lambda _: any(holds(master, ip) for master in survivors))
+
+                  # NOTE: the agents reach the apiserver through the virtual ip,
+                  # every survivor has to reconnect once it moves, cilium-dbg
+                  # status in its agent checks that
+                  for master in survivors:
+                      agent = (
+                          "kubectl --namespace kube-system get pods --selector k8s-app=cilium"
+                          f" --field-selector spec.nodeName={master.name} --output name"
+                      )
+                      master.wait_until_succeeds(
+                          f"kubectl --namespace kube-system exec $({agent}) --container cilium-agent"
+                          " -- cilium-dbg status --brief"
+                      )
         '';
     };
 in
