@@ -447,6 +447,14 @@ in
       peerTrustedCaFile = lib.mkDefault etcdCa.root.certPath;
     };
 
+    # NOTE: UPSTREAM: etcd is Type=notify, wait for it
+    systemd.services.kube-apiserver =
+      lib.mkIf (k8sCfg.apiserver.enable && config.services.etcd.enable)
+        {
+          wants = [ "etcd.service" ];
+          after = [ "etcd.service" ];
+        };
+
     systemd.services.kube-addon-manager = lib.mkIf (isMaster && k8sCfg.addonManager.enable) {
       environment.KUBECONFIG = mkKubeconfig "addon-manager" k8sCa.leaves.addonManager;
       # NOTE: the bootstrap addons hold the rbac rules the addon manager itself
