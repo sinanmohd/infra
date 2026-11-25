@@ -508,8 +508,7 @@ in
       # NOTE: the bootstrap addons hold the rbac rules the addon manager itself
       # needs, so they are applied as cluster admin, which upstream only does
       # with easyCerts
-      serviceConfig.PermissionsStartOnly = true;
-      preStart =
+      serviceConfig.ExecStartPre =
         let
           addons = k8sCfg.addonManager.bootstrapAddons;
           # NOTE: kubectl refuses an applyset whose objects sit in
@@ -528,21 +527,23 @@ in
                 name: "--filename ${pkgs.writeText "${name}.json" (lib.toJSON addons.${name})}"
               ) byNamespace.${namespace}}
           '';
+          bootstrap = pkgs.writeShellScript "kube-addon-manager-bootstrap" ''
+            set -e
+            export KUBECONFIG=${adminKubeconfig}
+            # NOTE: without this runs as root with the HOME of the kubernetes
+            # user, kubectl would cache into a root owned ~/.kube there that
+            # kube-addons can no longer read its kuberc from
+            export HOME=/root
+
+            until ${kubectl} cluster-info > /dev/null 2>&1; do
+              sleep 1
+            done
+
+            export KUBECTL_APPLYSET=true
+            ${lib.concatMapStrings applyNamespace namespaces}
+          '';
         in
-        lib.mkIf (addons != { }) ''
-          export KUBECONFIG=${adminKubeconfig}
-          # NOTE: runs as root with the HOME of the kubernetes user, kubectl
-          # would cache into a root owned ~/.kube there that kube-addons can no
-          # longer read its kuberc from
-          export HOME=/root
-
-          until ${kubectl} cluster-info > /dev/null 2>&1; do
-            sleep 1
-          done
-
-          export KUBECTL_APPLYSET=true
-          ${lib.concatMapStrings applyNamespace namespaces}
-        '';
+        lib.mkIf (addons != { }) [ "+${bootstrap}" ];
     };
 
     environment = {
