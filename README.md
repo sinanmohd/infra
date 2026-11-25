@@ -9,8 +9,8 @@ secrets are encrypted using sops in repo. no, the keys are not in here.
 - appsets:    argocd applicationsets, applied by apps/bootstrap.yaml
 - charts:     helm charts for the k8s cluster
 - nix/global: stuff shared between os and home
-- nix/home:   home-manager, same idea
-- nix/os:     nixos hosts and modules
+- nix/home:   home-manager, hosts and modules
+- nix/os:     nixos, same idea
 - tofu:       opentofu modules
 - values:     per chart values and sops secrets
 
