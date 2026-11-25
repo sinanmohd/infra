@@ -13,10 +13,6 @@ let
     "git-upload-pack"
     "git-upload-archive"
   ];
-  winch = pkgs.callPackage libSinan.nixpakWinch { };
-  named = pkgs.callPackage libSinan.nixpakNamed {
-    inherit nixpak pkg_raw;
-  };
   mkNixPak = nixpak.lib.nixpak {
     inherit lib pkgs;
   };
@@ -74,7 +70,7 @@ let
   };
 in
 libSinan.nixpakEnv {
-  inherit buildEnv pkg_raw;
+  inherit pkg_raw;
   pkg_nixpak = buildEnv {
     name = "${pkg_raw.pname}-nixpak";
     paths = [
@@ -97,7 +93,9 @@ libSinan.nixpakEnv {
           fi
         fi
 
-        exec ${winch} ${named} ${lib.getExe wrapped.config.script} "$@"
+        exec ${libSinan.nixpakWinch} ${
+          libSinan.nixpakNamed { inherit nixpak pkg_raw; }
+        } ${lib.getExe wrapped.config.script} "$@"
       '')
     ]
     # NOTE: [AGENT]: server side helpers invoked over ssh (git push/fetch),

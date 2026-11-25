@@ -11,18 +11,17 @@ in
   # bash-completion, Desktop entries, etc... can be reused
   nixpakEnv =
     {
-      buildEnv,
       pkg_raw,
       pkg_nixpak,
     }:
-    buildEnv {
+    pkgs.buildEnv {
       inherit (pkg_raw)
         pname
         version
         meta
         ;
       paths = [
-        (buildEnv {
+        (pkgs.buildEnv {
           name = "${pkg_raw.pname}-share";
           paths = [
             pkg_raw
@@ -52,17 +51,15 @@ in
   # after the file it was exec'd as, so run the launcher through a symlink
   nixpakNamed =
     {
-      runCommandLocal,
-      callPackage,
       nixpak,
       pkg_raw,
     }:
     let
       name = pkg_raw.meta.mainProgram or pkg_raw.name;
-      launcher = callPackage "${nixpak}/launcher" { };
+      launcher = pkgs.callPackage "${nixpak}/launcher" { };
     in
     "${
-      runCommandLocal "nixpak-named-${name}" { } ''
+      pkgs.runCommandLocal "nixpak-named-${name}" { } ''
         mkdir -p $out/bin
         ln -s ${launcher}/bin/launcher $out/bin/${name}
       ''
@@ -73,19 +70,12 @@ in
   # TUIs keep their startup size. This leaves a sidecar in the foreground
   # process group that relays SIGWINCH from the host side to the sessions
   nixpakWinch =
-    {
-      lib,
-      writeShellScript,
-      writeShellApplication,
-      coreutils,
-      procps,
-    }:
     let
       # NOTE: a separate script, so runtimeInputs does not leak
       # into the PATH of the launcher and from there into the sandbox
-      sidecar = writeShellApplication {
+      sidecar = pkgs.writeShellApplication {
         name = "nixpak-winch-sidecar";
-        runtimeInputs = [
+        runtimeInputs = with pkgs; [
           coreutils
           procps
         ];
@@ -117,7 +107,7 @@ in
         '';
       };
     in
-    writeShellScript "nixpak-winch" ''
+    pkgs.writeShellScript "nixpak-winch" ''
       [ -t 0 ] || [ -t 1 ] || [ -t 2 ] || exec "$@"
 
       # NOTE: $$ becomes the launcher once it is exec'd. No tty or

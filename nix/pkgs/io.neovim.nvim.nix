@@ -11,10 +11,6 @@
 }:
 let
   pkg_raw = pkgs.neovim;
-  winch = pkgs.callPackage libSinan.nixpakWinch { };
-  named = pkgs.callPackage libSinan.nixpakNamed {
-    inherit nixpak pkg_raw;
-  };
   mkNixPak = nixpak.lib.nixpak {
     inherit lib pkgs;
   };
@@ -82,7 +78,7 @@ let
   };
 in
 libSinan.nixpakEnv {
-  inherit buildEnv pkg_raw;
+  inherit pkg_raw;
   pkg_nixpak = pkgs.writeShellScriptBin "nvim" ''
     export NVIM_PATH="$PATH:${nvimBins}/bin"
 
@@ -105,8 +101,8 @@ libSinan.nixpakEnv {
       fi
     fi
 
-    exec ${winch} ${named} ${lib.getExe wrapped.config.script} ${
-      if configPath != null then "-u ${configPath}" else ""
-    } "$@"
+    exec ${libSinan.nixpakWinch} ${
+      libSinan.nixpakNamed { inherit nixpak pkg_raw; }
+    } ${lib.getExe wrapped.config.script} ${if configPath != null then "-u ${configPath}" else ""} "$@"
   '';
 }

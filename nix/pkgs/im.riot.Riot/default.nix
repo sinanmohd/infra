@@ -2,7 +2,6 @@
   lib,
   pkgs,
   nixpak,
-  buildEnv,
   libSinan,
 }:
 let
@@ -98,6 +97,6 @@ let
   };
 in
 libSinan.nixpakEnv {
-  inherit buildEnv pkg_raw;
+  inherit pkg_raw;
   pkg_nixpak = wrapped.config.script;
 }

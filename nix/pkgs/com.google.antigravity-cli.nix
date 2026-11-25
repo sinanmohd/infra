@@ -3,15 +3,10 @@
   pkgs,
   nixpak,
   git,
-  buildEnv,
   libSinan,
 }:
 let
   pkg_raw = pkgs.antigravity-cli;
-  winch = pkgs.callPackage libSinan.nixpakWinch { };
-  named = pkgs.callPackage libSinan.nixpakNamed {
-    inherit nixpak pkg_raw;
-  };
   mkNixPak = nixpak.lib.nixpak {
     inherit lib pkgs;
   };
@@ -109,7 +104,7 @@ let
   };
 in
 libSinan.nixpakEnv {
-  inherit buildEnv pkg_raw;
+  inherit pkg_raw;
   pkg_nixpak = pkgs.writeShellScriptBin pkg_raw.meta.mainProgram ''
     err() {
       : "''${1:?}"
@@ -148,6 +143,8 @@ libSinan.nixpakEnv {
       export RW_ROOT="$rw_root"
     fi
 
-    exec ${winch} ${named} ${lib.getExe wrapped.config.script} "$@"
+    exec ${libSinan.nixpakWinch} ${
+      libSinan.nixpakNamed { inherit nixpak pkg_raw; }
+    } ${lib.getExe wrapped.config.script} "$@"
   '';
 }
