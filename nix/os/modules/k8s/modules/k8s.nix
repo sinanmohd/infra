@@ -469,6 +469,11 @@ in
         in
         lib.mkIf (files != [ ]) ''
           export KUBECONFIG=${adminKubeconfig}
+          # NOTE: runs as root with the HOME of the kubernetes user, kubectl
+          # would cache into a root owned ~/.kube there that kube-addons can no
+          # longer read its kuberc from
+          export HOME=/root
+
           until ${kubectl} cluster-info > /dev/null 2>&1; do
             sleep 1
           done
