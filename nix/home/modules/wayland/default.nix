@@ -1,4 +1,9 @@
-{ pkgs, inputsSinan, ... }:
+{
+  config,
+  pkgs,
+  inputsSinan,
+  ...
+}:
 let
   pkgsSinan = inputsSinan.self.packages.${pkgs.stdenv.hostPlatform.system};
   wayland-scripts = pkgsSinan.wayland-scripts;
@@ -39,6 +44,9 @@ in
       xdg-utils
 
       pkgsSinan.qbittorrent
+      (pkgsSinan.slack.override {
+        policies.DownloadPath = config.xdg.userDirs.download;
+      })
     ];
   };
 

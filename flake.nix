@@ -131,6 +131,7 @@
               builtins.elem (lib.getName pkg) [
                 "claude-code"
                 "antigravity-cli"
+                "slack"
               ];
           };
         };
@@ -175,6 +176,10 @@
             libSinan = self.lib { inherit pkgs; };
           };
           chromium = pkgs.callPackage ./nix/pkgs/org.chromium.Chromium.nix {
+            inherit nixpak;
+            libSinan = self.lib { inherit pkgs; };
+          };
+          slack = pkgs.callPackage ./nix/pkgs/com.slack.Slack.nix {
             inherit nixpak;
             libSinan = self.lib { inherit pkgs; };
           };

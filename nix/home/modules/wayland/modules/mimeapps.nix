@@ -29,6 +29,9 @@
       "x-scheme-handler/https" = "firefox.desktop";
       "x-scheme-handler/unknown" = "firefox.desktop";
 
+      # apps
+      "x-scheme-handler/slack" = "slack.desktop";
+
       # documents
       "application/pdf" = "org.pwmt.zathura.desktop";
     };
