@@ -214,6 +214,24 @@ let
                   machine.wait_until_succeeds(f"curl --silent --fail http://{ip}:10054/health")
 
 
+          with subtest("a NodePort service answers on every node, test firewall rules"):
+              master1.succeed(
+                  "kubectl --namespace kube-system expose deployment coredns"
+                  " --name coredns-nodeport --type NodePort --port 10054"
+              )
+              node_port = master1.succeed(
+                  "kubectl --namespace kube-system get service coredns-nodeport"
+                  " --output jsonpath='{.spec.ports[0].nodePort}'"
+              ).strip()
+              for machine in machines:
+                  # NOTE: kubelet registers the node with its eth1 addr
+                  node_ip = master1.succeed(
+                      f"kubectl get node {machine.name} --output"
+                      " jsonpath='{.status.addresses[?(@.type==\"InternalIP\")].address}'"
+                  ).strip()
+                  master1.wait_until_succeeds(f"curl --silent --fail http://{node_ip}:{node_port}/health")
+
+
           def holds(machine: BaseMachine, address: str) -> bool:
               """Whether kube-vip announces the address from this machine"""
               return machine.execute(f"ip -4 address show eth1 | grep --fixed-strings ' {address}/'")[0] == 0

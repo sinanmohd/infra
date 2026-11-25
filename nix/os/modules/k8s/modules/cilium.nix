@@ -206,6 +206,8 @@ in
       lib.mkDefault "10min"
     );
 
+    # NOTE: no rule for the NodePort range, cilium handles NodePorts in ebpf on
+    # the device before the INPUT chain the firewall filters
     networking.firewall = lib.mkIf (config.sinan.k8s.openFirewall && k8sCfg.kubelet.enable) {
       # NOTE: health checks between agents and hubble relay reaching the agents
       allowedTCPPorts = [
