@@ -185,6 +185,21 @@ let
       };
     };
 
+    testPackageThrowsWithoutCreateCerts = {
+      expr =
+        let
+          ca = (evalToolkit { cas.my-ca.leaves.my-cert = { }; }).cas.my-ca;
+        in
+        {
+          root = (builtins.tryEval ca.root.package).success;
+          leaf = (builtins.tryEval ca.leaves.my-cert.package).success;
+        };
+      expected = {
+        root = false;
+        leaf = false;
+      };
+    };
+
     testSopsSettingsMergePerKey = {
       expr =
         (evalToolkit {

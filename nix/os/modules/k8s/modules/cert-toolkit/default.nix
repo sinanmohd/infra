@@ -103,12 +103,32 @@ let
     };
   };
 
+  /**
+    Error for reading the `package` of a cert without `createCerts`.
+
+    # Inputs
+
+    `id`
+
+    : The `id` of the cert
+
+    # Type
+
+    ```
+    noPackage :: String -> String
+    ```
+  */
+  noPackage =
+    id:
+    "sinan.certToolkit: ${id} has no package without createCerts, building it would put its private key in the world readable store";
+
   certOptions = sopsOptions // {
     package = lib.mkOption {
       type = lib.types.package;
       description = ''
-        The derivation creating the certificate and its key, only used
-        with `sinan.certToolkit.createCerts`
+        The derivation creating the certificate and its key. Only available
+        with `sinan.certToolkit.createCerts`, reading it otherwise throws,
+        since its key would land in the world readable store.
       '';
     };
     key = lib.mkOption { type = keyType; };
@@ -364,16 +384,19 @@ let
             relativeCertPath = "${cfg.dir}/leaf/${owner}/${caName}-${name}.crt";
             relativeSopsKeyPath = "${cfg.dir}/leaf/${owner}/${caName}-${name}.key.sops";
             package = lib.mkDefault (
-              pkgs.runCommand "certtoolkit-${config.id}" { nativeBuildInputs = [ pkgs.cfssl ]; } ''
-                cfssl gencert -loglevel 2 \
-                  -ca ${ca.root.package}/ca.crt \
-                  -ca-key ${ca.root.package}/ca.key \
-                  -config ${mkSigningConfigFile config} \
-                  ${mkLeafCsrFile config} \
-                  | cfssljson -bare cert
-                install -D --mode 444 cert.pem "$out/cert.crt"
-                install -D --mode 444 cert-key.pem "$out/cert.key"
-              ''
+              if cfg.createCerts then
+                pkgs.runCommand "certtoolkit-${config.id}" { nativeBuildInputs = [ pkgs.cfssl ]; } ''
+                  cfssl gencert -loglevel 2 \
+                    -ca ${ca.root.package}/ca.crt \
+                    -ca-key ${ca.root.package}/ca.key \
+                    -config ${mkSigningConfigFile config} \
+                    ${mkLeafCsrFile config} \
+                    | cfssljson -bare cert
+                  install -D --mode 444 cert.pem "$out/cert.crt"
+                  install -D --mode 444 cert-key.pem "$out/cert.key"
+                ''
+              else
+                throw (noPackage config.id)
             );
             certPath =
               if cfg.createCerts then "${config.package}/cert.crt" else flakeFile config.relativeCertPath;
@@ -437,12 +460,15 @@ let
             relativeCertPath = "${cfg.dir}/root/${caName}.crt";
             relativeSopsKeyPath = "${cfg.dir}/root/${caName}.key.sops";
             package = lib.mkDefault (
-              pkgs.runCommand "certtoolkit-${config.id}" { nativeBuildInputs = [ pkgs.cfssl ]; } ''
-                cfssl gencert -loglevel 2 -initca ${mkRootCsrFile config} \
-                  | cfssljson -bare ca
-                install -D --mode 444 ca.pem "$out/ca.crt"
-                install -D --mode 444 ca-key.pem "$out/ca.key"
-              ''
+              if cfg.createCerts then
+                pkgs.runCommand "certtoolkit-${config.id}" { nativeBuildInputs = [ pkgs.cfssl ]; } ''
+                  cfssl gencert -loglevel 2 -initca ${mkRootCsrFile config} \
+                    | cfssljson -bare ca
+                  install -D --mode 444 ca.pem "$out/ca.crt"
+                  install -D --mode 444 ca-key.pem "$out/ca.key"
+                ''
+              else
+                throw (noPackage config.id)
             );
             certPath =
               if cfg.createCerts then "${config.package}/ca.crt" else flakeFile config.relativeCertPath;
