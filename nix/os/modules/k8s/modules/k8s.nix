@@ -418,6 +418,15 @@ in
         tlsCertFile = k8sCa.leaves.kubelet.certPath;
         tlsKeyFile = k8sCa.leaves.kubelet.keyPath;
         kubeconfig = clientCert k8sCa.leaves.kubeletClient;
+
+        # NOTE: upstream taints master only nodes with unschedulable and the
+        # node-role master key kubeadm dropped in 1.25, keep only its
+        # control-plane successor that charts tolerate
+        unschedulable = lib.mkOverride (mkDefaultPriority - 1) false;
+        taints.master = lib.mkIf (!lib.elem "node" k8sCfg.roles) {
+          key = lib.mkForce "node-role.kubernetes.io/control-plane";
+          value = lib.mkForce "";
+        };
       };
 
       proxy = lib.mkIf k8sCfg.proxy.enable {
