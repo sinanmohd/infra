@@ -1,5 +1,6 @@
 {
   config,
+  options,
   lib,
   pkgs,
   ...
@@ -41,13 +42,14 @@ let
 
   /**
     Compute the first IP in a CIDR range, used for the default kubernetes
-    apiserver service IP (e.g. 10.0.0.1 for 10.0.0.0/24).
+    apiserver service IP (e.g. 10.0.0.1 for 10.0.0.0/24). An IPv6 range has
+    to end its network address in `::`, which is how they are written.
 
     # Inputs
 
     `cidr`
 
-    : An IPv4 CIDR string (e.g. "10.0.0.0/24")
+    : An IPv4 or IPv6 CIDR string (e.g. "10.0.0.0/24" or "fd10:2::/112")
 
     # Type
 
@@ -62,6 +64,8 @@ let
     ```nix
     firstServiceIp "10.0.0.0/24"
     => "10.0.0.1"
+    firstServiceIp "fd10:2::/112"
+    => "fd10:2::1"
     ```
 
     :::
@@ -69,9 +73,15 @@ let
   firstServiceIp =
     cidr:
     let
-      parts = lib.splitString "." cidr;
+      network = lib.head (lib.splitString "/" cidr);
     in
-    lib.concatStringsSep "." (lib.take 3 parts) + ".1";
+    if lib.hasInfix ":" cidr then
+      if lib.hasSuffix "::" network then
+        "${network}1"
+      else
+        throw "sinan.k8s: the IPv6 range ${cidr} must end its network address in ::"
+    else
+      lib.concatStringsSep "." (lib.take 3 (lib.splitString "." network)) + ".1";
 
   /**
     The files a client needs to talk to the apiserver with a leaf of the
@@ -137,9 +147,41 @@ in
         etcd this host runs, based on its `services.kubernetes.roles`
       '';
     };
+
+    ipv6 = {
+      enable = lib.mkEnableOption ''
+        dual-stack, IPv4 first, so pods and Services get an IPv6 address too.
+        Needs Cilium, and every node an IPv6 address, set both in
+        `services.kubernetes.kubelet.nodeIp` as `<ipv4>,<ipv6>`'';
+
+      podCidr = lib.mkOption {
+        type = lib.types.str;
+        default = "fd10:1::/56";
+        description = ''
+          IPv6 range of the pods, each node gets a /64 of it. ULA by
+          default, pods reach the outside through masquerade on the node.
+        '';
+      };
+
+      serviceCidr = lib.mkOption {
+        type = lib.types.str;
+        default = "fd10:2::/112";
+        description = ''
+          IPv6 range of the Service cluster IPs, its network address has to
+          end in `::`
+        '';
+      };
+    };
   };
 
   config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = cfg.ipv6.enable -> cfg.cilium.enable;
+        message = "sinan.k8s.ipv6 needs sinan.k8s.cilium, flannel and kube-proxy are IPv4 only here";
+      }
+    ];
+
     sinan.certToolkit = {
       dir = lib.mkDefault "nix/os/modules/k8s/certs";
       defaults.key = lib.mkDefault {
@@ -182,8 +224,8 @@ in
                   config.networking.hostName
                   config.networking.fqdnOrHostName
                   k8sCfg.masterAddress
-                  (firstServiceIp k8sCfg.apiserver.serviceClusterIpRange)
                 ]
+                ++ map firstServiceIp (lib.splitString "," k8sCfg.apiserver.serviceClusterIpRange)
                 ++ hostAddresses
                 ++ lib.optional (k8sCfg.apiserver.advertiseAddress != null) k8sCfg.apiserver.advertiseAddress
                 ++ k8sCfg.apiserver.extraSANs
@@ -268,7 +310,7 @@ in
                   "localhost"
                 ]
                 ++ hostAddresses
-                ++ lib.optional (k8sCfg.kubelet.nodeIp != null) k8sCfg.kubelet.nodeIp
+                ++ lib.optionals (k8sCfg.kubelet.nodeIp != null) (lib.splitString "," k8sCfg.kubelet.nodeIp)
               );
               usages = [
                 "signing"
@@ -374,8 +416,14 @@ in
       apiserverAddress = lib.mkOverride (
         mkDefaultPriority - 100
       ) "https://${k8sCfg.masterAddress}:${toString k8sCfg.apiserver.securePort}";
+      clusterCidr = lib.mkIf cfg.ipv6.enable (
+        lib.mkDefault "${options.services.kubernetes.clusterCidr.default},${cfg.ipv6.podCidr}"
+      );
 
       apiserver = lib.mkIf isMaster {
+        serviceClusterIpRange = lib.mkIf cfg.ipv6.enable (
+          lib.mkDefault "${options.services.kubernetes.apiserver.serviceClusterIpRange.default},${cfg.ipv6.serviceCidr}"
+        );
         tlsCertFile = k8sCa.leaves.apiserver.certPath;
         tlsKeyFile = k8sCa.leaves.apiserver.keyPath;
         clientCaFile = k8sCa.root.certPath;

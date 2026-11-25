@@ -147,6 +147,9 @@ let
   // lib.optionalAttrs kubeVipCfg.enable {
     # NOTE: kube-vip-cloud-provider hands out the LoadBalancer addresses
     defaultLBServiceIPAM = "none";
+  }
+  // lib.optionalAttrs config.sinan.k8s.ipv6.enable {
+    ipv6.enabled = true;
   };
 in
 {

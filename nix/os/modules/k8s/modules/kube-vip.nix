@@ -28,6 +28,15 @@ let
       arm64 = "sha256-/YwpG36aQXK6kqZDVPO4yGafJ3HkEIyuonb92B+GE14=";
     };
   };
+
+  addresses = lib.concatStringsSep "," (
+    [ cfg.address ] ++ lib.optional (cfg.addressIpv6 != null) cfg.addressIpv6
+  );
+  loadBalancerRanges = lib.concatStringsSep "," (
+    [ cfg.loadBalancerRange ]
+    ++ lib.optional (cfg.loadBalancerRangeIpv6 != null) cfg.loadBalancerRangeIpv6
+  );
+
   cloudProviderImage = libSinan.ociImagePull {
     name = "ghcr.io/kube-vip/kube-vip-cloud-provider";
     tag = "v0.0.13";
@@ -66,6 +75,26 @@ in
       description = ''
         IPv4 range kube-vip-cloud-provider gives LoadBalancer services
         their addresses from
+      '';
+    };
+
+    addressIpv6 = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "2001:db8::100";
+      description = ''
+        Virtual IPv6 address of the apiserver next to `address`, announced
+        over NDP by the same master
+      '';
+    };
+
+    loadBalancerRangeIpv6 = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "2001:db8::200-2001:db8::250";
+      description = ''
+        IPv6 range kube-vip-cloud-provider gives LoadBalancer services their
+        addresses from, dual-stack services get one of each family
       '';
     };
 
@@ -111,12 +140,12 @@ in
         kubeVersion = "v${k8sCfg.package.version}";
         values = lib.recursiveUpdate {
           image = libSinan.ociImageValues kubeVipImage;
-          config.address = cfg.address;
+          config.address = addresses;
           env = {
             port = toString k8sCfg.apiserver.securePort;
             vip_interface = cfg.interface;
             vip_arp = "true";
-            vip_subnet = "32";
+            vip_subnet = if cfg.addressIpv6 != null then "32,128" else "32";
 
             cp_enable = "true";
             vip_leaderelection = "true";
@@ -151,7 +180,7 @@ in
         kubeVersion = "v${k8sCfg.package.version}";
         values = lib.recursiveUpdate {
           image = libSinan.ociImageValues cloudProviderImage;
-          cm.data.range-global = cfg.loadBalancerRange;
+          cm.data.range-global = loadBalancerRanges;
         } cfg.cloudProviderValues;
       })
     ];
@@ -163,7 +192,7 @@ in
         else
           "https://${cfg.address}:${toString k8sCfg.apiserver.securePort}"
       );
-      apiserver.extraSANs = lib.mkIf isMaster [ cfg.address ];
+      apiserver.extraSANs = lib.mkIf isMaster (lib.splitString "," addresses);
 
       kubelet = lib.mkIf k8sCfg.kubelet.enable {
         seedDockerImages = [

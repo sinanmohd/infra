@@ -13,8 +13,10 @@ let
     "worker1"
     "worker2"
   ];
-  # NOTE: a free addresses on eth1, the vms take 192.168.1.1-5
-  virtualIp = "192.168.1.69";
+
+  k8sApiIpHA = "192.168.1.69";
+  k8sApiIpv6HA = "2001:db8:1::69";
+
   loadBalancerRange = {
     first = 200;
     last = 210;
@@ -29,12 +31,15 @@ let
       sinan.k8s = {
         enable = true;
         openFirewall = true;
+        ipv6.enable = true;
         cilium.enable = true;
         kubeVip = {
           enable = true;
-          address = virtualIp;
+          address = k8sApiIpHA;
+          addressIpv6 = k8sApiIpv6HA;
           interface = "eth1";
           loadBalancerRange = "192.168.1.${toString loadBalancerRange.first}-192.168.1.${toString loadBalancerRange.last}";
+          loadBalancerRangeIpv6 = "2001:db8:1::${toString loadBalancerRange.first}-2001:db8:1::${toString loadBalancerRange.last}";
         };
       };
       sinan.certToolkit = {
@@ -43,7 +48,7 @@ let
       };
       services.kubernetes = {
         masterAddress = "master1";
-        kubelet.nodeIp = config.networking.primaryIPAddress;
+        kubelet.nodeIp = "${config.networking.primaryIPAddress},${config.networking.primaryIPv6Address}";
       };
 
       virtualisation = {
@@ -147,6 +152,8 @@ let
           kubelet = cas.kubernetes.leaves.kubeletClient;
         in
         ''
+          import json
+
           start_all()
 
           masters = [machine for machine in machines if machine.name.startswith("master")]
@@ -182,13 +189,27 @@ let
               )
 
 
-          with subtest("masters can reach pods over the pod network"):
-              pod_ip = (
+          def url(address: str, port: int | str) -> str:
+              """An http url, with the brackets an IPv6 address needs"""
+              host = f"[{address}]" if ":" in address else address
+              return f"http://{host}:{port}"
+
+
+          def pod_ips() -> list[str]:
+              """The addresses of a coredns pod, empty until it has them"""
+              return master1.succeed(
                   "kubectl --namespace kube-system get pods --selector k8s-app=kube-dns"
-                  " --output jsonpath='{.items[0].status.podIP}'"
-              )
+                  " --output jsonpath='{.items[0].status.podIPs[*].ip}'"
+              ).split()
+
+
+          with subtest("masters can reach pods over the pod network on both IPv4 and IPv6"):
+              retry(lambda _: len(pod_ips()) == 2)
+              addresses = pod_ips()
+              assert any(":" in address for address in addresses), addresses
               for master in masters:
-                  master.wait_until_succeeds(f"curl --silent --fail http://$({pod_ip}):10054/health")
+                  for address in addresses:
+                      master.wait_until_succeeds(f"curl --silent --fail {url(address, 10054)}/health")
 
 
           def all_pods_ready(last_try: bool) -> bool:
@@ -211,71 +232,92 @@ let
               retry(all_pods_ready)
 
 
-          with subtest("the apiserver answers on the virtual ip"):
-              master1.wait_until_succeeds(
-                  "kubectl --server https://${virtualIp}:6443 get --raw /healthz | grep ok"
-              )
+          with subtest("the apiserver answers on both virtual ips"):
+              for address in ["${k8sApiIpHA}", "[${k8sApiIpv6HA}]"]:
+                  master1.wait_until_succeeds(
+                      f"kubectl --server https://{address}:6443 get --raw /healthz | grep ok"
+                  )
 
 
-          def load_balancer_ip(machine: BaseMachine) -> str:
-              """The address of the coredns-health service, empty until it has one"""
+          def dual_stack_service(name: str, service_type: str) -> None:
+              """A coredns health service with an address of each family"""
+              manifest = json.dumps({
+                  "apiVersion": "v1",
+                  "kind": "Service",
+                  "metadata": {"name": name, "namespace": "kube-system"},
+                  "spec": {
+                      "type": service_type,
+                      "ipFamilyPolicy": "RequireDualStack",
+                      "ipFamilies": ["IPv4", "IPv6"],
+                      "selector": {"k8s-app": "kube-dns"},
+                      "ports": [{"port": 10054, "targetPort": 10054}],
+                  },
+              })
+              master1.succeed(f"kubectl apply --filename - <<'EOF'\n{manifest}\nEOF")
+
+
+          def load_balancer_ips(machine: BaseMachine) -> list[str]:
+              """The addresses of the coredns-health service, empty until it has them"""
               return machine.succeed(
                   "kubectl --namespace kube-system get service coredns-health"
-                  " --output jsonpath='{.status.loadBalancer.ingress[0].ip}'"
-              ).strip()
+                  " --output jsonpath='{.status.loadBalancer.ingress[*].ip}'"
+              ).split()
 
 
-          with subtest("a LoadBalancer service gets an ip from the pool"):
-              master1.succeed(
-                  "kubectl --namespace kube-system expose deployment coredns"
-                  " --name coredns-health --type LoadBalancer --port 10054"
-              )
-              retry(lambda _: load_balancer_ip(master1) != "")
-              lb_address = load_balancer_ip(master1)
-              assert lb_address.startswith("192.168.1.")
-              assert ${toString loadBalancerRange.first} <= int(lb_address.rsplit(".", 1)[1]) <= ${toString loadBalancerRange.last}
+          with subtest("a LoadBalancer service gets an ip of each family from the pools"):
+              dual_stack_service("coredns-health", "LoadBalancer")
+              retry(lambda _: len(load_balancer_ips(master1)) == 2)
+              lb_addresses = load_balancer_ips(master1)
+              ipv4 = next(address for address in lb_addresses if ":" not in address)
+              ipv6 = next(address for address in lb_addresses if ":" in address)
+              assert ipv4.startswith("192.168.1.")
+              assert ${toString loadBalancerRange.first} <= int(ipv4.rsplit(".", 1)[1]) <= ${toString loadBalancerRange.last}
+              assert ipv6.startswith("2001:db8:1::")
               for machine in machines:
-                  machine.wait_until_succeeds(f"curl --silent --fail http://{lb_address}:10054/health")
+                  for address in lb_addresses:
+                      machine.wait_until_succeeds(f"curl --silent --fail {url(address, 10054)}/health")
 
 
-          with subtest("a NodePort service answers on every node, test firewall rules"):
-              master1.succeed(
-                  "kubectl --namespace kube-system expose deployment coredns"
-                  " --name coredns-nodeport --type NodePort --port 10054"
-              )
+          with subtest("a NodePort service answers on every node and family, test firewall rules"):
+              dual_stack_service("coredns-nodeport", "NodePort")
               node_port = master1.succeed(
                   "kubectl --namespace kube-system get service coredns-nodeport"
                   " --output jsonpath='{.spec.ports[0].nodePort}'"
               ).strip()
               for machine in machines:
                   # NOTE: kubelet registers the node with its eth1 addr
-                  node_ip = master1.succeed(
+                  node_ips = master1.succeed(
                       f"kubectl get node {machine.name} --output"
                       " jsonpath='{.status.addresses[?(@.type==\"InternalIP\")].address}'"
-                  ).strip()
-                  master1.wait_until_succeeds(f"curl --silent --fail http://{node_ip}:{node_port}/health")
+                  ).split()
+                  assert len(node_ips) == 2, node_ips
+                  for address in node_ips:
+                      master1.wait_until_succeeds(f"curl --silent --fail {url(address, node_port)}/health")
 
 
           def holds(machine: BaseMachine, address: str) -> bool:
               """Whether kube-vip announces the address from this machine"""
-              return machine.execute(f"ip -4 address show eth1 | grep --fixed-strings ' {address}/'")[0] == 0
+              return machine.execute(f"ip address show eth1 | grep --fixed-strings ' {address}/'")[0] == 0
 
 
           if len(masters) > 1:
               with subtest("the cluster keeps working when the master holding the virtual ip goes down"):
-                  holder = next(master for master in masters if holds(master, "${virtualIp}"))
-                  lb_address = load_balancer_ip(master1)
+                  holder = next(master for master in masters if holds(master, "${k8sApiIpHA}"))
+                  assert holds(holder, "${k8sApiIpv6HA}")
+                  lb_addresses = load_balancer_ips(master1)
                   assert isinstance(holder, QemuMachine)
                   holder.crash()
                   survivors = [master for master in masters if master is not holder]
 
-                  survivors[0].wait_until_succeeds(
-                      "kubectl --server https://${virtualIp}:6443 get --raw /healthz | grep ok"
-                  )
+                  for address in ["${k8sApiIpHA}", "[${k8sApiIpv6HA}]"]:
+                      survivors[0].wait_until_succeeds(
+                          f"kubectl --server https://{address}:6443 get --raw /healthz | grep ok"
+                      )
 
                   # NOTE: the LoadBalancer ip from the subtest above moves to a
                   # survivor once its lease expires, check that
-                  retry(lambda _: any(holds(master, lb_address) for master in survivors))
+                  for address in lb_addresses:
+                      retry(lambda _: any(holds(master, address) for master in survivors))
 
                   # NOTE: the agents reach the apiserver through the virtual ip,
                   # every survivor has to reconnect once it moves, cilium-dbg
