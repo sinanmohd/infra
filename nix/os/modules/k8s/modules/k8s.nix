@@ -474,6 +474,7 @@ in
             ++ lib.remove "kube-system" (lib.attrNames byNamespace);
           applyNamespace = namespace: ''
             ${kubectl} apply --validate=false --prune \
+              --server-side --force-conflicts --field-manager=bootstrap-addons \
               --applyset=bootstrap-addons --namespace ${namespace} \
               ${lib.concatMapStringsSep " " (
                 name: "--filename ${pkgs.writeText "${name}.json" (lib.toJSON addons.${name})}"
