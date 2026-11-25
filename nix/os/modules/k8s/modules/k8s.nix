@@ -370,7 +370,7 @@ in
       # NOTE: cert toolkit gives prod ready alternative
       easyCerts = lib.mkForce false;
       caFile = lib.mkDefault k8sCa.root.certPath;
-      # NOTE: the upstream default drops the port when advertiseAddress is set
+      # NOTE: UPSTREAM: the default drops the port when advertiseAddress is set
       apiserverAddress = lib.mkOverride (
         mkDefaultPriority - 100
       ) "https://${k8sCfg.masterAddress}:${toString k8sCfg.apiserver.securePort}";
