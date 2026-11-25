@@ -95,14 +95,14 @@ spec:
                   valueFiles:
                     - "/values/signoz/values.sinan.yaml"
                     - "/values/signoz/secrets.sinan.yaml"
-          - name: valkey
-            namespace: valkey
+          - name: valkey-cluster
+            namespace: valkey-cluster
             sources:
               - repoURL: "https://github.com/sinanmohd/infra.git"
                 targetRevision: HEAD
-                path: "charts/valkey"
+                path: "charts/valkey-cluster"
                 helm:
-                  releaseName: valkey
+                  releaseName: valkey-cluster
                   valueFiles: []
   template:
     metadata:
