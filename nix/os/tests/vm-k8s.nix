@@ -191,6 +191,26 @@ let
                   master.wait_until_succeeds(f"curl --silent --fail http://$({pod_ip}):10054/health")
 
 
+          def all_pods_ready(last_try: bool) -> bool:
+              """Whether every pod is Ready, or Succeeded like finished jobs"""
+              pods = master1.succeed(
+                  "kubectl get pods --all-namespaces --output jsonpath='{range .items[*]}"
+                  "{.metadata.namespace}/{.metadata.name} {.status.phase}"
+                  " {.status.conditions[?(@.type==\"Ready\")].status}{\"\\n\"}{end}'"
+              ).strip().splitlines()
+              not_ready = [
+                  pod for pod in pods
+                  if pod.split()[1] != "Succeeded" and pod.split()[2:] != ["True"]
+              ]
+              if last_try:
+                  print("pods not ready:", not_ready)
+              return not_ready == []
+
+
+          with subtest("every pod is ready or has succeeded"):
+              retry(all_pods_ready)
+
+
           with subtest("the apiserver answers on the virtual ip"):
               master1.wait_until_succeeds(
                   "kubectl --server https://${virtualIp}:6443 get --raw /healthz | grep ok"
@@ -276,6 +296,8 @@ in
         master
         worker
       ];
+      # NOTE: the chart never puts two operators on the same node
+      sinan.k8s.cilium.values.operator.replicas = 1;
     };
   };
 
