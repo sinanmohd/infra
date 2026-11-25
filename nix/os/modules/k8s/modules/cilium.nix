@@ -150,18 +150,32 @@ let
   };
 in
 {
-  options.sinan.k8s.cilium.enable = lib.mkOption {
-    type = lib.types.bool;
-    default = false;
-    description = ''
-      Whether to run Cilium from its upstream chart as the CNI and kube-proxy
-      replacement, with Hubble, in place of flannel and kube-proxy.
+  options.sinan.k8s.cilium = {
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Whether to run Cilium from its upstream chart as the CNI and kube-proxy
+        replacement, with Hubble, in place of flannel and kube-proxy.
 
-      Without kube-proxy the agents reach the apiserver directly: through
-      `sinan.k8s.kubeVip.address` when kube-vip is enabled, which stays
-      up when a master goes down, otherwise through `masterAddress` alone,
-      which is not highly available.
-    '';
+        Without kube-proxy the agents reach the apiserver directly: through
+        `sinan.k8s.kubeVip.address` when kube-vip is enabled, which stays
+        up when a master goes down, otherwise through `masterAddress` alone,
+        which is not highly available.
+      '';
+    };
+    values = lib.mkOption {
+      type = lib.types.attrsOf lib.types.anything;
+      default = { };
+      example = {
+        operator.replicas = 1;
+      };
+      description = ''
+        Helm values for the Cilium chart, merged over the ones this module
+        sets, key by key, so nested settings keep their siblings. Lists
+        replace the module's list as a whole.
+      '';
+    };
   };
 
   config = lib.mkIf (config.sinan.k8s.enable && cfg.enable) {
@@ -173,7 +187,7 @@ in
         namespace = "kube-system";
         inherit chart;
         kubeVersion = "v${k8sCfg.package.version}";
-        inherit values;
+        values = lib.recursiveUpdate values cfg.values;
       };
 
       flannel.enable = false;

@@ -68,6 +68,31 @@ in
         their addresses from
       '';
     };
+
+    values = lib.mkOption {
+      type = lib.types.attrsOf lib.types.anything;
+      default = { };
+      example = {
+        env.vip_leaseduration = "10";
+      };
+      description = ''
+        Helm values for the kube-vip chart, merged over the ones this module
+        sets, key by key, so nested settings keep their siblings. Lists
+        replace the module's list as a whole.
+      '';
+    };
+
+    cloudProviderValues = lib.mkOption {
+      type = lib.types.attrsOf lib.types.anything;
+      default = { };
+      example = {
+        cm.data.cidr-default = "192.168.2.0/24";
+      };
+      description = ''
+        Helm values for the kube-vip-cloud-provider chart, merged like
+        `values`
+      '';
+    };
   };
 
   config = lib.mkIf (config.sinan.k8s.enable && cfg.enable) {
@@ -84,7 +109,7 @@ in
           chartHash = "sha256-ZGRBTyhoRAzCUMABF/EB5Zuxwf7FNwoNGp+cFOxwrb0=";
         };
         kubeVersion = "v${k8sCfg.package.version}";
-        values = {
+        values = lib.recursiveUpdate {
           image = libSinan.ociImageValues kubeVipImage;
           config.address = cfg.address;
           env = {
@@ -112,7 +137,7 @@ in
           };
           nodeSelector.${kubeVipControlPlaneLabel} = "true";
           envValueFrom.vip_nodename.fieldRef.fieldPath = "spec.nodeName";
-        };
+        } cfg.values;
       })
       (libSinan.mkChartAddons {
         name = "kube-vip-cloud-provider";
@@ -124,10 +149,10 @@ in
           chartHash = "sha256-QY9CyP4Tl6twwCp8O1rilak28SG+EEnGTRyrdhF19cU=";
         };
         kubeVersion = "v${k8sCfg.package.version}";
-        values = {
+        values = lib.recursiveUpdate {
           image = libSinan.ociImageValues cloudProviderImage;
           cm.data.range-global = cfg.loadBalancerRange;
-        };
+        } cfg.cloudProviderValues;
       })
     ];
 
