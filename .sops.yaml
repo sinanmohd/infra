@@ -5,6 +5,20 @@ keys:
   - &app_argocd age1eu9fuw6wfn2d3p0vrv8cwhg0elju0m69mf8l42etdc87lm9zfuqqw4l05u
 
 creation_rules:
+  # NOTE: cert-toolkit node specifc certs
+  - path_regex: (^|/)certs/leaf/kay/[^/]+\.key\.sops$
+    key_groups:
+      - age:
+          - *sinan
+          - *machine_kay
+  # NOTE: cert-toolkit shared certs
+  # TODO: change the cert struct to host based so single sops rule would suffice
+  - path_regex: (^|/)certs/leaf/shared/[^/]+\.key\.sops$
+    key_groups:
+      - age:
+          - *sinan
+          - *machine_kay
+
   - path_regex: nix/os/modules/pc/.*
     key_groups:
       - age:
