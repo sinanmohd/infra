@@ -3,11 +3,13 @@
   options,
   lib,
   pkgs,
+  inputsSinan,
   ...
 }:
 let
   cfg = config.sinan.k8s;
   k8sCfg = config.services.kubernetes;
+  libSinan = inputsSinan.self.lib { inherit pkgs; };
 
   k8sCa = config.sinan.certToolkit.cas.kubernetes;
   etcdCa = config.sinan.certToolkit.cas.etcd;
@@ -171,6 +173,23 @@ in
           end in `::`
         '';
       };
+    };
+
+    etcdMembers = lib.mkOption {
+      type = lib.types.nullOr (lib.types.listOf lib.types.str);
+      default = null;
+      example = [
+        "master1"
+        "master2"
+        "master3"
+      ];
+      description = ''
+        Host names of the masters forming the etcd cluster, each reachable
+        by its name and running etcd under it. Sets every member's name,
+        advertised URLs and initial cluster, and the etcd servers of the
+        apiserver. Null keeps the single member upstream sets up, named after
+        `services.kubernetes.masterAddress`.
+      '';
     };
   };
 
@@ -380,8 +399,10 @@ in
                 "localhost"
                 config.networking.hostName
                 config.networking.fqdnOrHostName
-                k8sCfg.masterAddress
               ]
+              ++ map libSinan.urlToHost (
+                config.services.etcd.advertiseClientUrls ++ config.services.etcd.initialAdvertisePeerUrls
+              )
               ++ hostAddresses
               ++ lib.optional (k8sCfg.apiserver.advertiseAddress != null) k8sCfg.apiserver.advertiseAddress
             );
@@ -444,7 +465,11 @@ in
         serviceAccountKeyFile = k8sCa.leaves.serviceAccount.certPath;
         serviceAccountSigningKeyFile = k8sCa.leaves.serviceAccount.keyPath;
         etcd = {
-          servers = lib.mkDefault [ "https://${k8sCfg.masterAddress}:2379" ];
+          servers = lib.mkOverride (mkDefaultPriority - 1) (
+            map (member: libSinan.hostToUrl member 2379) (
+              if cfg.etcdMembers != null then cfg.etcdMembers else [ k8sCfg.masterAddress ]
+            )
+          );
           caFile = etcdCa.root.certPath;
           certFile = etcdCa.leaves.client.certPath;
           keyFile = etcdCa.leaves.client.keyPath;
@@ -486,14 +511,22 @@ in
       kubeconfig = mkKubeconfig "flannel" k8sCa.leaves.flannelClient;
     };
 
-    services.etcd = lib.mkIf isMaster {
-      certFile = lib.mkDefault etcdCa.leaves.server.certPath;
-      keyFile = lib.mkDefault etcdCa.leaves.server.keyPath;
-      trustedCaFile = lib.mkDefault etcdCa.root.certPath;
-      peerCertFile = lib.mkDefault etcdCa.leaves.server.certPath;
-      peerKeyFile = lib.mkDefault etcdCa.leaves.server.keyPath;
-      peerTrustedCaFile = lib.mkDefault etcdCa.root.certPath;
-    };
+    services.etcd = lib.mkIf isMaster (
+      lib.optionalAttrs (cfg.etcdMembers != null) {
+        name = config.networking.hostName;
+        advertiseClientUrls = [ (libSinan.hostToUrl config.networking.hostName 2379) ];
+        initialAdvertisePeerUrls = [ (libSinan.hostToUrl config.networking.hostName 2380) ];
+        initialCluster = map (member: "${member}=${libSinan.hostToUrl member 2380}") cfg.etcdMembers;
+      }
+      // {
+        certFile = lib.mkDefault etcdCa.leaves.server.certPath;
+        keyFile = lib.mkDefault etcdCa.leaves.server.keyPath;
+        trustedCaFile = lib.mkDefault etcdCa.root.certPath;
+        peerCertFile = lib.mkDefault etcdCa.leaves.server.certPath;
+        peerKeyFile = lib.mkDefault etcdCa.leaves.server.keyPath;
+        peerTrustedCaFile = lib.mkDefault etcdCa.root.certPath;
+      }
+    );
 
     # NOTE: UPSTREAM: etcd is Type=notify, wait for it
     systemd.services.kube-apiserver =

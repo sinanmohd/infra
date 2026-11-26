@@ -72,22 +72,10 @@ let
     };
 
   # NOTE: one of the masters of the etcd cluster in `masters`
-  clusteredMaster =
-    { config, ... }:
-    let
-      name = config.networking.hostName;
-    in
-    {
-      imports = [ master ];
-      services.kubernetes.apiserver.etcd.servers = map (master: "https://${master}:2379") masters;
-      services.etcd = {
-        # NOTE: upstream names every member after masterAddress
-        inherit name;
-        advertiseClientUrls = [ "https://${name}:2379" ];
-        initialAdvertisePeerUrls = [ "https://${name}:2380" ];
-        initialCluster = map (master: "${master}=https://${master}:2380") masters;
-      };
-    };
+  clusteredMaster = {
+    imports = [ master ];
+    sinan.k8s.etcdMembers = masters;
+  };
 
   worker = {
     imports = [ common ];

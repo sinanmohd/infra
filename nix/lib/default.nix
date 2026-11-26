@@ -121,6 +121,80 @@ in
     '';
 
   /**
+    An https URL to a host and port, with the brackets an IPv6 address needs.
+
+    # Inputs
+
+    `host`
+
+    : Host name or address
+
+    `port`
+
+    : Port
+
+    # Type
+
+    ```
+    hostToUrl :: String -> Int -> String
+    ```
+
+    # Examples
+    :::{.example}
+    ## `hostToUrl` usage example
+
+    ```nix
+    hostToUrl "master1" 2379
+    => "https://master1:2379"
+    hostToUrl "2001:db8::1" 2380
+    => "https://[2001:db8::1]:2380"
+    ```
+
+    :::
+  */
+  hostToUrl =
+    host: port: "https://${if lib.hasInfix ":" host then "[${host}]" else host}:${toString port}";
+
+  /**
+    The host of a URL, without scheme, port, path or the brackets of an IPv6
+    address.
+
+    # Inputs
+
+    `url`
+
+    : A URL like "https://master1:2379" or "https://[2001:db8::1]:2380"
+
+    # Type
+
+    ```
+    urlToHost :: String -> String
+    ```
+
+    # Examples
+    :::{.example}
+    ## `urlToHost` usage example
+
+    ```nix
+    urlToHost "https://master1:2379"
+    => "master1"
+    urlToHost "https://[2001:db8::1]:2380"
+    => "2001:db8::1"
+    ```
+
+    :::
+  */
+  urlToHost =
+    url:
+    let
+      authority = lib.head (lib.splitString "/" (lib.last (lib.splitString "://" url)));
+    in
+    if lib.hasPrefix "[" authority then
+      lib.head (lib.splitString "]" (lib.removePrefix "[" authority))
+    else
+      lib.head (lib.splitString ":" authority);
+
+  /**
     Pull an OCI image pinned by digest, for the architecture of the host
     it is built for. Meant for `services.kubernetes.kubelet.seedDockerImages`,
     so nodes never pull it and VM tests work offline.
