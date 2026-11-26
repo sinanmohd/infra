@@ -1,6 +1,5 @@
 {
   config,
-  options,
   lib,
   pkgs,
   inputsSinan,
@@ -150,6 +149,24 @@ in
       '';
     };
 
+    ipv4 = {
+      podCidr = lib.mkOption {
+        type = lib.types.str;
+        default = "10.42.0.0/16";
+        description = ''
+          IPv4 range of the pods.
+        '';
+      };
+
+      serviceCidr = lib.mkOption {
+        type = lib.types.str;
+        default = "10.43.0.0/16";
+        description = ''
+          IPv4 range of the Service cluster IPs
+        '';
+      };
+    };
+
     ipv6 = {
       enable = lib.mkEnableOption ''
         dual-stack, IPv4 first, so pods and Services get an IPv6 address too.
@@ -158,7 +175,7 @@ in
 
       podCidr = lib.mkOption {
         type = lib.types.str;
-        default = "fd10:1::/56";
+        default = "fd12:b0d8:b00b::/56";
         description = ''
           IPv6 range of the pods, each node gets a /64 of it. ULA by
           default, pods reach the outside through masquerade on the node.
@@ -167,7 +184,7 @@ in
 
       serviceCidr = lib.mkOption {
         type = lib.types.str;
-        default = "fd10:2::/112";
+        default = "fd12:b0d8:babe::/112";
         description = ''
           IPv6 range of the Service cluster IPs, its network address has to
           end in `::`
@@ -437,44 +454,51 @@ in
       apiserverAddress = lib.mkOverride (
         mkDefaultPriority - 100
       ) "https://${k8sCfg.masterAddress}:${toString k8sCfg.apiserver.securePort}";
-      clusterCidr = lib.mkIf cfg.ipv6.enable (
-        lib.mkDefault "${options.services.kubernetes.clusterCidr.default},${cfg.ipv6.podCidr}"
+      clusterCidr = lib.mkDefault (
+        lib.concatStringsSep "," ([ cfg.ipv4.podCidr ] ++ lib.optional cfg.ipv6.enable cfg.ipv6.podCidr)
       );
 
-      apiserver = lib.mkIf isMaster {
-        serviceClusterIpRange = lib.mkIf cfg.ipv6.enable (
-          lib.mkDefault "${options.services.kubernetes.apiserver.serviceClusterIpRange.default},${cfg.ipv6.serviceCidr}"
-        );
-        tlsCertFile = k8sCa.leaves.apiserver.certPath;
-        tlsKeyFile = k8sCa.leaves.apiserver.keyPath;
-        clientCaFile = k8sCa.root.certPath;
-        kubeletClientCaFile = k8sCa.root.certPath;
-        kubeletClientCertFile = k8sCa.leaves.apiserverKubeletClient.certPath;
-        kubeletClientKeyFile = k8sCa.leaves.apiserverKubeletClient.keyPath;
-        proxyClientCertFile = frontProxyCa.leaves.client.certPath;
-        proxyClientKeyFile = frontProxyCa.leaves.client.keyPath;
-        # NOTE: upstream has no options for these, without them an aggregated
-        # api cannot tell who sent a request
-        extraOpts = lib.concatStringsSep " " [
-          "--requestheader-client-ca-file=${frontProxyCa.root.certPath}"
-          "--requestheader-allowed-names=${frontProxyCa.leaves.client.commonName}"
-          "--requestheader-username-headers=X-Remote-User"
-          "--requestheader-group-headers=X-Remote-Group"
-          "--requestheader-extra-headers-prefix=X-Remote-Extra-"
-        ];
-        serviceAccountKeyFile = k8sCa.leaves.serviceAccount.certPath;
-        serviceAccountSigningKeyFile = k8sCa.leaves.serviceAccount.keyPath;
-        etcd = {
-          servers = lib.mkOverride (mkDefaultPriority - 1) (
-            map (member: libSinan.hostToUrl member 2379) (
-              if cfg.etcdMembers != null then cfg.etcdMembers else [ k8sCfg.masterAddress ]
+      apiserver = lib.mkMerge [
+        {
+          serviceClusterIpRange = lib.mkDefault (
+            lib.concatStringsSep "," (
+              [ cfg.ipv4.serviceCidr ] ++ lib.optional cfg.ipv6.enable cfg.ipv6.serviceCidr
             )
           );
-          caFile = etcdCa.root.certPath;
-          certFile = etcdCa.leaves.client.certPath;
-          keyFile = etcdCa.leaves.client.keyPath;
-        };
-      };
+        }
+
+        (lib.mkIf isMaster {
+          tlsCertFile = k8sCa.leaves.apiserver.certPath;
+          tlsKeyFile = k8sCa.leaves.apiserver.keyPath;
+          clientCaFile = k8sCa.root.certPath;
+          kubeletClientCaFile = k8sCa.root.certPath;
+          kubeletClientCertFile = k8sCa.leaves.apiserverKubeletClient.certPath;
+          kubeletClientKeyFile = k8sCa.leaves.apiserverKubeletClient.keyPath;
+          proxyClientCertFile = frontProxyCa.leaves.client.certPath;
+          proxyClientKeyFile = frontProxyCa.leaves.client.keyPath;
+          # NOTE: upstream has no options for these, without them an aggregated
+          # api cannot tell who sent a request
+          extraOpts = lib.concatStringsSep " " [
+            "--requestheader-client-ca-file=${frontProxyCa.root.certPath}"
+            "--requestheader-allowed-names=${frontProxyCa.leaves.client.commonName}"
+            "--requestheader-username-headers=X-Remote-User"
+            "--requestheader-group-headers=X-Remote-Group"
+            "--requestheader-extra-headers-prefix=X-Remote-Extra-"
+          ];
+          serviceAccountKeyFile = k8sCa.leaves.serviceAccount.certPath;
+          serviceAccountSigningKeyFile = k8sCa.leaves.serviceAccount.keyPath;
+          etcd = {
+            servers = lib.mkOverride (mkDefaultPriority - 1) (
+              map (member: libSinan.hostToUrl member 2379) (
+                if cfg.etcdMembers != null then cfg.etcdMembers else [ k8sCfg.masterAddress ]
+              )
+            );
+            caFile = etcdCa.root.certPath;
+            certFile = etcdCa.leaves.client.certPath;
+            keyFile = etcdCa.leaves.client.keyPath;
+          };
+        })
+      ];
 
       controllerManager = lib.mkIf isMaster {
         serviceAccountKeyFile = k8sCa.leaves.serviceAccount.keyPath;
