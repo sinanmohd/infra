@@ -341,4 +341,52 @@ in
       }))
       lib.listToAttrs
     ];
+
+  /**
+    Build the `recreate-certs` script, which creates the root and leaf
+    certs every host declares with `sinan.certToolkit` and encrypts their
+    keys with sops. It runs from the top of the git repo it is started in
+    and takes the recipients from the `.sops.yaml` there, so another flake
+    importing `nixosModules.k8s` can create its certs in its own repo.
+
+    # Inputs
+
+    `args`
+
+    : An attribute set containing:
+
+      `nixosConfigurations`
+
+      : NixOS systems to collect the certs from, systems without the cert
+        toolkit are skipped
+
+    # Type
+
+    ```
+    mkCertsRecreate :: { nixosConfigurations :: { [String] :: AttrSet }; } -> Derivation
+    ```
+
+    # Examples
+    :::{.example}
+    ## `mkCertsRecreate` usage example
+
+    ```nix
+    # in the outputs of another flake
+    apps.x86_64-linux.certs-recreate = {
+      type = "app";
+      program = lib.getExe (
+        (sinan.lib { inherit pkgs; }).mkCertsRecreate {
+          inherit (self) nixosConfigurations;
+        }
+      );
+    };
+    ```
+
+    :::
+  */
+  mkCertsRecreate =
+    { nixosConfigurations }:
+    pkgs.callPackage ../os/modules/k8s/modules/cert-toolkit/recreate.nix {
+      inherit nixosConfigurations;
+    };
 }

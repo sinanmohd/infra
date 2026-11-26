@@ -40,6 +40,11 @@ let
     }).config.sinan.certToolkit;
 
   failures = lib.runTests {
+    testRootDefaultsToThisFlake = {
+      expr = (evalToolkit { }).root;
+      expected = self.outPath;
+    };
+
     testDir = {
       expr = (evalToolkit { dir = "./my-dir"; }).dir;
       expected = "./my-dir";

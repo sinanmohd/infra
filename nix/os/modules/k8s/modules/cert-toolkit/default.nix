@@ -16,14 +16,15 @@ let
     ;
 
   /**
-    Copy a file of this flake into its own store path, so a host only
-    pulls that file into its closure instead of the whole flake source.
+    Copy a file of the flake at `sinan.certToolkit.root` into its own store
+    path, so a host only pulls that file into its closure instead of the
+    whole flake source.
 
     # Inputs
 
     `relative`
 
-    : Path of the file relative to the flake root
+    : Path of the file relative to `sinan.certToolkit.root`
 
     # Type
 
@@ -45,7 +46,7 @@ let
   flakeFile =
     relative:
     builtins.path {
-      path = "${inputsSinan.self.outPath}/${relative}";
+      path = "${cfg.root}/${relative}";
     };
 
   keyType = lib.types.submodule {
@@ -156,11 +157,11 @@ let
     };
     relativeCertPath = lib.mkOption {
       type = lib.types.str;
-      description = "The path of the certificate relative to the flake root";
+      description = "The path of the certificate relative to `sinan.certToolkit.root`";
     };
     relativeSopsKeyPath = lib.mkOption {
       type = lib.types.str;
-      description = "The path of the sops encrypted key relative to the flake root";
+      description = "The path of the sops encrypted key relative to `sinan.certToolkit.root`";
     };
     id = lib.mkOption {
       type = lib.types.str;
@@ -501,9 +502,23 @@ let
 in
 {
   options.sinan.certToolkit = {
+    root = lib.mkOption {
+      type = lib.types.path;
+      default = inputsSinan.self.outPath;
+      defaultText = lib.literalExpression "inputsSinan.self.outPath";
+      description = ''
+        Root of the flake holding the certs, `dir` and every
+        `relativeCertPath` and `relativeSopsKeyPath` resolve against it.
+        Another flake importing this module sets it to its own
+        `self.outPath` to keep its certs in its own repo. Only the single
+        files are copied out of it, so a host does not pull in the whole
+        tree.
+      '';
+      example = lib.literalExpression "self.outPath";
+    };
     dir = lib.mkOption {
       type = lib.types.str;
-      description = "Directory of the root and leaf certs relative to the flake root";
+      description = "Directory of the root and leaf certs relative to `root`";
       example = "nix/os/modules/k8s/certs";
     };
     createCerts = lib.mkOption {
