@@ -515,6 +515,10 @@ in
         tlsCertFile = k8sCa.leaves.kubelet.certPath;
         tlsKeyFile = k8sCa.leaves.kubelet.keyPath;
         kubeconfig = clientCert k8sCa.leaves.kubeletClient;
+        extraConfig = {
+          shutdownGracePeriod = lib.mkDefault "30s";
+          shutdownGracePeriodCriticalPods = lib.mkDefault "10s";
+        };
 
         # NOTE: upstream taints master only nodes with unschedulable and the
         # node-role master key kubeadm dropped in 1.25, keep only its
