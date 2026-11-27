@@ -112,7 +112,12 @@ let
 
     # NOTE: without kube-proxy the kubernetes service ip only works once the
     # agent runs, so it needs the apiserver directly
-    k8sServiceHost = if kubeVipCfg.enable then kubeVipCfg.address else k8sCfg.masterAddress;
+    # NOTE: not networking.hostName, every master applies this chart and would
+    # point the whole cluster at itself, so the masters keep overwriting each
+    # other and rolling the agents. The first etcd member is the same on every
+    # master
+    k8sServiceHost =
+      if kubeVipCfg.enable then kubeVipCfg.address else lib.head config.sinan.k8s.etcdMembers;
     k8sServicePort = toString k8sCfg.apiserver.securePort;
 
     # NOTE: the cni config and binary come from the kubelet, see ciliumCni var
@@ -163,8 +168,8 @@ in
 
         Without kube-proxy the agents reach the apiserver directly: through
         `sinan.k8s.kubeVip.address` when kube-vip is enabled, which stays
-        up when a master goes down, otherwise through `masterAddress` alone,
-        which is not highly available.
+        up when a master goes down, otherwise through the first of
+        `sinan.k8s.etcdMembers` alone, which is not highly available.
       '';
     };
     values = lib.mkOption {

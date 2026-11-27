@@ -46,10 +46,7 @@ let
         createCerts = true;
         clusterFrom = lib.mkIf (config.networking.hostName != "master1") nodes.master1.sinan.certToolkit;
       };
-      services.kubernetes = {
-        masterAddress = "master1";
-        kubelet.nodeIp = "${config.networking.primaryIPAddress},${config.networking.primaryIPv6Address}";
-      };
+      services.kubernetes.kubelet.nodeIp = "${config.networking.primaryIPAddress},${config.networking.primaryIPv6Address}";
 
       virtualisation = {
         # NOTE: vm-k8s-5 test went down to 132s -> 85s
