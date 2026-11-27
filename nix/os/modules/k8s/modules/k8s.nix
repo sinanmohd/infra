@@ -429,7 +429,6 @@ in
                 config.services.etcd.advertiseClientUrls ++ config.services.etcd.initialAdvertisePeerUrls
               )
               ++ hostAddresses
-              ++ lib.optional (k8sCfg.apiserver.advertiseAddress != null) k8sCfg.apiserver.advertiseAddress
             );
             usages = [
               "signing"
