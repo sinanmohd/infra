@@ -525,6 +525,11 @@ in
         extraConfig = {
           shutdownGracePeriod = lib.mkDefault "30s";
           shutdownGracePeriodCriticalPods = lib.mkDefault "10s";
+          # NOTE: /etc/resolv.conf points at the systemd-resolved stub on
+          # 127.0.0.53, which inside a pod is the pod's own loopback
+          resolvConf = lib.mkIf config.services.resolved.enable (
+            lib.mkDefault "/run/systemd/resolve/resolv.conf"
+          );
         };
 
         # NOTE: upstream taints master only nodes with unschedulable and the
