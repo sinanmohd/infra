@@ -44,9 +44,9 @@ let
     => ''
       mkdir --parents "$(dirname certs/leaf/h1/etcd-server.crt)"
       printf '%s' "$cfssl_json" \
-        | jq --raw-output .key \
+        | jq --join-output .key \
         | sops encrypt --filename-override certs/leaf/h1/etcd-server.key.sops --output certs/leaf/h1/etcd-server.key.sops /dev/stdin
-      printf '%s' "$cfssl_json" | jq --raw-output .cert > certs/leaf/h1/etcd-server.crt
+      printf '%s' "$cfssl_json" | jq --join-output .cert > certs/leaf/h1/etcd-server.crt
     ''
     ```
 
@@ -61,9 +61,9 @@ let
     ''
       mkdir --parents "$(dirname ${certFile})"
       printf '%s' "$cfssl_json" \
-        | jq --raw-output .key \
+        | jq --join-output .key \
         | sops encrypt --filename-override ${sopsFile} --output ${sopsFile} /dev/stdin
-      printf '%s' "$cfssl_json" | jq --raw-output .cert > ${certFile}
+      printf '%s' "$cfssl_json" | jq --join-output .cert > ${certFile}
     '';
 
   /**
