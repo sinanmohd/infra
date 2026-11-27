@@ -456,6 +456,10 @@ in
     services.kubernetes = {
       # NOTE: cert toolkit gives prod ready alternative
       easyCerts = lib.mkForce false;
+      # NOTE: nixos upstream passes it to the kubelet as --root-dir, with
+      # default being /var/lib/kubernetes, while every other distro usually
+      # uses /var/lib/kubelet. This breaks charts like velero
+      dataDir = lib.mkDefault "/var/lib/kubelet";
       caFile = lib.mkDefault k8sCa.root.certPath;
       apiserverAddress = lib.mkOverride (mkDefaultPriority - 100) (
         if isMaster then
