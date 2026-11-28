@@ -211,7 +211,7 @@ in
 
         "[app_id=org.qbittorrent.qBittorrent title=\"qBittorrent v[0-9]\"]" = 6;
         "[app_id=chromium-browser]" = 7;
-        "[app_id=Slack]" = 8;
+        "[app_id=slack]" = 8;
         "[app_id=element]" = 9;
       };
 
